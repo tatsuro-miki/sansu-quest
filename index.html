@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>さんすうクエスト</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1a1a2e;--card:#16213e;--primary:#e94560;--primary2:#ff6b6b;--gold:#ffd700;--gold2:#ffb347;--xp:#4ade80;--blue:#60a5fa;--purple:#a78bfa;--text:#f0f0f0;--text2:#94a3b8;--heart:#ef4444;--radius:20px;--glow-primary:0 0 24px rgba(233,69,96,.4);--glow-gold:0 0 24px rgba(255,215,0,.3);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito','M PLUS Rounded 1c',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);display:flex;align-items:center;justify-content:center;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(233,69,96,.12) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(96,165,250,.1) 0%,transparent 50%);pointer-events:none;}
+.wrap{width:100%;max-width:440px;padding:24px 16px;position:relative;z-index:1;animation:fadeDown .45s ease;}
+h1{text-align:center;font-size:2.2rem;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+.sub{text-align:center;color:var(--text2);font-size:.9rem;margin-bottom:28px;}
+.card{background:var(--card);border-radius:var(--radius);padding:28px 24px;border:1px solid rgba(255,255,255,.06);margin-bottom:14px;}
+.card-title{font-size:.82rem;font-weight:900;color:var(--text2);margin-bottom:16px;letter-spacing:.08em;}
+/* ユーザーボタン */
+.user-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.user-btn{padding:22px 12px;border-radius:16px;border:3px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--text);font-family:inherit;font-size:1.1rem;font-weight:900;cursor:pointer;transition:.2s;text-align:center;position:relative;}
+.user-btn .av{font-size:2.8rem;display:block;margin-bottom:8px;}
+.user-btn .xp-tag{font-size:.72rem;color:var(--xp);margin-top:4px;display:block;}
+.user-btn .lv-tag{font-size:.7rem;color:var(--gold);}
+.user-btn:hover{border-color:var(--primary);background:rgba(233,69,96,.1);transform:translateY(-3px);}
+.user-btn.loading-btn{opacity:.6;pointer-events:none;}
+/* ランキング */
+.ranking-card{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid rgba(255,215,0,.15);}
+.rank-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.04);margin-bottom:6px;}
+.rank-no{font-size:1rem;font-weight:900;width:26px;text-align:center;}
+.rank-name{flex:1;font-weight:800;}
+.rank-streak{font-size:.75rem;color:var(--primary2);}
+.rank-xp{font-size:.82rem;font-weight:800;color:var(--xp);}
+.loading-msg{text-align:center;color:var(--text2);font-size:.88rem;padding:12px;}
+.error-msg{text-align:center;color:#fca5a5;font-size:.82rem;padding:8px;background:rgba(239,68,68,.1);border-radius:10px;margin-top:8px;}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+@keyframes popIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧮 さんすうクエスト</h1>
+  <p class="sub">名前を選んでスタート！</p>
+
+  <div class="card">
+    <div class="card-title">👤 だれがやる？</div>
+    <div class="user-grid" id="user-grid">
+      <div class="loading-msg">⏳ よみこみちゅう...</div>
+    </div>
+    <div class="error-msg" id="error-msg" style="display:none"></div>
+  </div>
+
+  <div class="ranking-card">
+    <div class="card-title" style="margin-bottom:12px">🏆 ランキング</div>
+    <div id="ranking-area"><div class="loading-msg">⏳ よみこみちゅう...</div></div>
+  </div>
+</div>
+
+<script type="module">
+import { FIREBASE_CONFIG, USERS } from './firebase.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const app = initializeApp(FIREBASE_CONFIG);
+const db  = getFirestore(app);
+
+const HEARTS_MAX = 5;
+const todayStr = () => { const d=new Date(); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; };
+
+// ユーザーデータ読み込み or 新規作成
+async function loadUser(name) {
+  const ref = doc(db, 'users', name);
+  const snap = await getDoc(ref);
+  if (snap.exists()) return snap.data();
+  const fresh = { xp:0, level:1, totalCorrect:0, hearts:HEARTS_MAX, lastHeartRegen:Date.now(), streak:0, lastLogin:'', loginDays:0, dailyDone:0, dailyDate:'', unlockedBadges:[], catCorrect:[0,0,0,0], questionStreak:0, createdAt:Date.now() };
+  await setDoc(ref, fresh);
+  return fresh;
+}
+
+// ランキング読み込み
+async function loadRanking() {
+  const snap = await getDocs(collection(db, 'users'));
+  const users = [];
+  snap.forEach(d => users.push({ name: d.id, ...d.data() }));
+  return users.sort((a,b) => (b.xp||0) - (a.xp||0));
+}
+
+// ユーザーボタン描画
+function renderUsers(usersData) {
+  const grid = document.getElementById('user-grid');
+  grid.innerHTML = '';
+  USERS.forEach(u => {
+    const data = usersData[u.name] || {};
+    const btn = document.createElement('button');
+    btn.className = 'user-btn';
+    btn.innerHTML = `
+      <span class="av">${u.avatar}</span>
+      ${u.name}
+      <span class="xp-tag">⭐ ${data.xp||0} XP</span>
+      <span class="lv-tag">Lv.${data.level||1}</span>
+    `;
+    btn.addEventListener('click', () => selectUser(u.name, btn));
+    grid.appendChild(btn);
+  });
+}
+
+// ランキング描画
+function renderRanking(ranking) {
+  const medals = ['🥇','🥈','🥉'];
+  const html = ranking.slice(0,5).map((u,i) => `
+    <div class="rank-row">
+      <span class="rank-no">${medals[i]||i+1}</span>
+      <span class="rank-name">${u.name}</span>
+      <span class="rank-streak">🔥${u.loginDays||0}日</span>
+      <span class="rank-xp">⭐${u.xp||0} XP</span>
+    </div>
+  `).join('');
+  document.getElementById('ranking-area').innerHTML = html || '<div class="loading-msg">まだデータなし</div>';
+}
+
+// ユーザー選択
+async function selectUser(name, btn) {
+  btn.classList.add('loading-btn');
+  btn.textContent = '⏳ よみこみちゅう...';
+  try {
+    const data = await loadUser(name);
+    sessionStorage.setItem('sq_user', name);
+    sessionStorage.setItem('sq_data', JSON.stringify(data));
+    location.href = 'game.html';
+  } catch(e) {
+    showError('よみこみに失敗しました。Firebase設定を確認してください。');
+    btn.classList.remove('loading-btn');
+    renderUsers({});
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+// 初期化
+async function init() {
+  try {
+    const [ranking] = await Promise.all([loadRanking()]);
+    const usersData = {};
+    ranking.forEach(u => { usersData[u.name] = u; });
+    renderUsers(usersData);
+    renderRanking(ranking);
+  } catch(e) {
+    showError('Firebase接続エラー。firebase.jsの設定値を確認してください。');
+    renderUsers({});
+    document.getElementById('ranking-area').innerHTML = '<div class="loading-msg" style="color:#fca5a5">接続エラー</div>';
+  }
+}
+
+init();
+</script>
+</body>
+</html>

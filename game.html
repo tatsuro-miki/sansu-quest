@@ -128,6 +128,18 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .save-dot{position:fixed;bottom:16px;right:16px;width:8px;height:8px;border-radius:50%;background:var(--xp);opacity:0;transition:opacity .3s;z-index:999;}
 .save-dot.saving{opacity:1;animation:pulse 1s infinite;}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+/* 難易度選択 */
+.diff-select{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.diff-btn{font-family:inherit;background:var(--card);border:2px solid rgba(255,255,255,.06);border-radius:14px;padding:10px 6px;cursor:pointer;text-align:center;transition:.2s;color:var(--text);}
+.diff-btn .diff-icon{font-size:1.3rem;display:block;margin-bottom:2px;}
+.diff-btn .diff-label{font-size:.72rem;font-weight:800;color:var(--text2);display:block;}
+.diff-btn .diff-multi{font-size:.68rem;font-weight:900;color:var(--xp);display:block;margin-top:2px;}
+.diff-btn.active.easy{border-color:#4ade80;background:rgba(74,222,128,.12);}
+.diff-btn.active.mid{border-color:#fb923c;background:rgba(251,146,60,.12);}
+.diff-btn.active.mid .diff-multi{color:#fb923c;}
+.diff-btn.active.hard{border-color:var(--primary);background:rgba(233,69,96,.12);}
+.diff-btn.active.hard .diff-multi{color:var(--primary);}
+.diff-btn:hover{transform:translateY(-2px);}
 /* ===== テストモード ===== */
 .test-mode-btn{width:100%;font-family:inherit;font-size:1rem;font-weight:900;padding:14px 20px;background:linear-gradient(135deg,#3b82f6,#60a5fa);color:white;border:none;border-radius:16px;cursor:pointer;box-shadow:0 4px 20px rgba(96,165,250,.35);transition:.2s;text-align:center;}
 .test-mode-btn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(96,165,250,.5);}
@@ -227,6 +239,18 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <button class="cat-btn" onclick="setCategory(2)"><span class="icon">🔸</span><span class="label">小数</span></button>
     <button class="cat-btn" onclick="setCategory(3)"><span class="icon">📖</span><span class="label">文章</span></button>
   </div>
+  <!-- 難易度選択 -->
+  <div class="diff-select" id="diff-select">
+    <button class="diff-btn active" id="diff-easy" onclick="setDifficulty('easy')">
+      <span class="diff-icon">🌱</span><span class="diff-label">かんたん</span><span class="diff-multi">×1</span>
+    </button>
+    <button class="diff-btn" id="diff-mid" onclick="setDifficulty('mid')">
+      <span class="diff-icon">🔥</span><span class="diff-label">ふつう</span><span class="diff-multi">×1.5</span>
+    </button>
+    <button class="diff-btn" id="diff-hard" onclick="setDifficulty('hard')">
+      <span class="diff-icon">💀</span><span class="diff-label">むずかしい</span><span class="diff-multi">×2</span>
+    </button>
+  </div>
   <!-- テストモードボタン -->
   <div id="test-mode-wrap" style="display:none;margin-bottom:14px;">
     <button class="test-mode-btn" id="test-mode-btn" onclick="startTestMode()">
@@ -256,11 +280,12 @@ const db  = getFirestore(app);
 const HEARTS_MAX = 5;
 const DAILY_GOAL = 10;
 function dailyGoal(lv){ return DAILY_GOAL; }
-function diffTier(lv){ if(lv<=10) return 'easy'; if(lv<=20) return 'mid'; return 'hard'; }
 const LEVELS = [
   {name:'はじめての冒険者',xp:100},{name:'計算の見習い',xp:250},{name:'算数の戦士',xp:500},
   {name:'数式の魔法使い',xp:900},{name:'算術マスター',xp:1400},{name:'天才数学者',xp:2000},{name:'伝説の計算王',xp:Infinity}
 ];
+const xpForLv=lv=>LEVELS[Math.min(lv-1,LEVELS.length-1)].xp;
+const lvName=lv=>LEVELS[Math.min(lv-1,LEVELS.length-1)].name;
 const BADGES = [
   {id:'first',icon:'🌟',name:'はじめての正解'},{id:'streak3',icon:'🔥',name:'3連続正解'},
   {id:'streak7',icon:'💥',name:'7連続正解'},{id:'daily1',icon:'📅',name:'初デイリークリア'},
@@ -286,15 +311,15 @@ function getTestLv(userLv){
   return tl;
 }
 const XP_TBL = {lv1:10,lv2:15,lv3:25};
+const DIFF_MULTI = {easy:1, mid:1.5, hard:2}; // 難易度XP倍率
+const DIFF_LABELS = {easy:'かんたん', mid:'ふつう', hard:'むずかしい'};
 const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const gcd=(a,b)=>b===0?a:gcd(b,a%b);
 const shuffle=a=>[...a].sort(()=>Math.random()-.5);
 const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;};
-const xpForLv=lv=>LEVELS[Math.min(lv-1,LEVELS.length-1)].xp;
-const lvName=lv=>LEVELS[Math.min(lv-1,LEVELS.length-1)].name;
 
 // ===== 状態 =====
-let username='', save={}, category=0, question=null, answered=false;
+let username='', save={}, category=0, difficulty='easy', question=null, answered=false;
 let hintVisible=false, memoVisible=false;
 let saveTimer=null;
 // テストモード状態
@@ -392,15 +417,8 @@ function renderBadges(){
   });
 }
 
-// ===== カテゴリ =====
-window.setCategory = function(i){
-  category=i;
-  document.querySelectorAll('.cat-btn').forEach((b,idx)=>b.classList.toggle('active',idx===i));
-  nextQuestion();
-};
-
-// ===== 問題生成（レベル連動） =====
-// tier: 'easy'=Lv1-3 / 'mid'=Lv4-10 / 'hard'=Lv11+
+// ===== 問題生成（難易度連動） =====
+// tier: 'easy' / 'mid' / 'hard'
 function genArithmetic(tier){
   const op = tier==='easy' ? ['+','-'][R(0,1)]
             : tier==='mid'  ? ['+','-','×','÷'][R(0,3)]
@@ -461,7 +479,9 @@ function genWord(tier){
   return pool[R(0,pool.length-1)]();
 }
 function gen(){
-  const tier = diffTier(save.level||1);
+  // カテゴリに応じたtier決定（分数・小数・文章はeasyを選んでもmid以上で生成）
+  let tier = difficulty;
+  if((category===1||category===2||category===3) && tier==='easy') tier='mid';
   switch(category){
     case 0: return genArithmetic(tier);
     case 1: return genFraction(tier);
@@ -470,11 +490,27 @@ function gen(){
   }
 }
 
+// ===== カテゴリ・難易度切り替え =====
+window.setCategory = function(idx){
+  category=idx;
+  document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  nextQuestion();
+};
+window.setDifficulty = function(d){
+  difficulty=d;
+  ['easy','mid','hard'].forEach(k=>{
+    const el=document.getElementById('diff-'+k);
+    if(el){ el.classList.toggle('active',k===d); el.className='diff-btn'+(k===d?' active '+k:''); }
+  });
+  nextQuestion();
+};
+
 // ===== 問題描画 =====
 function nextQuestion(){
   if((save.hearts||0)<=0){renderGameOver();return;}
   question=gen(); answered=false; hintVisible=false; memoVisible=false;
   const lvLabel=question.lv==='lv1'?'かんたん':question.lv==='lv2'?'ふつう':'むずかしい';
+  const dispXp=Math.round((XP_TBL[question.lv]||10)*(DIFF_MULTI[difficulty]||1));
   let ansHtml='';
   if(question.type==='fraction'){
     ansHtml=`<div class="frac-wrap"><input type="number" id="fn" placeholder="分子" min="0" max="9999"><div class="frac-line"></div><input type="number" id="fd" placeholder="分母" min="1" max="9999"></div><button class="submit-btn" onclick="doCheck()">こたえる</button>`;
@@ -488,7 +524,7 @@ function nextQuestion(){
       <div class="q-meta">
         <span class="q-cat">${question.label}</span>
         <span class="q-lv ${question.lv}">${lvLabel}</span>
-        <span class="q-xp">+${XP_TBL[question.lv]}XP</span>
+        <span class="q-xp">+${dispXp}XP</span>
       </div>
       <div class="q-text">${question.text}</div>
       ${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}
@@ -539,7 +575,9 @@ window.doChoice=function(val,btn){
 
 function onCorrect(){
   answered=true;
-  const xpAmt=XP_TBL[question.lv];
+  const baseXp = XP_TBL[question.lv];
+  const multi   = DIFF_MULTI[difficulty] || 1;
+  const xpAmt   = Math.round(baseXp * multi);
   save.questionStreak=(save.questionStreak||0)+1;
   const bonus=save.questionStreak%5===0?10:0;
   const isCombo=save.questionStreak%3===0;
@@ -573,7 +611,8 @@ function onCorrect(){
   persistSave(); renderUI(); renderBadges();
   // feedback
   const msgs=['すごい！🎉','かんぺき！✨','よくできました！⭐','その調子！🔥','天才！🧠','完璧！💯'];
-  setFeedback('ok', msgs[R(0,msgs.length-1)]+(bonus?` コンボ+${bonus}XP！`:''));
+  const diffTag = multi>1 ? ` ${DIFF_LABELS[difficulty]}ボーナス×${multi}！` : '';
+  setFeedback('ok', msgs[R(0,msgs.length-1)]+(bonus?` コンボ+${bonus}XP！`:'')+diffTag);
   showXpPop(`+${xpAmt+bonus}XP`);
   if(isCombo) showCombo(`🔥×${save.questionStreak}`);
   const _dg=dailyGoal(save.level||1); if(save.dailyDone===_dg) setTimeout(()=>showModal('🎊 ノルマ達成！',`今日の${_dg}問クリア！\nまた明日もがんばろう！`,50),600);
@@ -768,8 +807,8 @@ window.startTestMode = function(){
   if((save.level||1) < TEST_UNLOCK_LV) return;
   testMode=true; testCorrect=0; testTotal=0; testAnswered=false;
   testTimeLeft=TEST_TIME;
-  // 通常モードUI非表示
   document.querySelector('.categories').style.display='none';
+  document.getElementById('diff-select').style.display='none';
   document.getElementById('test-mode-wrap').style.display='none';
   renderTestUI();
   testNextQuestion();
@@ -933,6 +972,7 @@ window.backToNormal = function(){
   testMode=false;
   clearInterval(testTimer);
   document.querySelector('.categories').style.display='';
+  document.getElementById('diff-select').style.display='';
   renderUI();
   nextQuestion();
 };

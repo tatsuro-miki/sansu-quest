@@ -149,13 +149,22 @@ function renderUsers(users) {
   });
 }
 
+// ログイン中のユーザー名を取得（index.htmlはゲーム前画面なので直前のセッションを参照）
+const myName = sessionStorage.getItem('sq_user') || '';
+
+function displayName(u) {
+  return u.name === myName
+    ? `<span style="color:var(--gold);font-weight:900">👤 ${u.name}（あなた）</span>`
+    : anonName(u.name);
+}
+
 function renderRanking(users) {
   const medals = ['🥇','🥈','🥉'];
   const sorted = [...users].sort((a,b) => (b.xp||0) - (a.xp||0));
   const html = sorted.slice(0,10).map((u,i) => `
-    <div class="rank-row">
+    <div class="rank-row" ${u.name===myName?'style="background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2)"':''}>
       <span class="rank-no">${medals[i]||i+1}</span>
-      <span class="rank-name">${anonName(u.name)}</span>
+      <span class="rank-name">${displayName(u)}</span>
       <span class="rank-streak">🔥${u.loginDays||0}日</span>
       <span class="rank-xp">⭐${u.xp||0} XP</span>
     </div>
@@ -174,9 +183,9 @@ function renderTestRanking(users) {
     return;
   }
   const html = sorted.slice(0,10).map((u,i) => `
-    <div class="rank-row">
+    <div class="rank-row" ${u.name===myName?'style="background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2)"':''}>
       <span class="rank-no">${medals[i]||i+1}</span>
-      <span class="rank-name">${anonName(u.name)}</span>
+      <span class="rank-name">${displayName(u)}</span>
       <span class="rank-testlv">${TEST_LV_NAMES[u.bestTestLv||1]||''}</span>
       <span class="rank-score">⚡${u.bestTestScore||0}点</span>
     </div>

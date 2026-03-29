@@ -141,14 +141,21 @@ function renderUsers(users) {
 function renderRanking(users) {
   const medals = ['🥇','🥈','🥉'];
   const sorted = [...users].sort((a,b) => (b.xp||0) - (a.xp||0));
-  const html = sorted.slice(0,10).map((u,i) => `
-    <div class="rank-row">
-      <span class="rank-no">${medals[i]||i+1}</span>
-      <span class="rank-name">${anonName(u.name)}</span>
-      <span class="rank-streak">🔥${u.loginDays||0}日</span>
-      <span class="rank-xp">⭐${u.xp||0} XP</span>
-    </div>
-  `).join('');
+  const currentUser = sessionStorage.getItem('sq_user');
+  const html = sorted.slice(0,10).map((u,i) => {
+    const isMe = u.name === currentUser;
+    const displayName = isMe
+      ? `${u.name} <span style="font-size:.68rem;background:var(--primary);color:white;padding:2px 6px;border-radius:6px;margin-left:4px">あなた</span>`
+      : anonName(u.name);
+    return `
+      <div class="rank-row" style="${isMe?'border:1px solid rgba(233,69,96,.4);background:rgba(233,69,96,.08);':''}">
+        <span class="rank-no">${medals[i]||i+1}</span>
+        <span class="rank-name">${displayName}</span>
+        <span class="rank-streak">🔥${u.loginDays||0}日</span>
+        <span class="rank-xp">⭐${u.xp||0} XP</span>
+      </div>
+    `;
+  }).join('');
   document.getElementById('ranking-area').innerHTML = html || '<div class="loading-msg">まだデータなし</div>';
 }
 

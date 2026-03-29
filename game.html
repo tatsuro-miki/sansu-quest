@@ -467,13 +467,53 @@ function genDecimal(tier){
 function genWord(tier){
   // easyは文章題なし→四則にフォールバック
   if(tier==='easy') return genArithmetic('easy');
+  // 小数を最大4桁で丸めるヘルパー
+  const round4=(n)=>Math.round(n*10000)/10000;
   const midTs=[
-    ()=>{const p=R(100,500),d=R(1,3)*10;const s=Math.round(p*(100-d)/100);return {type:'choice',lv:'lv2',label:'文章(割引)',text:`${p}円の商品が${d}%引き。\nいくらになる？`,hint:`${p}×(1-${d}/100)`,answer:s.toString(),choices:shuffle([s,p-d,Math.round(p*d/100),s+R(10,50)]).map(String)};},
-    ()=>{const tot=R(500,1500),r=R(2,4);const a=Math.round(tot*r/(r+1));return {type:'choice',lv:'lv2',label:'文章(割合)',text:`${tot}円を ${r}:1 で分けます。\n多い方は何円？`,hint:'全体÷(比の合計)×比',answer:a.toString(),choices:shuffle([a,a+R(20,100),tot-a,Math.round(tot/r)]).map(String)};},
+    ()=>{
+      const p=R(100,500),d=R(1,3)*10;
+      const s=Math.round(p*(100-d)/100);
+      return {type:'choice',lv:'lv2',label:'文章(割引)',
+        text:`${p}円の商品が${d}%引き。\nいくらになる？`,
+        hint:`${p}×(1-${d}/100)`,
+        answer:s.toString(),
+        choices:shuffle([s,p-d,Math.round(p*d/100),s+R(10,50)]).map(String)};
+    },
+    ()=>{
+      const tot=R(500,1500),r=R(2,4);
+      const a=Math.round(tot*r/(r+1));
+      return {type:'choice',lv:'lv2',label:'文章(割合)',
+        text:`${tot}円を ${r}:1 で分けます。\n多い方は何円？`,
+        hint:'全体÷(比の合計)×比',
+        answer:a.toString(),
+        choices:shuffle([a,a+R(20,100),tot-a,Math.round(tot/r)]).map(String)};
+    },
   ];
   const hardTs=[
-    ()=>{const s=R(60,120),t=R(10,60),d=s*t;return {type:'choice',lv:'lv3',label:'文章(速さ)',text:`時速${s}kmの電車が${t}分走りました。\n何km進みましたか？`,hint:'速さ×時間÷60',answer:d.toString(),choices:shuffle([d,d+R(10,100),Math.max(1,d-R(10,50)),d*2]).map(String)};},
-    ()=>{const r=R(3,8);const area=Math.round(r*r*314)/100;return {type:'choice',lv:'lv3',label:'文章(面積)',text:`半径${r}cmの円の面積は？\n（円周率3.14）`,hint:'半径×半径×3.14',answer:area.toString(),choices:shuffle([area,Math.round(r*2*314)/100,r*r,Math.round((r+1)*(r+1)*314)/100]).map(String)};},
+    ()=>{
+      // 速さ問題：割り切れる数値を選ぶ（時速×分÷60が整数になるよう調整）
+      const t=R(1,6)*10; // 10,20,30,40,50,60分
+      const s=R(3,12)*10; // 30〜120km（10の倍数）
+      const d=Math.round(s*t/60*10)/10; // 小数1桁まで
+      const wrong1=Math.round(s*t/60*10)/10+R(1,5);
+      const wrong2=Math.round(s*t*10)/10; // ÷60忘れバージョン（ひっかけ）
+      const wrong3=Math.max(1,d-R(1,5));
+      return {type:'choice',lv:'lv3',label:'文章(速さ)',
+        text:`時速${s}kmの電車が${t}分走りました。\n何km進みましたか？`,
+        hint:'速さ×時間÷60',
+        answer:d.toString(),
+        choices:shuffle([d,wrong1,wrong2,wrong3]).map(String)};
+    },
+    ()=>{
+      const r=R(3,8);
+      const area=round4(r*r*3.14);
+      const ans=area.toString();
+      return {type:'choice',lv:'lv3',label:'文章(面積)',
+        text:`半径${r}cmの円の面積は？\n（円周率3.14）`,
+        hint:'半径×半径×3.14',
+        answer:ans,
+        choices:shuffle([area,round4(r*2*3.14),r*r,round4((r+1)*(r+1)*3.14)]).map(String)};
+    },
   ];
   const pool = tier==='hard' ? [...midTs,...hardTs] : midTs;
   return pool[R(0,pool.length-1)]();
@@ -561,8 +601,10 @@ window.doCheck=function(){
   } else {
     const inp=document.getElementById('main-inp');
     if(!inp||inp.value==='') return;
-    const ua=parseFloat(inp.value).toString();
-    if(ua===question.answer){inp.classList.add('correct');onCorrect();}
+    // 小数4桁で丸めて比較（浮動小数点誤差対策）
+    const ua=(Math.round(parseFloat(inp.value)*10000)/10000).toString();
+    const qa=(Math.round(parseFloat(question.answer)*10000)/10000).toString();
+    if(ua===qa){inp.classList.add('correct');onCorrect();}
     else{inp.classList.add('wrong');onWrong(`せいかいは ${question.answer}`);}
   }
 };
@@ -695,54 +737,198 @@ function showModal(title,body,xp){
 function showCombo(text){const el=document.createElement('div');el.className='combo-pop';el.textContent=text;document.body.appendChild(el);setTimeout(()=>el.remove(),950);}
 function showXpPop(text){const el=document.createElement('div');el.className='xp-pop';el.textContent=text;document.body.appendChild(el);setTimeout(()=>el.remove(),950);}
 
-// ===== 🎵 サウンドシステム（Web Audio API） =====
+// ===== 🎵 ASMRサウンドシステム（Web Audio API） =====
 let _actx=null;
-function getACtx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();return _actx;}
-function playTone(freq,type,duration,vol=0.18,delay=0){
+function getACtx(){
+  if(!_actx) _actx=new(window.AudioContext||window.webkitAudioContext)();
+  return _actx;
+}
+
+// リバーブ（残響）ノードを生成
+function makeReverb(ctx, duration=0.8, decay=0.3){
+  const len=ctx.sampleRate*duration;
+  const buf=ctx.createBuffer(2,len,ctx.sampleRate);
+  for(let c=0;c<2;c++){
+    const d=buf.getChannelData(c);
+    for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);
+  }
+  const conv=ctx.createConvolver();
+  conv.buffer=buf;
+  return conv;
+}
+
+// ===== シール剥がす音（正解）=====
+// 摩擦ノイズ＋高周波バースト＋余韻
+function soundCorrect(){
   try{
     const ctx=getACtx();
-    const o=ctx.createOscillator(),g=ctx.createGain();
-    o.connect(g);g.connect(ctx.destination);
-    o.type=type;o.frequency.setValueAtTime(freq,ctx.currentTime+delay);
-    g.gain.setValueAtTime(0,ctx.currentTime+delay);
-    g.gain.linearRampToValueAtTime(vol,ctx.currentTime+delay+0.01);
-    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+duration);
-    o.start(ctx.currentTime+delay);o.stop(ctx.currentTime+delay+duration);
+    const now=ctx.currentTime;
+
+    // ① 摩擦ノイズ（ぺりっ）
+    const bufLen=ctx.sampleRate*0.06;
+    const noiseBuf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
+    const nd=noiseBuf.getChannelData(0);
+    for(let i=0;i<bufLen;i++) nd[i]=Math.random()*2-1;
+    const noiseNode=ctx.createBufferSource();
+    noiseNode.buffer=noiseBuf;
+
+    // ハイパスフィルタ（シャリシャリ感）
+    const hp=ctx.createBiquadFilter();
+    hp.type='highpass'; hp.frequency.value=3000;
+
+    // ローパスフィルタ（キツすぎない）
+    const lp=ctx.createBiquadFilter();
+    lp.type='lowpass'; lp.frequency.value=8000;
+
+    const noiseGain=ctx.createGain();
+    noiseGain.gain.setValueAtTime(0,now);
+    noiseGain.gain.linearRampToValueAtTime(0.35,now+0.005);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001,now+0.08);
+
+    noiseNode.connect(hp); hp.connect(lp); lp.connect(noiseGain);
+
+    // ② キラッとした高周波トーン（剥がれた瞬間の音）
+    const osc=ctx.createOscillator();
+    osc.type='sine'; osc.frequency.setValueAtTime(2800,now);
+    osc.frequency.exponentialRampToValueAtTime(1800,now+0.12);
+    const oscGain=ctx.createGain();
+    oscGain.gain.setValueAtTime(0,now);
+    oscGain.gain.linearRampToValueAtTime(0.08,now+0.008);
+    oscGain.gain.exponentialRampToValueAtTime(0.001,now+0.18);
+    osc.connect(oscGain);
+
+    // ③ 倍音（ふわっとした余韻）
+    const harm=ctx.createOscillator();
+    harm.type='sine'; harm.frequency.value=1200;
+    const harmGain=ctx.createGain();
+    harmGain.gain.setValueAtTime(0,now+0.04);
+    harmGain.gain.linearRampToValueAtTime(0.05,now+0.1);
+    harmGain.gain.exponentialRampToValueAtTime(0.001,now+0.5);
+    harm.connect(harmGain);
+
+    // リバーブで空間感
+    const reverb=makeReverb(ctx,0.6,0.4);
+    const dryGain=ctx.createGain(); dryGain.gain.value=0.7;
+    const wetGain=ctx.createGain(); wetGain.gain.value=0.3;
+
+    [noiseGain,oscGain,harmGain].forEach(g=>{
+      g.connect(dryGain);
+      g.connect(reverb);
+    });
+    reverb.connect(wetGain);
+    dryGain.connect(ctx.destination);
+    wetGain.connect(ctx.destination);
+
+    noiseNode.start(now); noiseNode.stop(now+0.1);
+    osc.start(now); osc.stop(now+0.2);
+    harm.start(now+0.04); harm.stop(now+0.6);
   }catch(e){}
 }
-function soundCorrect(){
-  // 明るい上昇音
-  playTone(523,'sine',0.12,0.15,0);
-  playTone(659,'sine',0.12,0.15,0.08);
-  playTone(784,'sine',0.15,0.15,0.16);
-  playTone(1047,'sine',0.2,0.12,0.26);
-}
+
+// ===== コンボ（シールを連続で剥がす＋チャイム）=====
 function soundCombo(){
-  // コンボ用：さらに派手
-  playTone(659,'sine',0.1,0.15,0);
-  playTone(784,'sine',0.1,0.15,0.06);
-  playTone(1047,'sine',0.1,0.15,0.12);
-  playTone(1319,'sine',0.22,0.15,0.2);
-  playTone(1568,'sine',0.25,0.12,0.3);
+  try{
+    const ctx=getACtx();
+    const now=ctx.currentTime;
+    // 連続ぺりぺり×3
+    [0, 0.07, 0.14].forEach(delay=>{
+      const bufLen=Math.floor(ctx.sampleRate*0.05);
+      const buf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<bufLen;i++) d[i]=Math.random()*2-1;
+      const src=ctx.createBufferSource(); src.buffer=buf;
+      const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=4000;
+      const g=ctx.createGain();
+      g.gain.setValueAtTime(0.3,now+delay);
+      g.gain.exponentialRampToValueAtTime(0.001,now+delay+0.06);
+      src.connect(hp); hp.connect(g); g.connect(ctx.destination);
+      src.start(now+delay); src.stop(now+delay+0.07);
+    });
+    // チャイム余韻
+    [1047,1319,1568].forEach((freq,i)=>{
+      const osc=ctx.createOscillator(); osc.type='sine'; osc.frequency.value=freq;
+      const g=ctx.createGain();
+      g.gain.setValueAtTime(0,now+0.18+i*0.08);
+      g.gain.linearRampToValueAtTime(0.09,now+0.19+i*0.08);
+      g.gain.exponentialRampToValueAtTime(0.001,now+0.7+i*0.1);
+      const reverb=makeReverb(ctx,0.8,0.3);
+      osc.connect(g); g.connect(reverb); reverb.connect(ctx.destination);
+      g.connect(ctx.destination);
+      osc.start(now+0.18+i*0.08); osc.stop(now+0.9+i*0.1);
+    });
+  }catch(e){}
 }
+
+// ===== 不正解（くぐもった低音）=====
 function soundWrong(){
-  // ざんねん音
-  playTone(220,'sawtooth',0.15,0.12,0);
-  playTone(180,'sawtooth',0.2,0.1,0.12);
+  try{
+    const ctx=getACtx();
+    const now=ctx.currentTime;
+    const osc=ctx.createOscillator();
+    osc.type='sine'; osc.frequency.setValueAtTime(220,now);
+    osc.frequency.exponentialRampToValueAtTime(140,now+0.25);
+    const g=ctx.createGain();
+    g.gain.setValueAtTime(0,now);
+    g.gain.linearRampToValueAtTime(0.12,now+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001,now+0.3);
+    // ローパスでこもった感じ
+    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=600;
+    osc.connect(lp); lp.connect(g); g.connect(ctx.destination);
+    osc.start(now); osc.stop(now+0.3);
+  }catch(e){}
 }
-function soundLevelUp(){
-  // レベルアップファンファーレ
-  const notes=[523,659,784,1047,1319];
-  notes.forEach((f,i)=>playTone(f,'sine',0.25,0.2,i*0.1));
-  setTimeout(()=>{
-    playTone(1047,'sine',0.3,0.18,0);
-    playTone(1319,'sine',0.3,0.18,0.05);
-    playTone(1568,'sine',0.4,0.18,0.1);
-  },600);
-}
+
+// ===== ハート消失（短い鈍音）=====
 function soundHeartLost(){
-  playTone(300,'triangle',0.08,0.1,0);
-  playTone(200,'triangle',0.12,0.08,0.1);
+  try{
+    const ctx=getACtx();
+    const now=ctx.currentTime+0.05;
+    const osc=ctx.createOscillator();
+    osc.type='triangle'; osc.frequency.setValueAtTime(180,now);
+    osc.frequency.exponentialRampToValueAtTime(100,now+0.15);
+    const g=ctx.createGain();
+    g.gain.setValueAtTime(0.08,now);
+    g.gain.exponentialRampToValueAtTime(0.001,now+0.18);
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start(now); osc.stop(now+0.2);
+  }catch(e){}
+}
+
+// ===== レベルアップ（クリスタルチャイム）=====
+function soundLevelUp(){
+  try{
+    const ctx=getACtx();
+    const now=ctx.currentTime;
+    const reverb=makeReverb(ctx,1.2,0.25);
+    const wetG=ctx.createGain(); wetG.gain.value=0.4;
+    reverb.connect(wetG); wetG.connect(ctx.destination);
+    // きらきら上昇
+    [784,1047,1319,1568,2093].forEach((freq,i)=>{
+      const osc=ctx.createOscillator(); osc.type='sine'; osc.frequency.value=freq;
+      const g=ctx.createGain();
+      g.gain.setValueAtTime(0,now+i*0.1);
+      g.gain.linearRampToValueAtTime(0.12,now+i*0.1+0.01);
+      g.gain.exponentialRampToValueAtTime(0.001,now+i*0.1+0.8);
+      osc.connect(g);
+      g.connect(ctx.destination);
+      g.connect(reverb);
+      osc.start(now+i*0.1); osc.stop(now+i*0.1+0.9);
+    });
+    // 最後にもう一度まとめて鳴らす
+    setTimeout(()=>{
+      try{
+        const n=ctx.currentTime;
+        [1047,1319,1568].forEach((freq,i)=>{
+          const osc=ctx.createOscillator(); osc.type='sine'; osc.frequency.value=freq;
+          const g=ctx.createGain();
+          g.gain.setValueAtTime(0.1,n+i*0.02);
+          g.gain.exponentialRampToValueAtTime(0.001,n+1.2);
+          osc.connect(g); g.connect(ctx.destination); g.connect(reverb);
+          osc.start(n+i*0.02); osc.stop(n+1.3);
+        });
+      }catch(e){}
+    },650);
+  }catch(e){}
 }
 
 // ===== ✨ ビジュアルエフェクト =====

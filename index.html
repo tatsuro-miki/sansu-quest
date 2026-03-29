@@ -34,11 +34,18 @@ h1{text-align:center;font-size:2.2rem;font-weight:900;background:linear-gradient
 .user-btn.loading-btn{opacity:.6;pointer-events:none;}
 /* ランキング */
 .ranking-card{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid rgba(255,215,0,.15);}
+/* タブ */
+.rank-tabs{display:flex;gap:6px;margin-bottom:12px;}
+.rank-tab{flex:1;font-family:inherit;font-size:.8rem;font-weight:900;padding:8px 6px;border-radius:12px;border:2px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--text2);cursor:pointer;transition:.2s;text-align:center;}
+.rank-tab.active{border-color:var(--gold);background:rgba(255,215,0,.1);color:var(--gold);}
+.rank-tab.test-tab.active{border-color:#60a5fa;background:rgba(96,165,250,.1);color:#60a5fa;}
 .rank-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.04);margin-bottom:6px;}
 .rank-no{font-size:1rem;font-weight:900;width:26px;text-align:center;}
 .rank-name{flex:1;font-weight:800;font-size:.9rem;}
 .rank-streak{font-size:.74rem;color:var(--primary2);}
 .rank-xp{font-size:.82rem;font-weight:800;color:var(--xp);}
+.rank-score{font-size:.82rem;font-weight:800;color:#60a5fa;}
+.rank-testlv{font-size:.7rem;color:var(--text2);}
 .loading-msg{text-align:center;color:var(--text2);font-size:.88rem;padding:12px;}
 .anon-note{font-size:.72rem;color:var(--text2);text-align:center;margin-bottom:10px;}
 .error-msg{color:#fca5a5;font-size:.82rem;padding:8px 10px;background:rgba(239,68,68,.1);border-radius:10px;margin-top:8px;display:none;}
@@ -65,9 +72,13 @@ h1{text-align:center;font-size:2.2rem;font-weight:900;background:linear-gradient
   </div>
 
   <div class="ranking-card">
-    <div class="card-title" style="margin-bottom:6px">🏆 ランキング</div>
+    <div class="rank-tabs">
+      <button class="rank-tab active" id="tab-xp" onclick="switchTab('xp')">🏆 XPランキング</button>
+      <button class="rank-tab test-tab" id="tab-test" onclick="switchTab('test')">⚡ テストランキング</button>
+    </div>
     <div class="anon-note">※ 名前はひみつにしてあるよ</div>
     <div id="ranking-area"><div class="loading-msg">⏳ よみこみちゅう...</div></div>
+    <div id="test-ranking-area" style="display:none"><div class="loading-msg">⏳ よみこみちゅう...</div></div>
   </div>
 </div>
 
@@ -141,23 +152,52 @@ function renderUsers(users) {
 function renderRanking(users) {
   const medals = ['🥇','🥈','🥉'];
   const sorted = [...users].sort((a,b) => (b.xp||0) - (a.xp||0));
-  const currentUser = sessionStorage.getItem('sq_user');
-  const html = sorted.slice(0,10).map((u,i) => {
-    const isMe = u.name === currentUser;
-    const displayName = isMe
-      ? `${u.name} <span style="font-size:.68rem;background:var(--primary);color:white;padding:2px 6px;border-radius:6px;margin-left:4px">あなた</span>`
-      : anonName(u.name);
-    return `
-      <div class="rank-row" style="${isMe?'border:1px solid rgba(233,69,96,.4);background:rgba(233,69,96,.08);':''}">
-        <span class="rank-no">${medals[i]||i+1}</span>
-        <span class="rank-name">${displayName}</span>
-        <span class="rank-streak">🔥${u.loginDays||0}日</span>
-        <span class="rank-xp">⭐${u.xp||0} XP</span>
-      </div>
-    `;
-  }).join('');
+  const html = sorted.slice(0,10).map((u,i) => `
+    <div class="rank-row">
+      <span class="rank-no">${medals[i]||i+1}</span>
+      <span class="rank-name">${anonName(u.name)}</span>
+      <span class="rank-streak">🔥${u.loginDays||0}日</span>
+      <span class="rank-xp">⭐${u.xp||0} XP</span>
+    </div>
+  `).join('');
   document.getElementById('ranking-area').innerHTML = html || '<div class="loading-msg">まだデータなし</div>';
 }
+
+function renderTestRanking(users) {
+  const medals = ['🥇','🥈','🥉'];
+  const TEST_LV_NAMES = ['','テストLv1','テストLv2','テストLv3','テストLv4','テストLv5'];
+  const withScore = users.filter(u => (u.bestTestScore||0) > 0);
+  const sorted = [...withScore].sort((a,b) => (b.bestTestScore||0) - (a.bestTestScore||0));
+  if (sorted.length === 0) {
+    document.getElementById('test-ranking-area').innerHTML =
+      '<div class="loading-msg">⚡ Lv5でテストモードが解放されるよ！</div>';
+    return;
+  }
+  const html = sorted.slice(0,10).map((u,i) => `
+    <div class="rank-row">
+      <span class="rank-no">${medals[i]||i+1}</span>
+      <span class="rank-name">${anonName(u.name)}</span>
+      <span class="rank-testlv">${TEST_LV_NAMES[u.bestTestLv||1]||''}</span>
+      <span class="rank-score">⚡${u.bestTestScore||0}点</span>
+    </div>
+  `).join('');
+  document.getElementById('test-ranking-area').innerHTML = html;
+}
+
+// ===== タブ切り替え =====
+window.switchTab = function(tab) {
+  const xpArea  = document.getElementById('ranking-area');
+  const testArea = document.getElementById('test-ranking-area');
+  const tabXp   = document.getElementById('tab-xp');
+  const tabTest = document.getElementById('tab-test');
+  if (tab === 'xp') {
+    xpArea.style.display = 'block'; testArea.style.display = 'none';
+    tabXp.classList.add('active'); tabTest.classList.remove('active');
+  } else {
+    xpArea.style.display = 'none'; testArea.style.display = 'block';
+    tabXp.classList.remove('active'); tabTest.classList.add('active');
+  }
+};
 
 function showError(msg) {
   const el = document.getElementById('error-msg');
@@ -215,6 +255,7 @@ async function init() {
     const users = await loadAllUsers();
     renderUsers(users);
     renderRanking(users);
+    renderTestRanking(users);
   } catch(e) {
     showError('Firebase接続エラー。firebase.jsの設定値を確認してください。');
     document.getElementById('user-grid').innerHTML = '<div class="loading-msg" style="grid-column:1/-1;color:#fca5a5">接続エラー</div>';

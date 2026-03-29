@@ -3,20 +3,18 @@
 //  Firebaseコンソール → プロジェクト設定 → マイアプリ → SDK設定
 // ============================================================
 const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyDTkbDLtf2RaN82-2lMrlrn5HzaPgAMlJ8",
-  authDomain: "sansu-quest.firebaseapp.com",
-  projectId: "sansu-quest",
-  storageBucket: "sansu-quest.firebasestorage.app",
-  messagingSenderId: "520218611702",
-  appId: "1:520218611702:web:e786ee5bcc634e5e7c81d7",
+  apiKey:            "YOUR_API_KEY",
+  authDomain:        "YOUR_PROJECT.firebaseapp.com",
+  projectId:         "YOUR_PROJECT_ID",
+  storageBucket:     "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId:             "YOUR_APP_ID"
 };
 
 // ============================================================
 //  ★ 子供の名前とアバターを変更してください ★
 // ============================================================
 const USERS = [
-  { name: "ここな", avatar: "🧒" },
-  { name: "れおな", avatar: "👦" },
   { name: "こども1", avatar: "🧒" },
   { name: "こども2", avatar: "👦" },
 ];

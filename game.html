@@ -128,6 +128,32 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .save-dot{position:fixed;bottom:16px;right:16px;width:8px;height:8px;border-radius:50%;background:var(--xp);opacity:0;transition:opacity .3s;z-index:999;}
 .save-dot.saving{opacity:1;animation:pulse 1s infinite;}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+/* ===== エフェクト追加 ===== */
+/* 正解フラッシュ */
+.correct-flash{position:fixed;inset:0;background:rgba(74,222,128,.18);pointer-events:none;z-index:9990;animation:flashIn .35s ease forwards;}
+@keyframes flashIn{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+/* 不正解フラッシュ */
+.wrong-flash{position:fixed;inset:0;background:rgba(239,68,68,.22);pointer-events:none;z-index:9990;animation:wrongFlash .4s ease forwards;}
+@keyframes wrongFlash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+/* コイン */
+.coin{position:fixed;font-size:1.5rem;pointer-events:none;z-index:9995;animation:coinFall var(--dur,1.2s) ease forwards;}
+@keyframes coinFall{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}60%{opacity:1}100%{opacity:0;transform:translateY(var(--ty,220px)) rotate(var(--rot,360deg)) scale(.4)}}
+/* スター */
+.star-burst{position:fixed;font-size:1.8rem;pointer-events:none;z-index:9994;animation:starBurst .8s cubic-bezier(.34,1.56,.64,1) forwards;}
+@keyframes starBurst{0%{opacity:0;transform:translate(-50%,-50%) scale(0)}50%{opacity:1;transform:translate(var(--tx,0px),var(--ty,0px)) scale(1.4)}100%{opacity:0;transform:translate(var(--tx2,0px),var(--ty2,0px)) scale(.5)}}
+/* レベルアップ全画面 */
+.levelup-overlay{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(255,215,0,.3) 0%,rgba(26,26,46,.95) 70%);z-index:9980;display:flex;align-items:center;justify-content:center;animation:lvFadeIn .4s ease;}
+.levelup-content{text-align:center;animation:lvPop .6s cubic-bezier(.34,1.56,.64,1);}
+.levelup-content .lv-big{font-size:6rem;display:block;margin-bottom:8px;animation:lvSpin 1s ease;}
+.levelup-content h2{font-size:2.2rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold2),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
+.levelup-content p{color:var(--text2);font-size:1rem;margin-bottom:20px;}
+.levelup-close{font-family:inherit;font-size:1rem;font-weight:900;padding:13px 36px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1a2e;border:none;border-radius:14px;cursor:pointer;box-shadow:var(--glow-gold);}
+@keyframes lvFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes lvPop{0%{opacity:0;transform:scale(.3) translateY(40px)}100%{opacity:1;transform:none}}
+@keyframes lvSpin{0%{transform:rotate(-20deg) scale(.5)}60%{transform:rotate(10deg) scale(1.2)}100%{transform:rotate(0deg) scale(1)}}
+/* ハート減少アニメ */
+.heart.hit{animation:heartHit .4s ease;}
+@keyframes heartHit{0%{transform:scale(1)}30%{transform:scale(1.6)}60%{transform:scale(.6)}100%{transform:scale(.7);opacity:.22}}
 /* animations */
 @keyframes cardIn{from{opacity:0;transform:scale(.92) translateY(12px)}to{opacity:1;transform:none}}
 @keyframes popIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
@@ -200,7 +226,10 @@ const app = initializeApp(FIREBASE_CONFIG);
 const db  = getFirestore(app);
 
 // ===== 定数 =====
-const HEARTS_MAX = 5, DAILY_GOAL = 10;
+const HEARTS_MAX = 5;
+const DAILY_GOAL = 10;
+function dailyGoal(lv){ return DAILY_GOAL; }
+function diffTier(lv){ if(lv<=10) return 'easy'; if(lv<=20) return 'mid'; return 'hard'; }
 const LEVELS = [
   {name:'はじめての冒険者',xp:100},{name:'計算の見習い',xp:250},{name:'算数の戦士',xp:500},
   {name:'数式の魔法使い',xp:900},{name:'算術マスター',xp:1400},{name:'天才数学者',xp:2000},{name:'伝説の計算王',xp:Infinity}
@@ -287,11 +316,11 @@ function renderUI() {
   document.getElementById('ui-xp-next').textContent=`${xp} / ${max} XP`;
   document.getElementById('ui-lv-bar').style.width=`${Math.min(100,xp/max*100)}%`;
   // daily
-  const done=Math.min(save.dailyDone||0,DAILY_GOAL), pct=done/DAILY_GOAL;
+  const DAILY_GOAL=dailyGoal(save.level||1); const done=Math.min(save.dailyDone||0,DAILY_GOAL), pct=done/DAILY_GOAL;
   document.getElementById('ui-ring').style.strokeDashoffset=138.2*(1-pct);
   document.getElementById('ui-ring-text').textContent=`${done}/${DAILY_GOAL}`;
   document.getElementById('ui-goal-title').textContent=done>=DAILY_GOAL?'🎉 クリア済み':'今日のノルマ';
-  document.getElementById('ui-goal-sub').textContent=done>=DAILY_GOAL?'✅ 今日のノルマ達成！':`あと ${DAILY_GOAL-done} 問でノルマ達成！`;
+  document.getElementById('ui-goal-sub').textContent=done>=DAILY_GOAL?'✅ 今日のノルマ達成！':`あと ${DAILY_GOAL-done} 問でノルマ達成！（目標${DAILY_GOAL}問）`;
 }
 
 function renderBadges(){
@@ -311,37 +340,76 @@ window.setCategory = function(i){
   nextQuestion();
 };
 
-// ===== 問題生成 =====
-function genArithmetic(){
-  const ops=['+','-','×','÷'];const op=ops[R(0,3)];let a,b,ans;
-  switch(op){case '+':a=R(10,999);b=R(10,999);ans=a+b;break;case '-':a=R(100,999);b=R(10,a);ans=a-b;break;case '×':a=R(2,99);b=R(2,99);ans=a*b;break;case '÷':ans=R(2,50);b=R(2,20);a=ans*b;break;}
-  const lv=op==='+'||op==='-'?(a>99?'lv2':'lv1'):(a>20?'lv3':'lv2');
+// ===== 問題生成（レベル連動） =====
+// tier: 'easy'=Lv1-3 / 'mid'=Lv4-10 / 'hard'=Lv11+
+function genArithmetic(tier){
+  const op = tier==='easy' ? ['+','-'][R(0,1)]
+            : tier==='mid'  ? ['+','-','×','÷'][R(0,3)]
+            :                 ['+','-','×','÷'][R(0,3)];
+  let a,b,ans;
+  if(op==='+'){
+    if(tier==='easy'){a=R(1,20);b=R(1,20);}
+    else if(tier==='mid'){a=R(10,99);b=R(10,99);}
+    else {a=R(100,999);b=R(100,999);}
+    ans=a+b;
+  } else if(op==='-'){
+    if(tier==='easy'){a=R(5,20);b=R(1,a);} 
+    else if(tier==='mid'){a=R(20,99);b=R(10,a);}
+    else {a=R(100,999);b=R(10,a);}
+    ans=a-b;
+  } else if(op==='×'){
+    if(tier==='mid'){a=R(2,9);b=R(2,9);}
+    else {a=R(2,99);b=R(2,99);}
+    ans=a*b;
+  } else {
+    if(tier==='mid'){ans=R(2,20);b=R(2,9);}
+    else {ans=R(2,50);b=R(2,20);}
+    a=ans*b;
+  }
+  const lv = (op==='+'||op==='-') ? (a>99?'lv2':'lv1') : (a>20?'lv3':'lv2');
   return {type:'number',lv,label:`四則(${op})`,text:`${a} ${op} ${b} ＝ ?`,answer:ans.toString(),hint:''};
 }
-function genFraction(){
-  const t=R(0,2);
-  if(t===0){const d1=R(2,9),d2=R(2,9),n1=R(1,d1-1),n2=R(1,d2-1),lcm=d1*d2/gcd(d1,d2),rn=n1*(lcm/d1)+n2*(lcm/d2),g=gcd(rn,lcm);return {type:'fraction',lv:'lv2',label:'分数たし算',text:`${n1}/${d1} ＋ ${n2}/${d2} ＝ ?`,hint:`公倍数は${lcm}`,answer:`${rn/g}/${lcm/g}`,na:rn/g,da:lcm/g};}
-  if(t===1){const d1=R(2,8),d2=R(2,8),lcm=d1*d2/gcd(d1,d2);let n1r=R(1,d1-1)*(lcm/d1),n2r=R(1,d2-1)*(lcm/d2);if(n1r<n2r)[n1r,n2r]=[n2r,n1r];const rn=n1r-n2r,g=gcd(rn||1,lcm);return {type:'fraction',lv:'lv2',label:'分数ひき算',text:`${n1r/(lcm/d1)}/${d1} ー ${n2r/(lcm/d2)||1}/${d2} ＝ ?`,hint:`公倍数は${lcm}`,answer:`${rn/g}/${lcm/g}`,na:rn/g,da:lcm/g};}
-  const n1=R(1,6),d1=R(2,8),n2=R(1,6),d2=R(2,8),rn=n1*n2,rd=d1*d2,g=gcd(rn,rd);
+function genFraction(tier){
+  // easyは分数なし→四則にフォールバック
+  if(tier==='easy') return genArithmetic('easy');
+  const t = tier==='mid' ? R(0,1) : R(0,2); // hardのみかけ算
+  if(t===0){const d1=R(2,6),d2=R(2,6),n1=R(1,d1-1),n2=R(1,d2-1),lcm=d1*d2/gcd(d1,d2),rn=n1*(lcm/d1)+n2*(lcm/d2),g=gcd(rn,lcm);return {type:'fraction',lv:'lv2',label:'分数たし算',text:`${n1}/${d1} ＋ ${n2}/${d2} ＝ ?`,hint:`公倍数は${lcm}`,answer:`${rn/g}/${lcm/g}`,na:rn/g,da:lcm/g};}
+  if(t===1){const d1=R(2,6),d2=R(2,6),lcm=d1*d2/gcd(d1,d2);let n1r=R(1,d1-1)*(lcm/d1),n2r=R(1,d2-1)*(lcm/d2);if(n1r<n2r)[n1r,n2r]=[n2r,n1r];const rn=n1r-n2r,g=gcd(rn||1,lcm);return {type:'fraction',lv:'lv2',label:'分数ひき算',text:`${n1r/(lcm/d1)}/${d1} ー ${n2r/(lcm/d2)||1}/${d2} ＝ ?`,hint:`公倍数は${lcm}`,answer:`${rn/g}/${lcm/g}`,na:rn/g,da:lcm/g};}
+  const n1=R(1,5),d1=R(2,7),n2=R(1,5),d2=R(2,7),rn=n1*n2,rd=d1*d2,g=gcd(rn,rd);
   return {type:'fraction',lv:'lv3',label:'分数かけ算',text:`${n1}/${d1} × ${n2}/${d2} ＝ ?`,hint:'分子同士・分母同士をかけよう',answer:`${rn/g}/${rd/g}`,na:rn/g,da:rd/g};
 }
-function genDecimal(){
-  const t=R(0,2);
+function genDecimal(tier){
+  // easyは小数なし→四則にフォールバック
+  if(tier==='easy') return genArithmetic('easy');
+  const t = tier==='mid' ? R(0,1) : R(0,2);
   if(t===0){const a=(R(10,99)/10).toFixed(1),b=(R(10,99)/10).toFixed(1),ans=((parseFloat(a)*10+parseFloat(b)*10)/10).toFixed(1);return {type:'number',lv:'lv2',label:'小数たし算',text:`${a} ＋ ${b} ＝ ?`,answer:ans,hint:''};}
   if(t===1){let a=(R(10,99)/10).toFixed(1),b=(R(10,99)/10).toFixed(1);if(parseFloat(a)<parseFloat(b))[a,b]=[b,a];const ans=((parseFloat(a)*10-parseFloat(b)*10)/10).toFixed(1);return {type:'number',lv:'lv2',label:'小数ひき算',text:`${a} ー ${b} ＝ ?`,answer:ans,hint:''};}
   const a=(R(2,9)/10).toFixed(1),b=R(2,9),ans=(parseFloat(a)*b).toFixed(1);
   return {type:'number',lv:'lv3',label:'小数かけ算',text:`${a} × ${b} ＝ ?`,answer:ans,hint:''};
 }
-function genWord(){
-  const ts=[
-    ()=>{const s=R(60,120),t=R(10,60),d=s*t;return {type:'choice',lv:'lv2',label:'文章(速さ)',text:`時速${s}kmの電車が${t}分走りました。\n何km進みましたか？`,hint:'速さ×時間÷60',answer:d.toString(),choices:shuffle([d,d+R(10,100),Math.max(1,d-R(10,50)),d*2]).map(String)};},
-    ()=>{const tot=R(800,2000),r=R(2,5);const a=Math.round(tot*r/(r+1));return {type:'choice',lv:'lv2',label:'文章(割合)',text:`${tot}円を ${r}:1 で分けます。\n多い方は何円？`,hint:'全体÷(比の合計)×比',answer:a.toString(),choices:shuffle([a,a+R(20,100),tot-a,Math.round(tot/r)]).map(String)};},
-    ()=>{const r=R(3,8);const area=Math.round(r*r*314)/100;return {type:'choice',lv:'lv3',label:'文章(面積)',text:`半径${r}cmの円の面積は？\n（円周率3.14）`,hint:'半径×半径×3.14',answer:area.toString(),choices:shuffle([area,Math.round(r*2*314)/100,r*r,Math.round((r+1)*(r+1)*314)/100]).map(String)};},
-    ()=>{const p=R(200,800),d=R(1,4)*10;const s=Math.round(p*(100-d)/100);return {type:'choice',lv:'lv2',label:'文章(割引)',text:`${p}円の商品が${d}%引き。\nいくらになる？`,hint:`${p}×(1-${d}/100)`,answer:s.toString(),choices:shuffle([s,p-d,Math.round(p*d/100),s+R(20,80)]).map(String)};},
+function genWord(tier){
+  // easyは文章題なし→四則にフォールバック
+  if(tier==='easy') return genArithmetic('easy');
+  const midTs=[
+    ()=>{const p=R(100,500),d=R(1,3)*10;const s=Math.round(p*(100-d)/100);return {type:'choice',lv:'lv2',label:'文章(割引)',text:`${p}円の商品が${d}%引き。\nいくらになる？`,hint:`${p}×(1-${d}/100)`,answer:s.toString(),choices:shuffle([s,p-d,Math.round(p*d/100),s+R(10,50)]).map(String)};},
+    ()=>{const tot=R(500,1500),r=R(2,4);const a=Math.round(tot*r/(r+1));return {type:'choice',lv:'lv2',label:'文章(割合)',text:`${tot}円を ${r}:1 で分けます。\n多い方は何円？`,hint:'全体÷(比の合計)×比',answer:a.toString(),choices:shuffle([a,a+R(20,100),tot-a,Math.round(tot/r)]).map(String)};},
   ];
-  return ts[R(0,ts.length-1)]();
+  const hardTs=[
+    ()=>{const s=R(60,120),t=R(10,60),d=s*t;return {type:'choice',lv:'lv3',label:'文章(速さ)',text:`時速${s}kmの電車が${t}分走りました。\n何km進みましたか？`,hint:'速さ×時間÷60',answer:d.toString(),choices:shuffle([d,d+R(10,100),Math.max(1,d-R(10,50)),d*2]).map(String)};},
+    ()=>{const r=R(3,8);const area=Math.round(r*r*314)/100;return {type:'choice',lv:'lv3',label:'文章(面積)',text:`半径${r}cmの円の面積は？\n（円周率3.14）`,hint:'半径×半径×3.14',answer:area.toString(),choices:shuffle([area,Math.round(r*2*314)/100,r*r,Math.round((r+1)*(r+1)*314)/100]).map(String)};},
+  ];
+  const pool = tier==='hard' ? [...midTs,...hardTs] : midTs;
+  return pool[R(0,pool.length-1)]();
 }
-function gen(){switch(category){case 0:return genArithmetic();case 1:return genFraction();case 2:return genDecimal();case 3:return genWord();}}
+function gen(){
+  const tier = diffTier(save.level||1);
+  switch(category){
+    case 0: return genArithmetic(tier);
+    case 1: return genFraction(tier);
+    case 2: return genDecimal(tier);
+    case 3: return genWord(tier);
+  }
+}
 
 // ===== 問題描画 =====
 function nextQuestion(){
@@ -415,6 +483,7 @@ function onCorrect(){
   const xpAmt=XP_TBL[question.lv];
   save.questionStreak=(save.questionStreak||0)+1;
   const bonus=save.questionStreak%5===0?10:0;
+  const isCombo=save.questionStreak%3===0;
   save.totalCorrect=(save.totalCorrect||0)+1;
   save.catCorrect=save.catCorrect||[0,0,0,0];
   save.catCorrect[category]=(save.catCorrect[category]||0)+1;
@@ -425,7 +494,21 @@ function onCorrect(){
   while(save.level<LEVELS.length && save.xp>=xpForLv(save.level)){
     save.xp-=xpForLv(save.level); save.level++; leveled=true;
   }
-  if(leveled){save.hearts=HEARTS_MAX;setTimeout(()=>showModal(`🎊 レベルアップ！`,`レベル ${save.level} になった！\n「${lvName(save.level)}」`,0),500);}
+  // ===== エフェクト・サウンド =====
+  flashScreen('correct-flash');
+  if(isCombo){
+    soundCombo();
+    spawnCoins(12);
+    spawnStars(6);
+  } else {
+    soundCorrect();
+    spawnCoins(5);
+    spawnStars(3);
+  }
+  if(leveled){
+    save.hearts=HEARTS_MAX;
+    setTimeout(()=>showLevelUpOverlay(save.level,lvName(save.level)),500);
+  }
   // badges
   checkBadges();
   persistSave(); renderUI(); renderBadges();
@@ -433,8 +516,8 @@ function onCorrect(){
   const msgs=['すごい！🎉','かんぺき！✨','よくできました！⭐','その調子！🔥','天才！🧠','完璧！💯'];
   setFeedback('ok', msgs[R(0,msgs.length-1)]+(bonus?` コンボ+${bonus}XP！`:''));
   showXpPop(`+${xpAmt+bonus}XP`);
-  if(save.questionStreak%3===0) showCombo(`🔥×${save.questionStreak}`);
-  if(save.dailyDone===DAILY_GOAL) setTimeout(()=>showModal('🎊 ノルマ達成！','今日の10問クリア！\nまた明日もがんばろう！',50),600);
+  if(isCombo) showCombo(`🔥×${save.questionStreak}`);
+  const _dg=dailyGoal(save.level||1); if(save.dailyDone===_dg) setTimeout(()=>showModal('🎊 ノルマ達成！',`今日の${_dg}問クリア！\nまた明日もがんばろう！`,50),600);
   showNextBtn();
 }
 function onWrong(msg){
@@ -443,6 +526,10 @@ function onWrong(msg){
   save.hearts=Math.max(0,(save.hearts||HEARTS_MAX)-1);
   save.lastHeartRegen=Date.now();
   persistSave(); renderUI();
+  // ===== エフェクト・サウンド =====
+  flashScreen('wrong-flash');
+  soundWrong();
+  soundHeartLost();
   setFeedback('ng',`❌ ざんねん… ${msg}`);
   document.getElementById('streak-pill').classList.add('shake');
   setTimeout(()=>document.getElementById('streak-pill').classList.remove('shake'),500);
@@ -453,7 +540,7 @@ function checkBadges(){
   const ub=save.unlockedBadges||[];
   const add=(id,cond)=>{if(cond&&!ub.includes(id)){ub.push(id);showCombo('🏅');}};
   add('first',save.totalCorrect>=1);add('streak3',save.questionStreak>=3);add('streak7',save.questionStreak>=7);
-  add('daily1',save.dailyDone>=DAILY_GOAL);add('day3',(save.loginDays||0)>=3);add('day7',(save.loginDays||0)>=7);
+  add('daily1',save.dailyDone>=dailyGoal(save.level||1));add('day3',(save.loginDays||0)>=3);add('day7',(save.loginDays||0)>=7);
   add('lv3',(save.level||1)>=3);add('lv5',(save.level||1)>=5);
   add('total50',save.totalCorrect>=50);add('total200',save.totalCorrect>=200);
   add('fraction1',(save.catCorrect||[])[1]>=5);add('word1',(save.catCorrect||[])[3]>=5);
@@ -509,6 +596,110 @@ function showModal(title,body,xp){
 }
 function showCombo(text){const el=document.createElement('div');el.className='combo-pop';el.textContent=text;document.body.appendChild(el);setTimeout(()=>el.remove(),950);}
 function showXpPop(text){const el=document.createElement('div');el.className='xp-pop';el.textContent=text;document.body.appendChild(el);setTimeout(()=>el.remove(),950);}
+
+// ===== 🎵 サウンドシステム（Web Audio API） =====
+let _actx=null;
+function getACtx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();return _actx;}
+function playTone(freq,type,duration,vol=0.18,delay=0){
+  try{
+    const ctx=getACtx();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type=type;o.frequency.setValueAtTime(freq,ctx.currentTime+delay);
+    g.gain.setValueAtTime(0,ctx.currentTime+delay);
+    g.gain.linearRampToValueAtTime(vol,ctx.currentTime+delay+0.01);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+duration);
+    o.start(ctx.currentTime+delay);o.stop(ctx.currentTime+delay+duration);
+  }catch(e){}
+}
+function soundCorrect(){
+  // 明るい上昇音
+  playTone(523,'sine',0.12,0.15,0);
+  playTone(659,'sine',0.12,0.15,0.08);
+  playTone(784,'sine',0.15,0.15,0.16);
+  playTone(1047,'sine',0.2,0.12,0.26);
+}
+function soundCombo(){
+  // コンボ用：さらに派手
+  playTone(659,'sine',0.1,0.15,0);
+  playTone(784,'sine',0.1,0.15,0.06);
+  playTone(1047,'sine',0.1,0.15,0.12);
+  playTone(1319,'sine',0.22,0.15,0.2);
+  playTone(1568,'sine',0.25,0.12,0.3);
+}
+function soundWrong(){
+  // ざんねん音
+  playTone(220,'sawtooth',0.15,0.12,0);
+  playTone(180,'sawtooth',0.2,0.1,0.12);
+}
+function soundLevelUp(){
+  // レベルアップファンファーレ
+  const notes=[523,659,784,1047,1319];
+  notes.forEach((f,i)=>playTone(f,'sine',0.25,0.2,i*0.1));
+  setTimeout(()=>{
+    playTone(1047,'sine',0.3,0.18,0);
+    playTone(1319,'sine',0.3,0.18,0.05);
+    playTone(1568,'sine',0.4,0.18,0.1);
+  },600);
+}
+function soundHeartLost(){
+  playTone(300,'triangle',0.08,0.1,0);
+  playTone(200,'triangle',0.12,0.08,0.1);
+}
+
+// ===== ✨ ビジュアルエフェクト =====
+function flashScreen(className){
+  const el=document.createElement('div');
+  el.className=className;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),400);
+}
+function spawnCoins(count=8){
+  const emojis=['⭐','🌟','💫','✨','🪙'];
+  for(let i=0;i<count;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.className='coin';
+      el.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+      const x=20+Math.random()*60; // vw
+      const ty=(120+Math.random()*120)+'px';
+      const rot=(-360+Math.random()*720)+'deg';
+      const dur=(0.9+Math.random()*0.6)+'s';
+      el.style.cssText=`left:${x}vw;top:15vh;--ty:${ty};--rot:${rot};--dur:${dur}`;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),1500);
+    },i*60);
+  }
+}
+function spawnStars(count=5){
+  const cx=window.innerWidth/2, cy=window.innerHeight*0.4;
+  for(let i=0;i<count;i++){
+    const el=document.createElement('div');
+    el.className='star-burst';
+    el.textContent=['⭐','💥','✨','🌟','💛'][i%5];
+    const angle=(i/count)*2*Math.PI;
+    const r1=60+Math.random()*40, r2=120+Math.random()*80;
+    el.style.cssText=`left:${cx}px;top:${cy}px;--tx:${Math.cos(angle)*r1}px;--ty:${Math.sin(angle)*r1}px;--tx2:${Math.cos(angle)*r2}px;--ty2:${Math.sin(angle)*r2}px;animation-delay:${i*0.05}s`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),900);
+  }
+}
+function showLevelUpOverlay(level,name){
+  soundLevelUp();
+  const ov=document.createElement('div');
+  ov.className='levelup-overlay';
+  ov.innerHTML=`
+    <div class="levelup-content">
+      <span class="lv-big">🏆</span>
+      <h2>レベルアップ！</h2>
+      <p>レベル <strong style="color:var(--gold);font-size:1.4em">${level}</strong> になった！<br>「${name}」</p>
+      <p style="font-size:.85rem;margin-bottom:16px;color:var(--xp)">❤️ ハートが全回復！</p>
+      <button class="levelup-close" onclick="this.closest('.levelup-overlay').remove()">やったー！🎉</button>
+    </div>`;
+  document.body.appendChild(ov);
+  spawnCoins(16);
+  spawnStars(8);
+}
 
 // ===== ログアウト =====
 window.logout=function(){sessionStorage.removeItem('sq_user');sessionStorage.removeItem('sq_data');location.href='index.html';};

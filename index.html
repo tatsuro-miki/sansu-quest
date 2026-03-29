@@ -6,34 +6,44 @@
 <title>さんすうクエスト</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#1a1a2e;--card:#16213e;--primary:#e94560;--primary2:#ff6b6b;--gold:#ffd700;--gold2:#ffb347;--xp:#4ade80;--blue:#60a5fa;--purple:#a78bfa;--text:#f0f0f0;--text2:#94a3b8;--heart:#ef4444;--radius:20px;--glow-primary:0 0 24px rgba(233,69,96,.4);--glow-gold:0 0 24px rgba(255,215,0,.3);}
+:root{--bg:#1a1a2e;--card:#16213e;--primary:#e94560;--primary2:#ff6b6b;--gold:#ffd700;--xp:#4ade80;--blue:#60a5fa;--purple:#a78bfa;--text:#f0f0f0;--text2:#94a3b8;--radius:20px;--glow-primary:0 0 24px rgba(233,69,96,.4);--glow-gold:0 0 24px rgba(255,215,0,.3);}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Nunito','M PLUS Rounded 1c',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);display:flex;align-items:center;justify-content:center;overflow-x:hidden;}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(233,69,96,.12) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(96,165,250,.1) 0%,transparent 50%);pointer-events:none;}
 .wrap{width:100%;max-width:440px;padding:24px 16px;position:relative;z-index:1;animation:fadeDown .45s ease;}
 h1{text-align:center;font-size:2.2rem;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
-.sub{text-align:center;color:var(--text2);font-size:.9rem;margin-bottom:28px;}
-.card{background:var(--card);border-radius:var(--radius);padding:28px 24px;border:1px solid rgba(255,255,255,.06);margin-bottom:14px;}
-.card-title{font-size:.82rem;font-weight:900;color:var(--text2);margin-bottom:16px;letter-spacing:.08em;}
+.sub{text-align:center;color:var(--text2);font-size:.9rem;margin-bottom:24px;}
+.card{background:var(--card);border-radius:var(--radius);padding:24px 20px;border:1px solid rgba(255,255,255,.06);margin-bottom:14px;}
+.card-title{font-size:.82rem;font-weight:900;color:var(--text2);margin-bottom:12px;letter-spacing:.08em;}
+/* 名前入力 */
+.new-user-wrap{display:flex;gap:8px;margin-bottom:16px;}
+.name-input{flex:1;font-family:inherit;font-size:1rem;font-weight:700;padding:12px 14px;background:rgba(255,255,255,.06);color:var(--text);border:2px solid rgba(255,255,255,.1);border-radius:14px;outline:none;transition:.2s;}
+.name-input:focus{border-color:var(--primary);background:rgba(233,69,96,.07);}
+.name-input::placeholder{color:var(--text2);}
+.add-btn{font-family:inherit;font-size:.9rem;font-weight:900;padding:12px 16px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;border:none;border-radius:14px;cursor:pointer;white-space:nowrap;box-shadow:var(--glow-primary);transition:.2s;}
+.add-btn:hover{transform:translateY(-2px);}
+.add-btn:disabled{opacity:.5;pointer-events:none;}
 /* ユーザーボタン */
-.user-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.user-btn{padding:22px 12px;border-radius:16px;border:3px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--text);font-family:inherit;font-size:1.1rem;font-weight:900;cursor:pointer;transition:.2s;text-align:center;position:relative;}
-.user-btn .av{font-size:2.8rem;display:block;margin-bottom:8px;}
-.user-btn .xp-tag{font-size:.72rem;color:var(--xp);margin-top:4px;display:block;}
-.user-btn .lv-tag{font-size:.7rem;color:var(--gold);}
+.user-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.user-btn{padding:18px 10px;border-radius:16px;border:3px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--text);font-family:inherit;font-size:1rem;font-weight:900;cursor:pointer;transition:.2s;text-align:center;}
+.user-btn .av{font-size:2.4rem;display:block;margin-bottom:6px;}
+.user-btn .uname{display:block;margin-bottom:4px;}
+.user-btn .xp-tag{font-size:.7rem;color:var(--xp);display:block;}
+.user-btn .lv-tag{font-size:.68rem;color:var(--gold);}
 .user-btn:hover{border-color:var(--primary);background:rgba(233,69,96,.1);transform:translateY(-3px);}
 .user-btn.loading-btn{opacity:.6;pointer-events:none;}
 /* ランキング */
 .ranking-card{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid rgba(255,215,0,.15);}
 .rank-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.04);margin-bottom:6px;}
 .rank-no{font-size:1rem;font-weight:900;width:26px;text-align:center;}
-.rank-name{flex:1;font-weight:800;}
-.rank-streak{font-size:.75rem;color:var(--primary2);}
+.rank-name{flex:1;font-weight:800;font-size:.9rem;}
+.rank-streak{font-size:.74rem;color:var(--primary2);}
 .rank-xp{font-size:.82rem;font-weight:800;color:var(--xp);}
 .loading-msg{text-align:center;color:var(--text2);font-size:.88rem;padding:12px;}
-.error-msg{text-align:center;color:#fca5a5;font-size:.82rem;padding:8px;background:rgba(239,68,68,.1);border-radius:10px;margin-top:8px;}
+.anon-note{font-size:.72rem;color:var(--text2);text-align:center;margin-bottom:10px;}
+.error-msg{color:#fca5a5;font-size:.82rem;padding:8px 10px;background:rgba(239,68,68,.1);border-radius:10px;margin-top:8px;display:none;}
 @keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
-@keyframes popIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 </style>
 </head>
 <body>
@@ -42,74 +52,99 @@ h1{text-align:center;font-size:2.2rem;font-weight:900;background:linear-gradient
   <p class="sub">名前を選んでスタート！</p>
 
   <div class="card">
-    <div class="card-title">👤 だれがやる？</div>
-    <div class="user-grid" id="user-grid">
-      <div class="loading-msg">⏳ よみこみちゅう...</div>
+    <div class="card-title">🆕 はじめての人は名前を入力してね</div>
+    <div class="new-user-wrap">
+      <input class="name-input" id="name-input" type="text" maxlength="8" placeholder="ニックネーム（8文字まで）">
+      <button class="add-btn" id="add-btn">➕ 追加</button>
     </div>
-    <div class="error-msg" id="error-msg" style="display:none"></div>
+    <div class="card-title">👤 プレーヤーを選ぼう</div>
+    <div class="user-grid" id="user-grid">
+      <div class="loading-msg" style="grid-column:1/-1">⏳ よみこみちゅう...</div>
+    </div>
+    <div class="error-msg" id="error-msg"></div>
   </div>
 
   <div class="ranking-card">
-    <div class="card-title" style="margin-bottom:12px">🏆 ランキング</div>
+    <div class="card-title" style="margin-bottom:6px">🏆 ランキング</div>
+    <div class="anon-note">※ 名前はひみつにしてあるよ</div>
     <div id="ranking-area"><div class="loading-msg">⏳ よみこみちゅう...</div></div>
   </div>
 </div>
 
 <script type="module">
-import { FIREBASE_CONFIG, USERS } from './firebase.js';
+import { FIREBASE_CONFIG } from './firebase.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const app = initializeApp(FIREBASE_CONFIG);
 const db  = getFirestore(app);
-
 const HEARTS_MAX = 5;
-const todayStr = () => { const d=new Date(); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; };
 
-// ユーザーデータ読み込み or 新規作成
-async function loadUser(name) {
-  const ref = doc(db, 'users', name);
-  const snap = await getDoc(ref);
-  if (snap.exists()) return snap.data();
-  const fresh = { xp:0, level:1, totalCorrect:0, hearts:HEARTS_MAX, lastHeartRegen:Date.now(), streak:0, lastLogin:'', loginDays:0, dailyDone:0, dailyDate:'', unlockedBadges:[], catCorrect:[0,0,0,0], questionStreak:0, createdAt:Date.now() };
-  await setDoc(ref, fresh);
-  return fresh;
+// ===== 匿名ニックネーム（名前から一貫したランダム名） =====
+const ANON_NAMES = [
+  ['🐼','パンダ'],['🦁','ライオン'],['🐧','ペンギン'],['🐨','コアラ'],['🦒','キリン'],
+  ['🐘','ゾウ'],['🐯','トラ'],['🐰','ウサギ'],['🐬','イルカ'],['🦉','フクロウ'],
+  ['🌸','サクラ'],['🌻','ヒマワリ'],['🌷','チューリップ'],['🌹','バラ'],['💐','コスモス'],
+  ['🚀','ロケット'],['🚄','シンカンセン'],['🚁','ヘリコプター'],['🎈','バルーン'],['⛵','ヨット'],
+];
+function anonName(username) {
+  let seed = 0;
+  for (let i = 0; i < username.length; i++) seed += username.charCodeAt(i) * (i+1);
+  const [emoji, name] = ANON_NAMES[seed % ANON_NAMES.length];
+  return `${emoji} ${name}`;
 }
 
-// ランキング読み込み
-async function loadRanking() {
+// ===== アバター =====
+const AVATARS = ['🧒','👦','👧','🧑','👩','👨','🧒‍♀️','🧑‍🎓','🦸','🧙'];
+
+// ===== Firestore =====
+async function loadAllUsers() {
   const snap = await getDocs(collection(db, 'users'));
   const users = [];
   snap.forEach(d => users.push({ name: d.id, ...d.data() }));
-  return users.sort((a,b) => (b.xp||0) - (a.xp||0));
+  return users.sort((a,b) => (a.createdAt||0) - (b.createdAt||0));
+}
+async function loadUser(name) {
+  const snap = await getDoc(doc(db, 'users', name));
+  return snap.exists() ? snap.data() : null;
+}
+async function createUser(name, avatarIndex) {
+  const data = {
+    xp:0, level:1, totalCorrect:0, hearts:HEARTS_MAX,
+    lastHeartRegen:Date.now(), streak:0, lastLogin:'',
+    loginDays:0, dailyDone:0, dailyDate:'',
+    unlockedBadges:[], catCorrect:[0,0,0,0],
+    questionStreak:0, avatarIndex, createdAt:Date.now(),
+  };
+  await setDoc(doc(db, 'users', name), data);
+  return data;
 }
 
-// ユーザーボタン描画
-function renderUsers(usersData) {
+// ===== UI =====
+function renderUsers(users) {
   const grid = document.getElementById('user-grid');
+  if (users.length === 0) {
+    grid.innerHTML = '<div class="loading-msg" style="grid-column:1/-1">まだプレーヤーがいないよ！<br>上に名前を入力して追加しよう🎮</div>';
+    return;
+  }
   grid.innerHTML = '';
-  USERS.forEach(u => {
-    const data = usersData[u.name] || {};
+  users.forEach((u, i) => {
+    const av = AVATARS[u.avatarIndex ?? i % AVATARS.length];
     const btn = document.createElement('button');
     btn.className = 'user-btn';
-    btn.innerHTML = `
-      <span class="av">${u.avatar}</span>
-      ${u.name}
-      <span class="xp-tag">⭐ ${data.xp||0} XP</span>
-      <span class="lv-tag">Lv.${data.level||1}</span>
-    `;
+    btn.innerHTML = `<span class="av">${av}</span><span class="uname">${u.name}</span><span class="xp-tag">⭐ ${u.xp||0} XP</span><span class="lv-tag">Lv.${u.level||1}</span>`;
     btn.addEventListener('click', () => selectUser(u.name, btn));
     grid.appendChild(btn);
   });
 }
 
-// ランキング描画
-function renderRanking(ranking) {
+function renderRanking(users) {
   const medals = ['🥇','🥈','🥉'];
-  const html = ranking.slice(0,5).map((u,i) => `
+  const sorted = [...users].sort((a,b) => (b.xp||0) - (a.xp||0));
+  const html = sorted.slice(0,10).map((u,i) => `
     <div class="rank-row">
       <span class="rank-no">${medals[i]||i+1}</span>
-      <span class="rank-name">${u.name}</span>
+      <span class="rank-name">${anonName(u.name)}</span>
       <span class="rank-streak">🔥${u.loginDays||0}日</span>
       <span class="rank-xp">⭐${u.xp||0} XP</span>
     </div>
@@ -117,42 +152,68 @@ function renderRanking(ranking) {
   document.getElementById('ranking-area').innerHTML = html || '<div class="loading-msg">まだデータなし</div>';
 }
 
-// ユーザー選択
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg; el.style.display = 'block';
+  el.style.animation = 'none';
+  requestAnimationFrame(() => el.style.animation = 'shake .3s ease');
+  setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+// ===== プレーヤー追加 =====
+async function addUser() {
+  const input = document.getElementById('name-input');
+  const btn   = document.getElementById('add-btn');
+  const name  = input.value.trim();
+  if (!name) { showError('名前を入力してね！'); return; }
+  if (name.length > 8) { showError('8文字以内で入力してね！'); return; }
+
+  btn.disabled = true; btn.textContent = '⏳';
+  try {
+    let data = await loadUser(name);
+    if (!data) {
+      const all = await loadAllUsers();
+      data = await createUser(name, all.length % AVATARS.length);
+    }
+    sessionStorage.setItem('sq_user', name);
+    sessionStorage.setItem('sq_data', JSON.stringify(data));
+    location.href = 'game.html';
+  } catch(e) {
+    showError('エラーが発生しました。もう一度試してね。');
+    btn.disabled = false; btn.textContent = '➕ 追加';
+  }
+}
+
+// ===== ユーザー選択 =====
 async function selectUser(name, btn) {
   btn.classList.add('loading-btn');
-  btn.textContent = '⏳ よみこみちゅう...';
   try {
     const data = await loadUser(name);
     sessionStorage.setItem('sq_user', name);
     sessionStorage.setItem('sq_data', JSON.stringify(data));
     location.href = 'game.html';
   } catch(e) {
-    showError('よみこみに失敗しました。Firebase設定を確認してください。');
+    showError('よみこみに失敗しました。');
     btn.classList.remove('loading-btn');
-    renderUsers({});
   }
 }
 
-function showError(msg) {
-  const el = document.getElementById('error-msg');
-  el.textContent = msg; el.style.display = 'block';
-}
+// ===== イベント =====
+document.getElementById('add-btn').addEventListener('click', addUser);
+document.getElementById('name-input').addEventListener('keydown', e => { if (e.key === 'Enter') addUser(); });
 
-// 初期化
+// ===== 起動 =====
 async function init() {
   try {
-    const [ranking] = await Promise.all([loadRanking()]);
-    const usersData = {};
-    ranking.forEach(u => { usersData[u.name] = u; });
-    renderUsers(usersData);
-    renderRanking(ranking);
+    const users = await loadAllUsers();
+    renderUsers(users);
+    renderRanking(users);
   } catch(e) {
     showError('Firebase接続エラー。firebase.jsの設定値を確認してください。');
-    renderUsers({});
+    document.getElementById('user-grid').innerHTML = '<div class="loading-msg" style="grid-column:1/-1;color:#fca5a5">接続エラー</div>';
     document.getElementById('ranking-area').innerHTML = '<div class="loading-msg" style="color:#fca5a5">接続エラー</div>';
   }
 }
-
 init();
 </script>
 </body>

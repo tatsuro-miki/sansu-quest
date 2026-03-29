@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://*.firebaseio.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:;">
 <title>さんすうクエスト</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=M+PLUS+Rounded 1c:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
@@ -128,32 +129,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .save-dot{position:fixed;bottom:16px;right:16px;width:8px;height:8px;border-radius:50%;background:var(--xp);opacity:0;transition:opacity .3s;z-index:999;}
 .save-dot.saving{opacity:1;animation:pulse 1s infinite;}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
-/* ===== エフェクト追加 ===== */
-/* 正解フラッシュ */
-.correct-flash{position:fixed;inset:0;background:rgba(74,222,128,.18);pointer-events:none;z-index:9990;animation:flashIn .35s ease forwards;}
-@keyframes flashIn{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
-/* 不正解フラッシュ */
-.wrong-flash{position:fixed;inset:0;background:rgba(239,68,68,.22);pointer-events:none;z-index:9990;animation:wrongFlash .4s ease forwards;}
-@keyframes wrongFlash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
-/* コイン */
-.coin{position:fixed;font-size:1.5rem;pointer-events:none;z-index:9995;animation:coinFall var(--dur,1.2s) ease forwards;}
-@keyframes coinFall{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}60%{opacity:1}100%{opacity:0;transform:translateY(var(--ty,220px)) rotate(var(--rot,360deg)) scale(.4)}}
-/* スター */
-.star-burst{position:fixed;font-size:1.8rem;pointer-events:none;z-index:9994;animation:starBurst .8s cubic-bezier(.34,1.56,.64,1) forwards;}
-@keyframes starBurst{0%{opacity:0;transform:translate(-50%,-50%) scale(0)}50%{opacity:1;transform:translate(var(--tx,0px),var(--ty,0px)) scale(1.4)}100%{opacity:0;transform:translate(var(--tx2,0px),var(--ty2,0px)) scale(.5)}}
-/* レベルアップ全画面 */
-.levelup-overlay{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(255,215,0,.3) 0%,rgba(26,26,46,.95) 70%);z-index:9980;display:flex;align-items:center;justify-content:center;animation:lvFadeIn .4s ease;}
-.levelup-content{text-align:center;animation:lvPop .6s cubic-bezier(.34,1.56,.64,1);}
-.levelup-content .lv-big{font-size:6rem;display:block;margin-bottom:8px;animation:lvSpin 1s ease;}
-.levelup-content h2{font-size:2.2rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold2),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
-.levelup-content p{color:var(--text2);font-size:1rem;margin-bottom:20px;}
-.levelup-close{font-family:inherit;font-size:1rem;font-weight:900;padding:13px 36px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1a2e;border:none;border-radius:14px;cursor:pointer;box-shadow:var(--glow-gold);}
-@keyframes lvFadeIn{from{opacity:0}to{opacity:1}}
-@keyframes lvPop{0%{opacity:0;transform:scale(.3) translateY(40px)}100%{opacity:1;transform:none}}
-@keyframes lvSpin{0%{transform:rotate(-20deg) scale(.5)}60%{transform:rotate(10deg) scale(1.2)}100%{transform:rotate(0deg) scale(1)}}
-/* ハート減少アニメ */
-.heart.hit{animation:heartHit .4s ease;}
-@keyframes heartHit{0%{transform:scale(1)}30%{transform:scale(1.6)}60%{transform:scale(.6)}100%{transform:scale(.7);opacity:.22}}
 /* animations */
 @keyframes cardIn{from{opacity:0;transform:scale(.92) translateY(12px)}to{opacity:1;transform:none}}
 @keyframes popIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
@@ -483,7 +458,6 @@ function onCorrect(){
   const xpAmt=XP_TBL[question.lv];
   save.questionStreak=(save.questionStreak||0)+1;
   const bonus=save.questionStreak%5===0?10:0;
-  const isCombo=save.questionStreak%3===0;
   save.totalCorrect=(save.totalCorrect||0)+1;
   save.catCorrect=save.catCorrect||[0,0,0,0];
   save.catCorrect[category]=(save.catCorrect[category]||0)+1;
@@ -494,21 +468,7 @@ function onCorrect(){
   while(save.level<LEVELS.length && save.xp>=xpForLv(save.level)){
     save.xp-=xpForLv(save.level); save.level++; leveled=true;
   }
-  // ===== エフェクト・サウンド =====
-  flashScreen('correct-flash');
-  if(isCombo){
-    soundCombo();
-    spawnCoins(12);
-    spawnStars(6);
-  } else {
-    soundCorrect();
-    spawnCoins(5);
-    spawnStars(3);
-  }
-  if(leveled){
-    save.hearts=HEARTS_MAX;
-    setTimeout(()=>showLevelUpOverlay(save.level,lvName(save.level)),500);
-  }
+  if(leveled){save.hearts=HEARTS_MAX;setTimeout(()=>showModal(`🎊 レベルアップ！`,`レベル ${save.level} になった！\n「${lvName(save.level)}」`,0),500);}
   // badges
   checkBadges();
   persistSave(); renderUI(); renderBadges();
@@ -516,7 +476,7 @@ function onCorrect(){
   const msgs=['すごい！🎉','かんぺき！✨','よくできました！⭐','その調子！🔥','天才！🧠','完璧！💯'];
   setFeedback('ok', msgs[R(0,msgs.length-1)]+(bonus?` コンボ+${bonus}XP！`:''));
   showXpPop(`+${xpAmt+bonus}XP`);
-  if(isCombo) showCombo(`🔥×${save.questionStreak}`);
+  if(save.questionStreak%3===0) showCombo(`🔥×${save.questionStreak}`);
   const _dg=dailyGoal(save.level||1); if(save.dailyDone===_dg) setTimeout(()=>showModal('🎊 ノルマ達成！',`今日の${_dg}問クリア！\nまた明日もがんばろう！`,50),600);
   showNextBtn();
 }
@@ -526,10 +486,6 @@ function onWrong(msg){
   save.hearts=Math.max(0,(save.hearts||HEARTS_MAX)-1);
   save.lastHeartRegen=Date.now();
   persistSave(); renderUI();
-  // ===== エフェクト・サウンド =====
-  flashScreen('wrong-flash');
-  soundWrong();
-  soundHeartLost();
   setFeedback('ng',`❌ ざんねん… ${msg}`);
   document.getElementById('streak-pill').classList.add('shake');
   setTimeout(()=>document.getElementById('streak-pill').classList.remove('shake'),500);
@@ -596,110 +552,6 @@ function showModal(title,body,xp){
 }
 function showCombo(text){const el=document.createElement('div');el.className='combo-pop';el.textContent=text;document.body.appendChild(el);setTimeout(()=>el.remove(),950);}
 function showXpPop(text){const el=document.createElement('div');el.className='xp-pop';el.textContent=text;document.body.appendChild(el);setTimeout(()=>el.remove(),950);}
-
-// ===== 🎵 サウンドシステム（Web Audio API） =====
-let _actx=null;
-function getACtx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();return _actx;}
-function playTone(freq,type,duration,vol=0.18,delay=0){
-  try{
-    const ctx=getACtx();
-    const o=ctx.createOscillator(),g=ctx.createGain();
-    o.connect(g);g.connect(ctx.destination);
-    o.type=type;o.frequency.setValueAtTime(freq,ctx.currentTime+delay);
-    g.gain.setValueAtTime(0,ctx.currentTime+delay);
-    g.gain.linearRampToValueAtTime(vol,ctx.currentTime+delay+0.01);
-    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+duration);
-    o.start(ctx.currentTime+delay);o.stop(ctx.currentTime+delay+duration);
-  }catch(e){}
-}
-function soundCorrect(){
-  // 明るい上昇音
-  playTone(523,'sine',0.12,0.15,0);
-  playTone(659,'sine',0.12,0.15,0.08);
-  playTone(784,'sine',0.15,0.15,0.16);
-  playTone(1047,'sine',0.2,0.12,0.26);
-}
-function soundCombo(){
-  // コンボ用：さらに派手
-  playTone(659,'sine',0.1,0.15,0);
-  playTone(784,'sine',0.1,0.15,0.06);
-  playTone(1047,'sine',0.1,0.15,0.12);
-  playTone(1319,'sine',0.22,0.15,0.2);
-  playTone(1568,'sine',0.25,0.12,0.3);
-}
-function soundWrong(){
-  // ざんねん音
-  playTone(220,'sawtooth',0.15,0.12,0);
-  playTone(180,'sawtooth',0.2,0.1,0.12);
-}
-function soundLevelUp(){
-  // レベルアップファンファーレ
-  const notes=[523,659,784,1047,1319];
-  notes.forEach((f,i)=>playTone(f,'sine',0.25,0.2,i*0.1));
-  setTimeout(()=>{
-    playTone(1047,'sine',0.3,0.18,0);
-    playTone(1319,'sine',0.3,0.18,0.05);
-    playTone(1568,'sine',0.4,0.18,0.1);
-  },600);
-}
-function soundHeartLost(){
-  playTone(300,'triangle',0.08,0.1,0);
-  playTone(200,'triangle',0.12,0.08,0.1);
-}
-
-// ===== ✨ ビジュアルエフェクト =====
-function flashScreen(className){
-  const el=document.createElement('div');
-  el.className=className;
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(),400);
-}
-function spawnCoins(count=8){
-  const emojis=['⭐','🌟','💫','✨','🪙'];
-  for(let i=0;i<count;i++){
-    setTimeout(()=>{
-      const el=document.createElement('div');
-      el.className='coin';
-      el.textContent=emojis[Math.floor(Math.random()*emojis.length)];
-      const x=20+Math.random()*60; // vw
-      const ty=(120+Math.random()*120)+'px';
-      const rot=(-360+Math.random()*720)+'deg';
-      const dur=(0.9+Math.random()*0.6)+'s';
-      el.style.cssText=`left:${x}vw;top:15vh;--ty:${ty};--rot:${rot};--dur:${dur}`;
-      document.body.appendChild(el);
-      setTimeout(()=>el.remove(),1500);
-    },i*60);
-  }
-}
-function spawnStars(count=5){
-  const cx=window.innerWidth/2, cy=window.innerHeight*0.4;
-  for(let i=0;i<count;i++){
-    const el=document.createElement('div');
-    el.className='star-burst';
-    el.textContent=['⭐','💥','✨','🌟','💛'][i%5];
-    const angle=(i/count)*2*Math.PI;
-    const r1=60+Math.random()*40, r2=120+Math.random()*80;
-    el.style.cssText=`left:${cx}px;top:${cy}px;--tx:${Math.cos(angle)*r1}px;--ty:${Math.sin(angle)*r1}px;--tx2:${Math.cos(angle)*r2}px;--ty2:${Math.sin(angle)*r2}px;animation-delay:${i*0.05}s`;
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(),900);
-  }
-}
-function showLevelUpOverlay(level,name){
-  soundLevelUp();
-  const ov=document.createElement('div');
-  ov.className='levelup-overlay';
-  ov.innerHTML=`
-    <div class="levelup-content">
-      <span class="lv-big">🏆</span>
-      <h2>レベルアップ！</h2>
-      <p>レベル <strong style="color:var(--gold);font-size:1.4em">${level}</strong> になった！<br>「${name}」</p>
-      <p style="font-size:.85rem;margin-bottom:16px;color:var(--xp)">❤️ ハートが全回復！</p>
-      <button class="levelup-close" onclick="this.closest('.levelup-overlay').remove()">やったー！🎉</button>
-    </div>`;
-  document.body.appendChild(ov);
-  spawnCoins(16);
-  spawnStars(8);
-}
 
 // ===== ログアウト =====
 window.logout=function(){sessionStorage.removeItem('sq_user');sessionStorage.removeItem('sq_data');location.href='index.html';};

@@ -744,167 +744,106 @@ function getACtx(){
   return _actx;
 }
 
-function makeReverb(ctx, duration=1.2, decay=0.2){
-  const len=ctx.sampleRate*duration;
-  const buf=ctx.createBuffer(2,len,ctx.sampleRate);
-  for(let c=0;c<2;c++){
-    const d=buf.getChannelData(c);
-    for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);
-  }
+function makeReverb(ctx, duration=0.4, decay=0.3){
+  // 軽量版：短めのバッファ
+  const len=Math.floor(ctx.sampleRate*duration);
+  const buf=ctx.createBuffer(1,len,ctx.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);
   const conv=ctx.createConvolver();
   conv.buffer=buf;
   return conv;
 }
 
-// ===== 正解：やわらかいシール剥がし音 =====
+// シンプルなトーン再生（確実に鳴る基本関数）
+function playNote(freq,duration,vol,delay=0){
+  try{
+    const ctx=getACtx();
+    const now=ctx.currentTime+delay;
+    const osc=ctx.createOscillator();
+    const g=ctx.createGain();
+    osc.type='sine'; osc.frequency.value=freq;
+    g.gain.setValueAtTime(0,now);
+    g.gain.linearRampToValueAtTime(vol,now+0.01);
+    g.gain.exponentialRampToValueAtTime(0.001,now+duration);
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start(now); osc.stop(now+duration+0.05);
+  }catch(e){}
+}
+
+// ===== 正解：柔らかい2音＋余韻 =====
 function soundCorrect(){
   try{
     const ctx=getACtx();
     const now=ctx.currentTime;
-
-    // ① 摩擦ノイズ（ぺりっ）—帯域を狭めて優しく
-    const bufLen=Math.floor(ctx.sampleRate*0.09);
+    // ノイズ（ぺりっ感）
+    const bufLen=Math.floor(ctx.sampleRate*0.06);
     const noiseBuf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
     const nd=noiseBuf.getChannelData(0);
-    for(let i=0;i<bufLen;i++) nd[i]=Math.random()*2-1;
-    const noiseNode=ctx.createBufferSource();
-    noiseNode.buffer=noiseBuf;
-
-    const hp=ctx.createBiquadFilter();
-    hp.type='bandpass'; hp.frequency.value=1200; hp.Q.value=0.8;
-
-    const noiseGain=ctx.createGain();
-    noiseGain.gain.setValueAtTime(0,now);
-    noiseGain.gain.linearRampToValueAtTime(0.1,now+0.01);   // 音量を控えめに
-    noiseGain.gain.exponentialRampToValueAtTime(0.001,now+0.12);
-
-    noiseNode.connect(hp); hp.connect(noiseGain);
-
-    // ② 柔らかいトーン（高すぎない、800Hz台）
-    const osc=ctx.createOscillator();
-    osc.type='sine';
-    osc.frequency.setValueAtTime(900,now+0.02);
-    osc.frequency.exponentialRampToValueAtTime(650,now+0.35);
-    const oscGain=ctx.createGain();
-    oscGain.gain.setValueAtTime(0,now+0.02);
-    oscGain.gain.linearRampToValueAtTime(0.06,now+0.06);
-    oscGain.gain.exponentialRampToValueAtTime(0.001,now+0.6);
-    osc.connect(oscGain);
-
-    // リバーブ多め（ウェット0.6）で遠い空間感
-    const reverb=makeReverb(ctx,1.4,0.18);
-    const dryGain=ctx.createGain(); dryGain.gain.value=0.35;
-    const wetGain=ctx.createGain(); wetGain.gain.value=0.6;
-
-    [noiseGain, oscGain].forEach(g=>{
-      g.connect(dryGain);
-      g.connect(reverb);
-    });
-    reverb.connect(wetGain);
-    dryGain.connect(ctx.destination);
-    wetGain.connect(ctx.destination);
-
-    noiseNode.start(now); noiseNode.stop(now+0.13);
-    osc.start(now+0.02); osc.stop(now+0.7);
-  }catch(e){}
+    for(let i=0;i<bufLen;i++) nd[i]=(Math.random()*2-1)*(1-i/bufLen);
+    const src=ctx.createBufferSource(); src.buffer=noiseBuf;
+    const bp=ctx.createBiquadFilter(); bp.type='bandpass';
+    bp.frequency.value=1400; bp.Q.value=1.2;
+    const ng=ctx.createGain(); ng.gain.value=0.12;
+    src.connect(bp); bp.connect(ng); ng.connect(ctx.destination);
+    src.start(now); src.stop(now+0.07);
+    // やわらかいトーン2音
+    playNote(660, 0.5, 0.07, 0.03);
+    playNote(880, 0.7, 0.04, 0.12);
+  }catch(e){ console.error('soundCorrect',e); }
 }
 
-// ===== コンボ：静かなぺりぺり×2＋低めのチャイム =====
+// ===== コンボ：ぺりぺり×2＋低チャイム =====
 function soundCombo(){
-  try{
-    const ctx=getACtx();
-    const now=ctx.currentTime;
-    const reverb=makeReverb(ctx,1.5,0.18);
-    const wetG=ctx.createGain(); wetG.gain.value=0.55;
-    reverb.connect(wetG); wetG.connect(ctx.destination);
-
-    // ぺりっ×2（間隔を広げてゆったり）
-    [0, 0.12].forEach(delay=>{
-      const bufLen=Math.floor(ctx.sampleRate*0.07);
+  [0, 0.1].forEach(d=>{
+    try{
+      const ctx=getACtx();
+      const now=ctx.currentTime+d;
+      const bufLen=Math.floor(ctx.sampleRate*0.05);
       const buf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
-      const d=buf.getChannelData(0);
-      for(let i=0;i<bufLen;i++) d[i]=Math.random()*2-1;
+      const data=buf.getChannelData(0);
+      for(let i=0;i<bufLen;i++) data[i]=(Math.random()*2-1)*(1-i/bufLen);
       const src=ctx.createBufferSource(); src.buffer=buf;
-      const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1000; bp.Q.value=0.7;
-      const g=ctx.createGain();
-      g.gain.setValueAtTime(0.09,now+delay);
-      g.gain.exponentialRampToValueAtTime(0.001,now+delay+0.1);
-      src.connect(bp); bp.connect(g);
-      g.connect(ctx.destination); g.connect(reverb);
-      src.start(now+delay); src.stop(now+delay+0.1);
-    });
-
-    // 低めチャイム（1047Hz以下）でゆっくり
-    [523, 659, 784].forEach((freq,i)=>{
-      const osc=ctx.createOscillator(); osc.type='sine'; osc.frequency.value=freq;
-      const g=ctx.createGain();
-      g.gain.setValueAtTime(0,now+0.28+i*0.12);
-      g.gain.linearRampToValueAtTime(0.06,now+0.29+i*0.12);
-      g.gain.exponentialRampToValueAtTime(0.001,now+1.1+i*0.15);
-      osc.connect(g);
-      g.connect(ctx.destination); g.connect(reverb);
-      osc.start(now+0.28+i*0.12); osc.stop(now+1.2+i*0.15);
-    });
-  }catch(e){}
+      const bp=ctx.createBiquadFilter(); bp.type='bandpass';
+      bp.frequency.value=1200; bp.Q.value=1.0;
+      const g=ctx.createGain(); g.gain.value=0.1;
+      src.connect(bp); bp.connect(g); g.connect(ctx.destination);
+      src.start(now); src.stop(now+0.06);
+    }catch(e){}
+  });
+  playNote(523, 0.8, 0.06, 0.25);
+  playNote(659, 0.8, 0.05, 0.38);
+  playNote(784, 1.0, 0.05, 0.51);
 }
 
-// ===== 不正解：短く低いため息系 =====
+// ===== 不正解：低くこもった音 =====
 function soundWrong(){
   try{
     const ctx=getACtx();
     const now=ctx.currentTime;
-    const osc=ctx.createOscillator();
-    osc.type='sine';
+    const osc=ctx.createOscillator(); osc.type='sine';
     osc.frequency.setValueAtTime(200,now);
-    osc.frequency.exponentialRampToValueAtTime(130,now+0.3);
+    osc.frequency.exponentialRampToValueAtTime(130,now+0.28);
     const g=ctx.createGain();
-    g.gain.setValueAtTime(0,now);
-    g.gain.linearRampToValueAtTime(0.08,now+0.03);
-    g.gain.exponentialRampToValueAtTime(0.001,now+0.35);
-    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=400;
+    g.gain.setValueAtTime(0.09,now);
+    g.gain.exponentialRampToValueAtTime(0.001,now+0.32);
+    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=500;
     osc.connect(lp); lp.connect(g); g.connect(ctx.destination);
-    osc.start(now); osc.stop(now+0.38);
+    osc.start(now); osc.stop(now+0.35);
   }catch(e){}
 }
 
 // ===== ハート消失 =====
 function soundHeartLost(){
-  try{
-    const ctx=getACtx();
-    const now=ctx.currentTime+0.05;
-    const osc=ctx.createOscillator();
-    osc.type='sine'; osc.frequency.setValueAtTime(160,now);
-    osc.frequency.exponentialRampToValueAtTime(90,now+0.2);
-    const g=ctx.createGain();
-    g.gain.setValueAtTime(0.06,now);
-    g.gain.exponentialRampToValueAtTime(0.001,now+0.22);
-    osc.connect(g); g.connect(ctx.destination);
-    osc.start(now); osc.stop(now+0.25);
-  }catch(e){}
+  playNote(160, 0.2, 0.06, 0.05);
 }
 
-// ===== レベルアップ：静かなクリスタル上昇 =====
+// ===== レベルアップ：上昇チャイム =====
 function soundLevelUp(){
-  try{
-    const ctx=getACtx();
-    const now=ctx.currentTime;
-    const reverb=makeReverb(ctx,2.0,0.15);
-    const wetG=ctx.createGain(); wetG.gain.value=0.65;
-    reverb.connect(wetG); wetG.connect(ctx.destination);
-
-    [523, 659, 784, 1047, 1319].forEach((freq,i)=>{
-      const osc=ctx.createOscillator(); osc.type='sine'; osc.frequency.value=freq;
-      const g=ctx.createGain();
-      g.gain.setValueAtTime(0,now+i*0.13);
-      g.gain.linearRampToValueAtTime(0.07,now+i*0.13+0.02);
-      g.gain.exponentialRampToValueAtTime(0.001,now+i*0.13+1.4);
-      osc.connect(g);
-      g.connect(ctx.destination); g.connect(reverb);
-      osc.start(now+i*0.13); osc.stop(now+i*0.13+1.5);
-    });
-  }catch(e){}
+  [523,659,784,1047,1319].forEach((freq,i)=>{
+    playNote(freq, 1.2, 0.07, i*0.12);
+  });
 }
-
 // ===== ✨ ビジュアルエフェクト =====
 function flashScreen(className){
   const el=document.createElement('div');
@@ -957,103 +896,6 @@ function showLevelUpOverlay(level,name){
   document.body.appendChild(ov);
   spawnCoins(16);
   spawnStars(8);
-}
-
-// ===== ログアウト =====
-window.logout=function(){sessionStorage.removeItem('sq_user');sessionStorage.removeItem('sq_data');location.href='index.html';};
-
-// ===== ⚡ テストモード =====
-window.startTestMode = function(){
-  if((save.level||1) < TEST_UNLOCK_LV) return;
-  testMode=true; testCorrect=0; testTotal=0; testAnswered=false;
-  testTimeLeft=TEST_TIME;
-  document.querySelector('.categories').style.display='none';
-  document.getElementById('diff-select').style.display='none';
-  document.getElementById('test-mode-wrap').style.display='none';
-  renderTestUI();
-  testNextQuestion();
-  startTestTimer();
-};
-
-function renderTestUI(){
-  const tl=getTestLv(save.level||1);
-  document.getElementById('main-area').innerHTML=`
-    <div class="test-header">
-      <div>
-        <div class="test-lv-badge">${tl.name}</div>
-        <div class="test-progress">問題 <span id="t-qno">1</span>/${TEST_Q_COUNT}</div>
-        <div class="test-score-big">✅ <span id="t-correct">0</span> 正解</div>
-      </div>
-      <div class="test-timer" id="t-timer">${TEST_TIME}</div>
-    </div>
-    <div id="t-question-area"></div>`;
-}
-
-function startTestTimer(){
-  clearInterval(testTimer);
-  testTimer=setInterval(()=>{
-    testTimeLeft--;
-    const el=document.getElementById('t-timer');
-    if(el){
-      el.textContent=testTimeLeft;
-      if(testTimeLeft<=10) el.classList.add('danger');
-    }
-    if(testTimeLeft<=0){ clearInterval(testTimer); endTest(); }
-  },1000);
-}
-
-function testNextQuestion(){
-  if(testTotal>=TEST_Q_COUNT){ clearInterval(testTimer); endTest(); return; }
-  testAnswered=false;
-  const tl=getTestLv(save.level||1);
-  const cat=tl.cats[Math.floor(Math.random()*tl.cats.length)];
-  // 通常の問題生成関数を流用
-  const q=generateQuestion(cat, tl.diff==='hard'?'hard':tl.diff==='mid'?'mid':'easy');
-  testCurrentQ=q;
-  document.getElementById('t-qno').textContent=testTotal+1;
-  renderTestQuestion(q);
-}
-
-function generateQuestion(cat, tier){
-  switch(cat){
-    case 0: return genArithmetic(tier);
-    case 1: return genFraction(tier);
-    case 2: return genDecimal(tier);
-    case 3: return genWord(tier);
-    default: return genArithmetic(tier);
-  }
-}
-
-function renderTestQuestion(q){
-  const area=document.getElementById('t-question-area');
-  if(!area) return;
-  let ansHtml='';
-  if(q.type==='fraction'){
-    ansHtml=`<div class="answer-area"><div class="frac-wrap">
-      <input type="number" id="t-fn" placeholder="分子" style="width:70px;font-size:1.1rem;padding:7px;text-align:center;background:rgba(255,255,255,.05);color:var(--text);border:2px solid rgba(255,255,255,.12);border-radius:10px;outline:none;">
-      <div class="frac-line"></div>
-      <input type="number" id="t-fd" placeholder="分母" style="width:70px;font-size:1.1rem;padding:7px;text-align:center;background:rgba(255,255,255,.05);color:var(--text);border:2px solid rgba(255,255,255,.12);border-radius:10px;outline:none;">
-    </div><button class="submit-btn" onclick="submitTestAnswer()">→</button></div>`;
-  } else if(q.type==='choice'){
-    ansHtml=`<div class="choices">${q.choices.map(c=>`<button class="choice-btn" onclick="submitTestChoice('${c}',this)">${c}</button>`).join('')}</div>`;
-  } else {
-    ansHtml=`<div class="answer-area"><input class="answer-input" id="t-ans" type="number" inputmode="numeric" placeholder="こたえ" style="font-size:1.5rem;"><button class="submit-btn" onclick="submitTestAnswer()">→</button></div>`;
-  }
-  area.innerHTML=`
-    <div class="question-card" style="animation:cardIn .3s ease">
-      <div class="q-text">${q.text}</div>
-      ${ansHtml}
-      <div class="feedback" id="t-fb" style="margin-top:10px;min-height:36px;"></div>
-    </div>`;
-  if(q.type==='number') {
-    const inp=document.getElementById('t-ans');
-    if(inp){
-      inp.addEventListener('keydown',e=>{if(e.key==='Enter')submitTestAnswer();});
-      setTimeout(()=>inp.focus(),80);
-    }
-  } else if(q.type==='fraction'){
-    setTimeout(()=>document.getElementById('t-fn')?.focus(),80);
-  }
 }
 
 function testJudge(correct){

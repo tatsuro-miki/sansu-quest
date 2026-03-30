@@ -3,7 +3,7 @@
 //  Firebaseコンソール → プロジェクト設定 → マイアプリ → SDK設定
 // ============================================================
 const FIREBASE_CONFIG = {
-  apiKey: "VITE_FIREBASE_API_KEY_PLACEHOLDER",
+   apiKey: "AIzaSyDTkbDLtf2RaN82-2lMrlrn5HzaPgAMlJ8",
   authDomain: "sansu-quest.firebaseapp.com",
   projectId: "sansu-quest",
   storageBucket: "sansu-quest.firebasestorage.app",

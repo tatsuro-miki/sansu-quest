@@ -898,6 +898,98 @@ function showLevelUpOverlay(level,name){
   spawnStars(8);
 }
 
+window.startTestMode = function(){
+  if((save.level||1) < TEST_UNLOCK_LV) return;
+  testMode=true; testCorrect=0; testTotal=0; testAnswered=false;
+  testTimeLeft=TEST_TIME;
+  document.querySelector('.categories').style.display='none';
+  document.getElementById('diff-select').style.display='none';
+  document.getElementById('test-mode-wrap').style.display='none';
+  renderTestUI();
+  testNextQuestion();
+  startTestTimer();
+};
+
+function renderTestUI(){
+  const tl=getTestLv(save.level||1);
+  document.getElementById('main-area').innerHTML=`
+    <div class="test-header">
+      <div>
+        <div class="test-lv-badge">${tl.name}</div>
+        <div class="test-progress">問題 <span id="t-qno">1</span>/${TEST_Q_COUNT}</div>
+        <div class="test-score-big">✅ <span id="t-correct">0</span> 正解</div>
+      </div>
+      <div class="test-timer" id="t-timer">${TEST_TIME}</div>
+    </div>
+    <div id="t-question-area"></div>`;
+}
+
+function startTestTimer(){
+  clearInterval(testTimer);
+  testTimer=setInterval(()=>{
+    testTimeLeft--;
+    const el=document.getElementById('t-timer');
+    if(el){
+      el.textContent=testTimeLeft;
+      if(testTimeLeft<=10) el.classList.add('danger');
+    }
+    if(testTimeLeft<=0){ clearInterval(testTimer); endTest(); }
+  },1000);
+}
+
+function testNextQuestion(){
+  if(testTotal>=TEST_Q_COUNT){ clearInterval(testTimer); endTest(); return; }
+  testAnswered=false;
+  const tl=getTestLv(save.level||1);
+  const cat=tl.cats[Math.floor(Math.random()*tl.cats.length)];
+  const q=generateQuestion(cat, tl.diff==='hard'?'hard':tl.diff==='mid'?'mid':'easy');
+  testCurrentQ=q;
+  document.getElementById('t-qno').textContent=testTotal+1;
+  renderTestQuestion(q);
+}
+
+function generateQuestion(cat, tier){
+  switch(cat){
+    case 0: return genArithmetic(tier);
+    case 1: return genFraction(tier);
+    case 2: return genDecimal(tier);
+    case 3: return genWord(tier);
+    default: return genArithmetic(tier);
+  }
+}
+
+function renderTestQuestion(q){
+  const area=document.getElementById('t-question-area');
+  if(!area) return;
+  let ansHtml='';
+  if(q.type==='fraction'){
+    ansHtml=`<div class="answer-area"><div class="frac-wrap">
+      <input type="number" id="t-fn" placeholder="分子" style="width:70px;font-size:1.1rem;padding:7px;text-align:center;background:rgba(255,255,255,.05);color:var(--text);border:2px solid rgba(255,255,255,.12);border-radius:10px;outline:none;">
+      <div class="frac-line"></div>
+      <input type="number" id="t-fd" placeholder="分母" style="width:70px;font-size:1.1rem;padding:7px;text-align:center;background:rgba(255,255,255,.05);color:var(--text);border:2px solid rgba(255,255,255,.12);border-radius:10px;outline:none;">
+    </div><button class="submit-btn" onclick="submitTestAnswer()">→</button></div>`;
+  } else if(q.type==='choice'){
+    ansHtml=`<div class="choices">${q.choices.map(c=>`<button class="choice-btn" onclick="submitTestChoice('${c}',this)">${c}</button>`).join('')}</div>`;
+  } else {
+    ansHtml=`<div class="answer-area"><input class="answer-input" id="t-ans" type="number" inputmode="numeric" placeholder="こたえ" style="font-size:1.5rem;"><button class="submit-btn" onclick="submitTestAnswer()">→</button></div>`;
+  }
+  area.innerHTML=`
+    <div class="question-card" style="animation:cardIn .3s ease">
+      <div class="q-text">${q.text}</div>
+      ${ansHtml}
+      <div class="feedback" id="t-fb" style="margin-top:10px;min-height:36px;"></div>
+    </div>`;
+  if(q.type==='number') {
+    const inp=document.getElementById('t-ans');
+    if(inp){
+      inp.addEventListener('keydown',e=>{if(e.key==='Enter')submitTestAnswer();});
+      setTimeout(()=>inp.focus(),80);
+    }
+  } else if(q.type==='fraction'){
+    setTimeout(()=>document.getElementById('t-fn')?.focus(),80);
+  }
+}
+
 function testJudge(correct){
   testAnswered=true; testTotal++;
   if(correct){

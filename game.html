@@ -1038,7 +1038,8 @@ function endTest(){
   testMode=false;
   clearInterval(testTimer);
   const tl=getTestLv(save.level||1);
-  const score=testCorrect*10+Math.max(0,testTimeLeft);
+  const timeBonus=Math.round(Math.max(0,testTimeLeft)/TEST_TIME*30);
+  const score=testCorrect*7+timeBonus;
   const isNew=score>(save.bestTestScore||0);
   // ベストスコア更新
   if(isNew){
@@ -1056,7 +1057,7 @@ function endTest(){
       <h2>⚡ テスト結果！</h2>
       <span class="test-result-score">${score}<small style="font-size:1.2rem">点</small></span>
       <div style="font-size:.9rem;color:var(--text2);margin-bottom:6px">
-        正解 ${testCorrect}/${testTotal} 問　残り時間 +${Math.max(0,testTimeLeft)}秒
+        正解 ${testCorrect}/${testTotal} 問（${testCorrect*7}点）＋ 時間ボーナス ${timeBonus}点
       </div>
       ${isNew?`<div class="test-result-best">🏅 ベストスコア更新！</div>`:`<div class="test-result-best">ベスト: ${save.bestTestScore||0}点</div>`}
       <button class="test-retry-btn" onclick="window.startTestMode()">🔁 もう一度</button>

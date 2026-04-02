@@ -898,6 +898,8 @@ function showLevelUpOverlay(level,name){
   spawnStars(8);
 }
 
+window.logout=function(){sessionStorage.removeItem('sq_user');sessionStorage.removeItem('sq_data');location.href='index.html';};
+
 window.startTestMode = function(){
   if((save.level||1) < TEST_UNLOCK_LV) return;
   testMode=true; testCorrect=0; testTotal=0; testAnswered=false;

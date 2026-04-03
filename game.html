@@ -280,30 +280,21 @@ const db  = getFirestore(app);
 const HEARTS_MAX = 5;
 const DAILY_GOAL = 10;
 function dailyGoal(lv){ return DAILY_GOAL; }
-const LEVELS = [
-  {name:'はじめての冒険者',xp:100},   // Lv1→2
-  {name:'計算の見習い',xp:150},       // Lv2→3
-  {name:'算数の戦士',xp:200},         // Lv3→4
-  {name:'数式の旅人',xp:280},         // Lv4→5
-  {name:'数式の魔法使い',xp:360},     // Lv5→6
-  {name:'計算の騎士',xp:450},         // Lv6→7
-  {name:'算術チャンピオン',xp:550},   // Lv7→8
-  {name:'数字の達人',xp:650},         // Lv8→9
-  {name:'計算マイスター',xp:780},     // Lv9→10
-  {name:'算数の勇者',xp:900},         // Lv10→11
-  {name:'数式ハンター',xp:1050},      // Lv11→12
-  {name:'計算の賢者',xp:1200},        // Lv12→13
-  {name:'算術マスター',xp:1400},      // Lv13→14
-  {name:'数学の魔導士',xp:1600},      // Lv14→15
-  {name:'計算の英雄',xp:1850},        // Lv15→16
-  {name:'算数キング',xp:2100},        // Lv16→17
-  {name:'数式の覇者',xp:2400},        // Lv17→18
-  {name:'天才数学者',xp:2800},        // Lv18→19
-  {name:'計算の神',xp:3200},          // Lv19→20
-  {name:'伝説の計算王',xp:Infinity}   // Lv20(MAX)
+const RANK_NAMES = [
+  'はじめての冒険者',   // Lv1-10
+  '計算の見習い',       // Lv11-20
+  '算数の戦士',         // Lv21-30
+  '数式の魔法使い',     // Lv31-40
+  '算術マスター',       // Lv41-50
+  '計算の賢者',         // Lv51-60
+  '数学の魔導士',       // Lv61-70
+  '算数キング',         // Lv71-80
+  '計算の神',           // Lv81-90
+  '伝説の計算王'        // Lv91-100
 ];
-const xpForLv=lv=>LEVELS[Math.min(lv-1,LEVELS.length-1)].xp;
-const lvName=lv=>LEVELS[Math.min(lv-1,LEVELS.length-1)].name;
+const MAX_LV = 100;
+function xpForLv(lv){ return lv >= MAX_LV ? Infinity : Math.floor(80 + lv * 12 + lv * lv * 0.8); }
+function lvName(lv){ return RANK_NAMES[Math.min(Math.floor((lv-1)/10), RANK_NAMES.length-1)]; }
 const BADGES = [
   {id:'first',icon:'🌟',name:'はじめての正解'},{id:'streak3',icon:'🔥',name:'3連続正解'},
   {id:'streak7',icon:'💥',name:'7連続正解'},{id:'daily1',icon:'📅',name:'初デイリークリア'},
@@ -648,7 +639,7 @@ function onCorrect(){
   // XP & level up
   save.xp=(save.xp||0)+xpAmt+bonus;
   let leveled=false;
-  while(save.level<LEVELS.length && save.xp>=xpForLv(save.level)){
+  while(save.level<MAX_LV && save.xp>=xpForLv(save.level)){
     save.xp-=xpForLv(save.level); save.level++; leveled=true;
   }
   // ===== エフェクト・サウンド =====

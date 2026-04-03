@@ -281,8 +281,26 @@ const HEARTS_MAX = 5;
 const DAILY_GOAL = 10;
 function dailyGoal(lv){ return DAILY_GOAL; }
 const LEVELS = [
-  {name:'はじめての冒険者',xp:100},{name:'計算の見習い',xp:250},{name:'算数の戦士',xp:500},
-  {name:'数式の魔法使い',xp:900},{name:'算術マスター',xp:1400},{name:'天才数学者',xp:2000},{name:'伝説の計算王',xp:Infinity}
+  {name:'はじめての冒険者',xp:100},   // Lv1→2
+  {name:'計算の見習い',xp:150},       // Lv2→3
+  {name:'算数の戦士',xp:200},         // Lv3→4
+  {name:'数式の旅人',xp:280},         // Lv4→5
+  {name:'数式の魔法使い',xp:360},     // Lv5→6
+  {name:'計算の騎士',xp:450},         // Lv6→7
+  {name:'算術チャンピオン',xp:550},   // Lv7→8
+  {name:'数字の達人',xp:650},         // Lv8→9
+  {name:'計算マイスター',xp:780},     // Lv9→10
+  {name:'算数の勇者',xp:900},         // Lv10→11
+  {name:'数式ハンター',xp:1050},      // Lv11→12
+  {name:'計算の賢者',xp:1200},        // Lv12→13
+  {name:'算術マスター',xp:1400},      // Lv13→14
+  {name:'数学の魔導士',xp:1600},      // Lv14→15
+  {name:'計算の英雄',xp:1850},        // Lv15→16
+  {name:'算数キング',xp:2100},        // Lv16→17
+  {name:'数式の覇者',xp:2400},        // Lv17→18
+  {name:'天才数学者',xp:2800},        // Lv18→19
+  {name:'計算の神',xp:3200},          // Lv19→20
+  {name:'伝説の計算王',xp:Infinity}   // Lv20(MAX)
 ];
 const xpForLv=lv=>LEVELS[Math.min(lv-1,LEVELS.length-1)].xp;
 const lvName=lv=>LEVELS[Math.min(lv-1,LEVELS.length-1)].name;
@@ -384,8 +402,8 @@ function renderUI() {
   const lv=save.level||1, xp=save.xp||0, max=xpForLv(lv);
   document.getElementById('ui-lv-orb').textContent=lv;
   document.getElementById('ui-lv-name').textContent=lvName(lv);
-  document.getElementById('ui-xp-next').textContent=`${xp} / ${max} XP`;
-  document.getElementById('ui-lv-bar').style.width=`${Math.min(100,xp/max*100)}%`;
+  document.getElementById('ui-xp-next').textContent=max===Infinity?'MAX':`${xp} / ${max} XP`;
+  document.getElementById('ui-lv-bar').style.width=max===Infinity?'100%':`${Math.min(100,xp/max*100)}%`;
   // daily
   const DAILY_GOAL=dailyGoal(save.level||1); const done=Math.min(save.dailyDone||0,DAILY_GOAL), pct=done/DAILY_GOAL;
   document.getElementById('ui-ring').style.strokeDashoffset=138.2*(1-pct);

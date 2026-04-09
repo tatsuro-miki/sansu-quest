@@ -516,6 +516,39 @@ body::before {
 @keyframes lvSpin     { 0%{transform:rotate(-20deg) scale(.5)}60%{transform:rotate(10deg) scale(1.2)}100%{transform:rotate(0deg) scale(1)} }
 @keyframes heartHit   { 0%{transform:scale(1)}30%{transform:scale(1.6)}60%{transform:scale(.6)}100%{transform:scale(.7);opacity:.22} }
 @keyframes timerPulse { 0%,100%{transform:scale(1)}50%{transform:scale(1.1)} }
+.lesson-corner {
+  margin-bottom: 14px;
+  display: none;
+  animation: cardIn .3s ease;
+}
+.lesson-corner.visible { display: block; }
+.lesson-corner-title {
+  font-size: .72rem; font-weight: 900; color: var(--text2);
+  letter-spacing: .08em; margin-bottom: 8px;
+}
+.lesson-list {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.lesson-btn {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-md);
+  padding: 12px 16px; cursor: pointer;
+  font-family: inherit; color: var(--text);
+  text-decoration: none;
+  transition: .2s;
+}
+.lesson-btn:hover {
+  border-color: var(--blue);
+  background: rgba(79,142,247,0.06);
+  transform: translateY(-2px);
+}
+.lesson-btn .lesson-icon { font-size: 1.4rem; }
+.lesson-btn .lesson-info { flex: 1; text-align: left; }
+.lesson-btn .lesson-name { font-size: .9rem; font-weight: 900; display: block; margin-bottom: 2px; }
+.lesson-btn .lesson-desc { font-size: .72rem; color: var(--text2); font-weight: 700; }
+.lesson-btn .lesson-arrow { font-size: .85rem; color: var(--text3); }
 </style>
 </head>
 <body>
@@ -581,6 +614,10 @@ body::before {
   </div>
 </div>
 <div class="save-dot" id="save-dot"></div>
+<div class="lesson-corner" id="lesson-corner">
+  <div class="lesson-corner-title">📚 学習コーナー</div>
+  <div class="lesson-list" id="lesson-list"></div>
+</div>
 
 <!-- ロジック部分は元のgame.htmlのscriptタグをそのままここに貼り付けてください -->
 <!-- （Firebaseロジック・問題生成・ゲームロジックは変更なし） -->
@@ -692,7 +729,12 @@ function genDecimal(tier){ if(tier==='easy') return genArithmetic('easy'); const
 function genWord(tier){ if(tier==='easy') return genArithmetic('easy'); const round4=(n)=>Math.round(n*10000)/10000; const midTs=[()=>{const p=R(100,500),d=R(1,3)*10,s=Math.round(p*(100-d)/100);return{type:'choice',lv:'lv2',label:'文章(割引)',text:`${p}円の商品が${d}%引き。\nいくらになる？`,hint:`${p}×(1-${d}/100)`,answer:s.toString(),choices:shuffle([s,p-d,Math.round(p*d/100),s+R(10,50)]).map(String)};},()=>{const tot=R(500,1500),r=R(2,4),a=Math.round(tot*r/(r+1));return{type:'choice',lv:'lv2',label:'文章(割合)',text:`${tot}円を ${r}:1 で分けます。\n多い方は何円？`,hint:'全体÷(比の合計)×比',answer:a.toString(),choices:shuffle([a,a+R(20,100),tot-a,Math.round(tot/r)]).map(String)};}]; const hardTs=[()=>{const t=R(1,6)*10,s=R(3,12)*10,d=Math.round(s*t/60*10)/10;return{type:'choice',lv:'lv3',label:'文章(速さ)',text:`時速${s}kmの電車が${t}分走りました。\n何km進みましたか？`,hint:'速さ×時間÷60',answer:d.toString(),choices:shuffle([d,d+R(1,5),Math.round(s*t*10)/10,Math.max(1,d-R(1,5))]).map(String)};},()=>{const r=R(3,8),area=round4(r*r*3.14),ans=area.toString();return{type:'choice',lv:'lv3',label:'文章(面積)',text:`半径${r}cmの円の面積は？\n（円周率3.14）`,hint:'半径×半径×3.14',answer:ans,choices:shuffle([area,round4(r*2*3.14),r*r,round4((r+1)*(r+1)*3.14)]).map(String)};}]; const pool=tier==='hard'?[...midTs,...hardTs]:midTs; return pool[R(0,pool.length-1)](); }
 function gen(){ let tier=difficulty; if((category===1||category===2||category===3)&&tier==='easy') tier='mid'; switch(category){case 0:return genArithmetic(tier);case 1:return genFraction(tier);case 2:return genDecimal(tier);case 3:return genWord(tier);} }
 
-window.setCategory=function(idx){ category=idx; document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===idx)); nextQuestion(); };
+window.setCategory = function(idx) {
+  category = idx;
+  document.querySelectorAll('.cat-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  renderLessonCorner(idx);  // ← この1行を追加
+  nextQuestion();
+};
 window.setDifficulty=function(d){ difficulty=d; ['easy','mid','hard'].forEach(k=>{const el=document.getElementById('diff-'+k);if(el){el.classList.toggle('active',k===d);el.className='diff-btn'+(k===d?' active '+k:'');}}); nextQuestion(); };
 
 function nextQuestion(){ if((save.hearts||0)<=0){renderGameOver();return;} question=gen(); answered=false; hintVisible=false; memoVisible=false; const lvLabel=question.lv==='lv1'?'かんたん':question.lv==='lv2'?'ふつう':'むずかしい'; const dispXp=Math.round((XP_TBL[question.lv]||10)*(DIFF_MULTI[difficulty]||1)); let ansHtml=''; if(question.type==='fraction'){ansHtml=`<div class="frac-wrap"><input type="number" id="fn" placeholder="分子" min="0" max="9999"><div class="frac-line"></div><input type="number" id="fd" placeholder="分母" min="1" max="9999"></div><button class="submit-btn" onclick="doCheck()">こたえる</button>`;}else if(question.type==='choice'){ansHtml=`<div class="choices">${question.choices.map(c=>`<button class="choice-btn" onclick="doChoice('${c}',this)">${c}</button>`).join('')}</div>`;}else{ansHtml=`<input type="number" class="answer-input" id="main-inp" placeholder="?" autocomplete="off"><button class="submit-btn" onclick="doCheck()">こたえる</button>`;} document.getElementById('main-area').innerHTML=`<div class="question-card"><div class="q-meta"><span class="q-cat">${question.label}</span><span class="q-lv ${question.lv}">${lvLabel}</span><span class="q-xp">+${dispXp}XP</span></div><div class="q-text">${question.text}</div>${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}<div class="answer-area" id="ans-area">${ansHtml}</div><div class="memo-wrap"><button class="memo-toggle" onclick="toggleMemo()">✏️ 計算メモを使う</button><div class="memo-area" id="memo-area" style="display:none"><div class="memo-label">📝 ここにメモしてOK！</div><textarea class="memo-textarea" placeholder="ここに計算を書こう"></textarea></div></div></div><div class="feedback" id="fb"></div><div id="btn-area"></div>`; if(question.type==='number') setTimeout(()=>document.getElementById('main-inp')?.focus(),80); if(question.type==='fraction'){document.getElementById('fn').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('fd').focus();});document.getElementById('fd').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();});setTimeout(()=>document.getElementById('fn').focus(),80);} if(question.type==='number') document.getElementById('main-inp').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();}); }
@@ -748,6 +790,58 @@ function endTest(){ testMode=false;clearInterval(testTimer);const tl=getTestLv(s
 window.backToNormal=function(){ testMode=false;clearInterval(testTimer);document.querySelector('.categories').style.display='';document.getElementById('diff-select').style.display='';renderUI();nextQuestion(); };
 
 init();
+// ============================================================
+// 学習コーナー
+// ============================================================
+const LESSONS = [
+  {
+    icon: '⭕',
+    name: '円の面積のひみつ',
+    desc: 'なぜ 半径×半径×3.14 なの？アニメで発見！',
+    url: 'lesson-circle.html',
+    cats: [3],  // 文章カテゴリで表示
+  },
+  // ↓ 今後ここに追加するだけでOK
+  // {
+  //   icon: '🔺',
+  //   name: '三角形・長方形の面積',
+  //   desc: '底辺×高さ÷2 の意味を図で理解しよう',
+  //   url: 'lesson-rect.html',
+  //   cats: [3],
+  // },
+  // {
+  //   icon: '🔷',
+  //   name: '複合図形をとく',
+  //   desc: 'どこで切り分けるかがポイント！',
+  //   url: 'lesson-compound.html',
+  //   cats: [3],
+  // },
+];
+
+function renderLessonCorner(catIndex) {
+  const corner = document.getElementById('lesson-corner');
+  const list = document.getElementById('lesson-list');
+  if (!corner || !list) return;
+
+  const filtered = LESSONS.filter(l => l.cats.includes(catIndex));
+  if (filtered.length === 0) {
+    corner.classList.remove('visible');
+    return;
+  }
+
+  list.innerHTML = filtered.map(l => `
+    <a class="lesson-btn" href="${l.url}">
+      <span class="lesson-icon">${l.icon}</span>
+      <span class="lesson-info">
+        <span class="lesson-name">${l.name}</span>
+        <span class="lesson-desc">${l.desc}</span>
+      </span>
+      <span class="lesson-arrow">→</span>
+    </a>
+  `).join('');
+
+  corner.classList.add('visible');
+}
 </script>
 </body>
 </html>

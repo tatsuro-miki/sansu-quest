@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>複合図形をとく｜さんすうクエスト</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap');
+
+:root {
+  --blue: #4f8ef7;
+  --mint: #2db87a;
+  --orange: #fb923c;
+  --purple: #9f7aea;
+  --yellow: #f5a623;
+  --red: #e94560;
+  --bg: #f0f4ff;
+  --surface: #ffffff;
+  --text: #1a1a2e;
+  --text2: #555577;
+  --border: rgba(0,0,0,0.12);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--text);
+}
+
+.back-bar { padding: 12px 16px; max-width: 720px; margin: 0 auto; }
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  padding: 8px 16px; border-radius: 20px;
+  border: 2px solid var(--border);
+  background: white; color: var(--text2);
+  cursor: pointer; text-decoration: none; transition: .15s;
+}
+.back-btn:hover { background: var(--bg); color: var(--text); }
+
+header {
+  text-align: center; padding: 8px 20px 20px;
+}
+header h1 {
+  font-family: 'Kaisei Decol', serif;
+  font-size: clamp(22px, 5vw, 36px);
+  color: var(--text); line-height: 1.3;
+}
+header h1 span { color: var(--blue); }
+header p { margin-top: 6px; color: var(--text2); font-size: 14px; }
+
+.container { max-width: 720px; margin: 0 auto; padding: 0 16px 40px; }
+
+.step-card {
+  background: white; border-radius: 20px;
+  padding: 24px; margin-bottom: 20px;
+  border: 1.5px solid var(--border);
+  box-shadow: 0 4px 20px rgba(79,142,247,0.08);
+  position: relative; overflow: hidden;
+}
+.step-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--blue), var(--mint), var(--purple));
+}
+
+.step-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color: white; padding: 4px 14px; border-radius: 20px;
+  font-size: 13px; font-weight: 700; margin-bottom: 12px;
+}
+.step-card h2 { font-size: 17px; color: var(--text); margin-bottom: 14px; font-weight: 900; }
+.desc { font-size: 13px; color: var(--text2); line-height: 1.8; margin-bottom: 16px; }
+.highlight { font-weight: 800; color: var(--blue); }
+
+/* キャンバスエリア */
+.canvas-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+canvas {
+  border-radius: 12px; background: #f8faff;
+  border: 1.5px solid rgba(79,142,247,0.2);
+  max-width: 100%; cursor: pointer;
+}
+
+/* 切り方選択ボタン */
+.split-choices {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; width: 100%; max-width: 400px;
+}
+.split-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
+  background: white; border: 2px solid var(--border);
+  border-radius: 14px; cursor: pointer;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  color: var(--text); transition: .2s; text-align: left;
+}
+.split-btn:hover { border-color: var(--blue); background: rgba(79,142,247,0.06); transform: translateY(-2px); }
+.split-btn.selected { border-color: var(--blue); background: rgba(79,142,247,0.10); color: var(--blue); }
+.split-btn.wrong-choice { border-color: var(--red); background: rgba(233,69,96,0.08); color: var(--red); }
+.split-icon { font-size: 1.6rem; }
+
+/* 計算エリア */
+.calc-area {
+  background: rgba(79,142,247,0.05);
+  border: 1.5px dashed rgba(79,142,247,0.3);
+  border-radius: 14px; padding: 16px;
+  margin-top: 14px;
+}
+.calc-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px; flex-wrap: wrap;
+}
+.calc-label {
+  font-size: 13px; font-weight: 800; color: var(--text2);
+  min-width: 80px;
+}
+.calc-expr {
+  font-size: 15px; font-weight: 900; color: var(--text);
+  background: white; padding: 6px 12px; border-radius: 8px;
+  border: 1.5px solid var(--border); flex: 1;
+}
+.calc-expr span { color: var(--blue); }
+.calc-input {
+  font-family: inherit; font-size: 16px; font-weight: 900;
+  width: 90px; padding: 8px 10px; text-align: center;
+  background: white; color: var(--text);
+  border: 2px solid var(--border); border-radius: 10px;
+  outline: none; transition: .2s;
+}
+.calc-input:focus { border-color: var(--blue); }
+.calc-input.correct { border-color: var(--mint); background: rgba(45,184,122,0.06); }
+.calc-input.wrong { border-color: var(--red); animation: shake .3s ease; }
+
+.check-btn {
+  font-family: inherit; font-size: 15px; font-weight: 900;
+  padding: 12px 28px; border-radius: 50px; border: none;
+  background: var(--blue); color: white;
+  cursor: pointer; box-shadow: 0 4px 16px rgba(79,142,247,0.3);
+  transition: .2s; display: block; margin: 14px auto 0;
+}
+.check-btn:hover { opacity: .88; transform: translateY(-2px); }
+
+/* フィードバック */
+.feedback {
+  border-radius: 12px; padding: 12px 16px;
+  text-align: center; font-weight: 800; font-size: 15px;
+  margin-top: 12px; display: none;
+}
+.feedback.ok { background: rgba(45,184,122,0.10); color: var(--mint); border: 1px solid rgba(45,184,122,0.3); display: block; animation: popIn .3s ease; }
+.feedback.ng { background: rgba(233,69,96,0.10); color: var(--red); border: 1px solid rgba(233,69,96,0.2); display: block; }
+
+/* 公式ボックス */
+.formula-box {
+  background: linear-gradient(135deg, #f0f4ff, #f3e8ff);
+  border: 2px dashed var(--purple); border-radius: 16px;
+  padding: 18px; text-align: center; margin-top: 16px;
+}
+.formula { font-family: 'Kaisei Decol', serif; font-size: clamp(16px, 3.5vw, 24px); color: var(--text); margin: 6px 0; }
+.formula span { color: var(--blue); font-weight: 700; }
+
+/* クイズ */
+.quiz-q { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 14px; line-height: 1.7; }
+.quiz-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.choice-btn {
+  padding: 14px; border-radius: 14px;
+  border: 2px solid var(--border); background: white;
+  font-family: inherit; font-size: 14px; font-weight: 800;
+  cursor: pointer; transition: .2s; color: var(--text);
+}
+.choice-btn:hover { border-color: var(--blue); background: rgba(79,142,247,0.06); }
+.choice-btn.correct { background: rgba(45,184,122,0.12); border-color: var(--mint); color: var(--mint); }
+.choice-btn.wrong { background: rgba(233,69,96,0.10); border-color: var(--red); color: var(--red); }
+
+.result-msg {
+  text-align: center; font-size: 17px; font-weight: 800;
+  padding: 10px; border-radius: 12px; display: none;
+}
+.result-msg.show { display: block; animation: popIn .3s ease; }
+.result-msg.ok { color: #065F46; background: #D1FAE5; }
+.result-msg.ng { color: #7F1D1D; background: #FFE4E4; }
+
+.next-btn {
+  font-family: inherit; font-size: 15px; font-weight: 900;
+  padding: 13px 32px; border-radius: 50px; border: none;
+  background: var(--mint); color: white;
+  cursor: pointer; box-shadow: 0 4px 16px rgba(45,184,122,0.3);
+  transition: .2s; display: block; margin: 14px auto 0;
+}
+.next-btn:hover { opacity: .88; transform: translateY(-2px); }
+
+.hint-box {
+  background: #FFFBEB; border: 2px solid var(--yellow);
+  border-radius: 12px; padding: 12px 16px;
+  font-size: 13px; color: #92400E; line-height: 1.7;
+  margin-top: 12px; display: none;
+}
+.hint-box.show { display: block; animation: fadeIn .3s ease; }
+
+.hint-btn {
+  font-family: inherit; font-size: 13px; font-weight: 800;
+  padding: 6px 16px; border-radius: 20px;
+  border: 1.5px solid rgba(245,166,35,0.4);
+  background: rgba(245,166,35,0.08); color: var(--yellow);
+  cursor: pointer; transition: .2s;
+}
+.hint-btn:hover { background: rgba(245,166,35,0.16); }
+
+footer { text-align: center; padding: 20px; color: var(--text2); font-size: 13px; }
+
+@keyframes popIn { from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)} }
+@keyframes fadeIn { from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)} }
+@keyframes shake { 0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)} }
+@keyframes drawLine { from{stroke-dashoffset:400}to{stroke-dashoffset:0} }
+</style>
+</head>
+<body>
+
+<div class="back-bar">
+  <a class="back-btn" href="game.html">← ゲームにもどる</a>
+</div>
+
+<header>
+  <h1>🔷 <span>複合図形</span>をとく！</h1>
+  <p>大きい図形から小さい図形を引くのがコツ！どこで切るかを考えよう</p>
+</header>
+
+<div class="container">
+
+  <!-- STEP 1: 考え方 -->
+  <div class="step-card">
+    <div class="step-badge">✦ STEP 1</div>
+    <h2>複合図形の考え方🧩</h2>
+    <p class="desc">
+      複合図形とは、<span class="highlight">いくつかの図形が組み合わさった形</span>のこと。<br>
+      解くコツは「<span class="highlight">大きい図形 − 小さい図形</span>」か「<span class="highlight">分割してたす</span>」の2つ！<br>
+      どちらを使うか見極めることが大事だよ。
+    </p>
+
+    <div class="canvas-wrap">
+      <canvas id="introCanvas" width="340" height="200"></canvas>
+    </div>
+
+    <div class="formula-box">
+      <div class="formula">方法① <span>大きい長方形</span> − <span>切り取った部分</span></div>
+      <div class="formula" style="margin-top:8px">方法② <span>小さい図形A</span> ＋ <span>小さい図形B</span></div>
+    </div>
+  </div>
+
+  <!-- STEP 2: インタラクティブ分割 -->
+  <div class="step-card">
+    <div class="step-badge">✦ STEP 2</div>
+    <h2>どこで切り分ける？✂️</h2>
+    <p class="desc">この図形をどうやって計算する？切り方を選んでみよう！</p>
+
+    <div class="canvas-wrap">
+      <canvas id="splitCanvas" width="340" height="220"></canvas>
+
+      <div class="split-choices">
+        <button class="split-btn" onclick="selectSplit(0, this)">
+          <span class="split-icon">↕️</span>
+          <span>たてに分ける</span>
+        </button>
+        <button class="split-btn" onclick="selectSplit(1, this)">
+          <span class="split-icon">↔️</span>
+          <span>よこに分ける</span>
+        </button>
+        <button class="split-btn" onclick="selectSplit(2, this)">
+          <span class="split-icon">⬛</span>
+          <span>大きい四角から引く</span>
+        </button>
+        <button class="split-btn" onclick="selectSplit(3, this)">
+          <span class="split-icon">🔺</span>
+          <span>三角形に分ける</span>
+        </button>
+      </div>
+
+      <div class="feedback" id="split-feedback"></div>
+    </div>
+
+    <div class="calc-area" id="calc-area" style="display:none">
+      <div class="calc-row">
+        <span class="calc-label">🟦 A の面積</span>
+        <span class="calc-expr"><span id="expr-a">8 × 4</span> ＝</span>
+        <input class="calc-input" id="inp-a" type="number" placeholder="?">
+      </div>
+      <div class="calc-row">
+        <span class="calc-label">🟩 B の面積</span>
+        <span class="calc-expr"><span id="expr-b">6 × 3</span> ＝</span>
+        <input class="calc-input" id="inp-b" type="number" placeholder="?">
+      </div>
+      <div class="calc-row">
+        <span class="calc-label">✅ 合計</span>
+        <span class="calc-expr">A <span id="op-label">＋</span> B ＝</span>
+        <input class="calc-input" id="inp-total" type="number" placeholder="?">
+      </div>
+      <button class="check-btn" onclick="checkCalc()">確認する</button>
+      <div class="feedback" id="calc-feedback"></div>
+    </div>
+  </div>
+
+  <!-- STEP 3: クイズ -->
+  <div class="step-card">
+    <div class="step-badge">✦ STEP 3</div>
+    <h2>チャレンジクイズ🌟</h2>
+
+    <canvas id="quizCanvas" width="340" height="200" style="display:block;margin:0 auto 16px;border-radius:12px;background:#f8faff;border:1.5px solid rgba(79,142,247,0.2);max-width:100%"></canvas>
+
+    <p class="quiz-q" id="quiz-q">この図形の面積は何cm²？</p>
+    <div class="quiz-choices" id="quiz-choices"></div>
+    <div class="result-msg" id="result-msg"></div>
+
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap">
+      <button class="hint-btn" onclick="showQuizHint()">💡 ヒント</button>
+      <button class="next-btn" onclick="nextQuiz()" style="margin:0">つぎの問題 →</button>
+    </div>
+    <div class="hint-box" id="quiz-hint"></div>
+  </div>
+
+  <div style="text-align:center;margin-top:8px">
+    <a class="back-btn" href="game.html" style="font-size:15px;padding:12px 28px;">🎮 ゲームにもどる</a>
+  </div>
+
+</div>
+
+<footer>✦ さんすうクエスト ✦</footer>
+
+<script>
+// ============================================================
+// STEP1: 説明図
+// ============================================================
+const introCanvas = document.getElementById('introCanvas');
+const ictx = introCanvas.getContext('2d');
+
+function drawIntro() {
+  ictx.clearRect(0, 0, introCanvas.width, introCanvas.height);
+  const W = introCanvas.width, H = introCanvas.height;
+
+  // 左: たし算で求める図
+  const lx = 20, ly = 30;
+  // A (上)
+  ictx.fillStyle = 'rgba(79,142,247,0.25)';
+  ictx.strokeStyle = '#4f8ef7';
+  ictx.lineWidth = 2;
+  ictx.beginPath(); ictx.rect(lx, ly, 100, 50); ictx.fill(); ictx.stroke();
+  // B (下左)
+  ictx.fillStyle = 'rgba(45,184,122,0.25)';
+  ictx.strokeStyle = '#2db87a';
+  ictx.beginPath(); ictx.rect(lx, ly+50, 60, 50); ictx.fill(); ictx.stroke();
+  // ラベル
+  ictx.font = 'bold 13px "M PLUS Rounded 1c"';
+  ictx.fillStyle = '#4f8ef7'; ictx.textAlign = 'center';
+  ictx.fillText('A', lx+50, ly+30);
+  ictx.fillStyle = '#2db87a';
+  ictx.fillText('B', lx+30, ly+80);
+  ictx.fillStyle = '#555577'; ictx.font = '12px "M PLUS Rounded 1c"';
+  ictx.fillText('A＋B', lx+50, ly+125);
+
+  // 矢印
+  ictx.fillStyle = '#9999bb'; ictx.font = 'bold 20px serif';
+  ictx.fillText('or', W/2-14, ly+65);
+
+  // 右: 引き算で求める図
+  const rx = W/2+10, ry = ly;
+  // 大きい四角
+  ictx.fillStyle = 'rgba(159,122,234,0.15)';
+  ictx.strokeStyle = '#9f7aea';
+  ictx.lineWidth = 2;
+  ictx.beginPath(); ictx.rect(rx, ry, 100, 100); ictx.fill(); ictx.stroke();
+  // 切り取り部分（赤）
+  ictx.fillStyle = 'rgba(233,69,96,0.25)';
+  ictx.strokeStyle = '#e94560';
+  ictx.setLineDash([4,3]);
+  ictx.beginPath(); ictx.rect(rx+60, ry+50, 40, 50); ictx.fill(); ictx.stroke();
+  ictx.setLineDash([]);
+  // ラベル
+  ictx.font = 'bold 13px "M PLUS Rounded 1c"';
+  ictx.fillStyle = '#9f7aea'; ictx.textAlign = 'center';
+  ictx.fillText('大', rx+30, ry+40);
+  ictx.fillStyle = '#e94560';
+  ictx.fillText('引', rx+80, ry+80);
+  ictx.fillStyle = '#555577'; ictx.font = '12px "M PLUS Rounded 1c"';
+  ictx.fillText('大 − 引', rx+50, ry+125);
+}
+drawIntro();
+
+// ============================================================
+// STEP2: 分割インタラクティブ
+// ============================================================
+const splitCanvas = document.getElementById('splitCanvas');
+const sctx = splitCanvas.getContext('2d');
+
+// L字型図形の定義
+// 全体: 8×7, 右下が4×3 切り取られている
+// スケール: 1cm = 26px
+const SCALE = 26;
+const SX = 30, SY = 20;
+// 頂点
+const shape = [
+  {x:0,y:0},{x:8,y:0},{x:8,y:4},{x:4,y:4},{x:4,y:7},{x:0,y:7}
+];
+
+function toCanvas(pt) {
+  return { x: SX + pt.x * SCALE, y: SY + pt.y * SCALE };
+}
+
+function drawShape(ctx, fillColor, strokeColor) {
+  ctx.beginPath();
+  const pts = shape.map(toCanvas);
+  ctx.moveTo(pts[0].x, pts[0].y);
+  pts.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.closePath();
+  if (fillColor) { ctx.fillStyle = fillColor; ctx.fill(); }
+  ctx.strokeStyle = strokeColor || '#4f8ef7';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+}
+
+function drawDimension(ctx, x1, y1, x2, y2, label, offset) {
+  ctx.save();
+  ctx.strokeStyle = '#9999bb';
+  ctx.fillStyle = '#555577';
+  ctx.lineWidth = 1;
+  ctx.font = 'bold 11px "M PLUS Rounded 1c"';
+  ctx.textAlign = 'center';
+  const mx = (x1+x2)/2, my = (y1+y2)/2;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  const ox = offset ? offset.x : 0, oy = offset ? offset.y : 0;
+  ctx.fillText(label, mx+ox, my+oy);
+  ctx.restore();
+}
+
+let splitState = -1; // -1: 未選択
+
+function drawSplitBase() {
+  sctx.clearRect(0, 0, splitCanvas.width, splitCanvas.height);
+  drawShape(sctx, 'rgba(79,142,247,0.12)', '#4f8ef7');
+
+  // 寸法
+  const p = (pt) => toCanvas(pt);
+  // 上辺 8cm
+  drawDimension(sctx, p({x:0,y:0}).x, p({x:0,y:0}).y-16, p({x:8,y:0}).x, p({x:8,y:0}).y-16, '8cm', {x:0,y:-4});
+  // 左辺 7cm
+  drawDimension(sctx, p({x:0,y:0}).x-18, p({x:0,y:0}).y, p({x:0,y:7}).x-18, p({x:0,y:7}).y, '7cm', {x:-16,y:0});
+  // 下の幅 4cm
+  drawDimension(sctx, p({x:0,y:7}).x, p({x:0,y:7}).y+16, p({x:4,y:7}).x, p({x:4,y:7}).y+16, '4cm', {x:0,y:5});
+  // 右の高さ 4cm (上から)
+  drawDimension(sctx, p({x:8,y:0}).x+14, p({x:8,y:0}).y, p({x:8,y:4}).x+14, p({x:8,y:4}).y, '4cm', {x:18,y:0});
+  // 右の段差 4cm (横)
+  drawDimension(sctx, p({x:4,y:4}).x, p({x:4,y:4}).y+14, p({x:8,y:4}).x, p({x:8,y:4}).y+14, '4cm', {x:0,y:6});
+  // 右側の高さ残り 3cm
+  drawDimension(sctx, p({x:4,y:4}).x+14, p({x:4,y:4}).y, p({x:4,y:7}).x+14, p({x:4,y:7}).y, '3cm', {x:18,y:0});
+}
+
+function drawSplitA() {
+  // たてに分ける: 左(4×7) + 右(4×4)
+  sctx.clearRect(0, 0, splitCanvas.width, splitCanvas.height);
+  const p = toCanvas;
+  // A: 左 4×7
+  sctx.fillStyle = 'rgba(79,142,247,0.25)';
+  sctx.beginPath();
+  sctx.rect(p({x:0,y:0}).x, p({x:0,y:0}).y, 4*SCALE, 7*SCALE);
+  sctx.fill();
+  // B: 右 4×4
+  sctx.fillStyle = 'rgba(45,184,122,0.25)';
+  sctx.beginPath();
+  sctx.rect(p({x:4,y:0}).x, p({x:4,y:0}).y, 4*SCALE, 4*SCALE);
+  sctx.fill();
+  drawShape(sctx, null, '#333');
+  // 分割線
+  sctx.strokeStyle = '#e94560'; sctx.lineWidth = 2; sctx.setLineDash([6,4]);
+  sctx.beginPath();
+  sctx.moveTo(p({x:4,y:0}).x, p({x:4,y:0}).y);
+  sctx.lineTo(p({x:4,y:4}).x, p({x:4,y:4}).y);
+  sctx.stroke(); sctx.setLineDash([]);
+  // ラベル
+  sctx.font = 'bold 14px "M PLUS Rounded 1c"';
+  sctx.textAlign = 'center';
+  sctx.fillStyle = '#4f8ef7'; sctx.fillText('A', p({x:2,y:3.5}).x, p({x:2,y:3.5}).y+5);
+  sctx.fillStyle = '#2db87a'; sctx.fillText('B', p({x:6,y:2}).x, p({x:6,y:2}).y+5);
+}
+
+function drawSplitB() {
+  // よこに分ける: 上(8×4) + 下(4×3)
+  sctx.clearRect(0, 0, splitCanvas.width, splitCanvas.height);
+  const p = toCanvas;
+  sctx.fillStyle = 'rgba(79,142,247,0.25)';
+  sctx.beginPath(); sctx.rect(p({x:0,y:0}).x, p({x:0,y:0}).y, 8*SCALE, 4*SCALE); sctx.fill();
+  sctx.fillStyle = 'rgba(45,184,122,0.25)';
+  sctx.beginPath(); sctx.rect(p({x:0,y:4}).x, p({x:0,y:4}).y, 4*SCALE, 3*SCALE); sctx.fill();
+  drawShape(sctx, null, '#333');
+  sctx.strokeStyle = '#e94560'; sctx.lineWidth = 2; sctx.setLineDash([6,4]);
+  sctx.beginPath();
+  sctx.moveTo(p({x:0,y:4}).x, p({x:0,y:4}).y);
+  sctx.lineTo(p({x:8,y:4}).x, p({x:8,y:4}).y);
+  sctx.stroke(); sctx.setLineDash([]);
+  sctx.font = 'bold 14px "M PLUS Rounded 1c"'; sctx.textAlign = 'center';
+  sctx.fillStyle = '#4f8ef7'; sctx.fillText('A', p({x:4,y:2}).x, p({x:4,y:2}).y+5);
+  sctx.fillStyle = '#2db87a'; sctx.fillText('B', p({x:2,y:5.5}).x, p({x:2,y:5.5}).y+5);
+}
+
+function drawSplitC() {
+  // 大きい四角(8×7) − 右下(4×3)
+  sctx.clearRect(0, 0, splitCanvas.width, splitCanvas.height);
+  const p = toCanvas;
+  sctx.fillStyle = 'rgba(159,122,234,0.15)';
+  sctx.beginPath(); sctx.rect(p({x:0,y:0}).x, p({x:0,y:0}).y, 8*SCALE, 7*SCALE); sctx.fill();
+  sctx.fillStyle = 'rgba(233,69,96,0.25)';
+  sctx.setLineDash([5,4]);
+  sctx.strokeStyle = '#e94560'; sctx.lineWidth = 2;
+  sctx.beginPath(); sctx.rect(p({x:4,y:4}).x, p({x:4,y:4}).y, 4*SCALE, 3*SCALE); sctx.fill(); sctx.stroke();
+  sctx.setLineDash([]);
+  drawShape(sctx, null, '#9f7aea');
+  sctx.font = 'bold 14px "M PLUS Rounded 1c"'; sctx.textAlign = 'center';
+  sctx.fillStyle = '#9f7aea'; sctx.fillText('大(8×7)', p({x:3,y:2}).x, p({x:3,y:2}).y+5);
+  sctx.fillStyle = '#e94560'; sctx.fillText('引(4×3)', p({x:6,y:5.5}).x, p({x:6,y:5.5}).y+5);
+}
+
+const splitConfigs = [
+  { // たてに分ける
+    correct: true,
+    draw: drawSplitA,
+    exprA: '4 × 7', ansA: 28,
+    exprB: '4 × 4', ansB: 16,
+    op: '＋', total: 44,
+    msg: '✅ 正解！たてに分けると A(4×7=28) + B(4×4=16) = 44cm²'
+  },
+  { // よこに分ける
+    correct: true,
+    draw: drawSplitB,
+    exprA: '8 × 4', ansA: 32,
+    exprB: '4 × 3', ansB: 12,
+    op: '＋', total: 44,
+    msg: '✅ 正解！よこに分けても A(8×4=32) + B(4×3=12) = 44cm²'
+  },
+  { // 大きい四角から引く
+    correct: true,
+    draw: drawSplitC,
+    exprA: '8 × 7', ansA: 56,
+    exprB: '4 × 3', ansB: 12,
+    op: '－', total: 44,
+    msg: '✅ 正解！大(8×7=56) − 引(4×3=12) = 44cm²'
+  },
+  { // 三角形（間違い）
+    correct: false,
+    msg: '❌ この図形は三角形には分けられないよ！長方形で考えよう。'
+  }
+];
+
+let currentSplit = -1;
+
+window.selectSplit = function(idx, btn) {
+  document.querySelectorAll('.split-btn').forEach(b => {
+    b.classList.remove('selected', 'wrong-choice');
+  });
+  const config = splitConfigs[idx];
+  const fb = document.getElementById('split-feedback');
+  const calcArea = document.getElementById('calc-area');
+
+  if (!config.correct) {
+    btn.classList.add('wrong-choice');
+    fb.className = 'feedback ng';
+    fb.textContent = config.msg;
+    calcArea.style.display = 'none';
+    drawSplitBase();
+    return;
+  }
+
+  btn.classList.add('selected');
+  currentSplit = idx;
+  config.draw();
+
+  fb.className = 'feedback ok';
+  fb.textContent = '👍 いい切り方！次は面積を計算してみよう';
+
+  document.getElementById('expr-a').textContent = config.exprA;
+  document.getElementById('expr-b').textContent = config.exprB;
+  document.getElementById('op-label').textContent = config.op;
+  document.getElementById('inp-a').value = '';
+  document.getElementById('inp-b').value = '';
+  document.getElementById('inp-total').value = '';
+  ['inp-a','inp-b','inp-total'].forEach(id => {
+    document.getElementById(id).className = 'calc-input';
+  });
+  document.getElementById('calc-feedback').className = 'feedback';
+  calcArea.style.display = 'block';
+};
+
+window.checkCalc = function() {
+  if (currentSplit < 0) return;
+  const config = splitConfigs[currentSplit];
+  const va = parseFloat(document.getElementById('inp-a').value);
+  const vb = parseFloat(document.getElementById('inp-b').value);
+  const vt = parseFloat(document.getElementById('inp-total').value);
+  const fb = document.getElementById('calc-feedback');
+
+  let allOk = true;
+  const checkField = (id, correct) => {
+    const el = document.getElementById(id);
+    const val = parseFloat(el.value);
+    if (val === correct) { el.className = 'calc-input correct'; }
+    else { el.className = 'calc-input wrong'; allOk = false; }
+  };
+  checkField('inp-a', config.ansA);
+  checkField('inp-b', config.ansB);
+  checkField('inp-total', config.total);
+
+  if (allOk) {
+    fb.className = 'feedback ok';
+    fb.textContent = `🎉 完璧！面積は ${config.total}cm² だね！`;
+  } else {
+    fb.className = 'feedback ng';
+    fb.textContent = `❌ 惜しい！もう一度確認してみよう。`;
+  }
+};
+
+drawSplitBase();
+
+// ============================================================
+// STEP3: クイズ
+// ============================================================
+const quizCanvas = document.getElementById('quizCanvas');
+const qctx = quizCanvas.getContext('2d');
+
+const quizData = [
+  {
+    // L字型 6×5, 右下 3×2 切り取り → 面積 = 30-6 = 24
+    label: '図形の面積は何cm²？',
+    hint: '大きい長方形(6×5=30)から右下の長方形(3×2=6)を引こう！',
+    answer: 24,
+    wrongs: [30, 18, 22],
+    draw: (ctx, W) => {
+      const sc = 30, sx = 60, sy = 20;
+      const pts = [{x:0,y:0},{x:6,y:0},{x:6,y:3},{x:3,y:3},{x:3,y:5},{x:0,y:5}];
+      ctx.beginPath();
+      ctx.moveTo(sx+pts[0].x*sc, sy+pts[0].y*sc);
+      pts.forEach(p => ctx.lineTo(sx+p.x*sc, sy+p.y*sc));
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(79,142,247,0.15)'; ctx.fill();
+      ctx.strokeStyle = '#4f8ef7'; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.font = 'bold 11px "M PLUS Rounded 1c"'; ctx.fillStyle = '#555577'; ctx.textAlign = 'center';
+      ctx.fillText('6cm', sx+3*sc, sy-10);
+      ctx.fillText('5cm', sx-20, sy+2.5*sc);
+      ctx.fillText('3cm', sx+1.5*sc, sy+5*sc+14);
+      ctx.fillText('3cm', sx+6*sc+18, sy+1.5*sc);
+      ctx.fillText('2cm', sx+3*sc+14+20, sy+4*sc);
+    }
+  },
+  {
+    // コの字型: 外 8×5, 中央 4×3 くり抜き → 面積 = 40-12 = 28
+    label: '図形の面積は何cm²？',
+    hint: '大きい長方形(8×5=40)から内側の長方形(4×3=12)を引こう！',
+    answer: 28,
+    wrongs: [40, 24, 32],
+    draw: (ctx, W) => {
+      const sc = 26, sx = 30, sy = 25;
+      // 外枠
+      ctx.fillStyle = 'rgba(45,184,122,0.15)';
+      ctx.strokeStyle = '#2db87a'; ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      const pts = [{x:0,y:0},{x:8,y:0},{x:8,y:5},{x:6,y:5},{x:6,y:2},{x:2,y:2},{x:2,y:5},{x:0,y:5}];
+      ctx.moveTo(sx+pts[0].x*sc, sy+pts[0].y*sc);
+      pts.forEach(p => ctx.lineTo(sx+p.x*sc, sy+p.y*sc));
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.font = 'bold 11px "M PLUS Rounded 1c"'; ctx.fillStyle = '#555577'; ctx.textAlign = 'center';
+      ctx.fillText('8cm', sx+4*sc, sy-10);
+      ctx.fillText('5cm', sx-18, sy+2.5*sc);
+      ctx.fillText('4cm', sx+4*sc, sy+2*sc-8);
+      ctx.fillText('3cm', sx+6*sc+18, sy+3.5*sc);
+    }
+  },
+  {
+    // 階段型: 上(5×2) + 下(3×3) → 面積 = 10+9 = 19
+    label: '図形の面積は何cm²？',
+    hint: 'たてに分けると 上(5×2=10) + 下(3×3=9) で計算できるよ！',
+    answer: 19,
+    wrongs: [15, 21, 25],
+    draw: (ctx, W) => {
+      const sc = 32, sx = 55, sy = 20;
+      const pts = [{x:0,y:0},{x:5,y:0},{x:5,y:2},{x:3,y:2},{x:3,y:5},{x:0,y:5}];
+      ctx.beginPath();
+      ctx.moveTo(sx+pts[0].x*sc, sy+pts[0].y*sc);
+      pts.forEach(p => ctx.lineTo(sx+p.x*sc, sy+p.y*sc));
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(159,122,234,0.18)'; ctx.fill();
+      ctx.strokeStyle = '#9f7aea'; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.font = 'bold 11px "M PLUS Rounded 1c"'; ctx.fillStyle = '#555577'; ctx.textAlign = 'center';
+      ctx.fillText('5cm', sx+2.5*sc, sy-10);
+      ctx.fillText('2cm', sx+5*sc+16, sy+sc);
+      ctx.fillText('3cm', sx+3*sc+14+8, sy+3.5*sc);
+      ctx.fillText('3cm', sx-16, sy+2.5*sc);
+      ctx.fillText('5cm', sx+1.5*sc, sy+5*sc+14);
+    }
+  },
+  {
+    // プラス型: 中央縦(2×6) + 横追加(4×2) → 面積 = 12+8 = 20
+    label: '図形の面積は何cm²？',
+    hint: 'たてに長い長方形(2×6=12) + よこに足す部分(2×2×2=8) で求められるよ！',
+    answer: 20,
+    wrongs: [24, 16, 28],
+    draw: (ctx, W) => {
+      const sc = 28, sx = 50, sy = 15;
+      const pts = [
+        {x:1,y:0},{x:3,y:0},{x:3,y:2},{x:5,y:2},{x:5,y:4},
+        {x:3,y:4},{x:3,y:6},{x:1,y:6},{x:1,y:4},{x:0,y:4},
+        {x:0,y:2},{x:1,y:2}
+      ];
+      ctx.beginPath();
+      ctx.moveTo(sx+pts[0].x*sc, sy+pts[0].y*sc);
+      pts.forEach(p => ctx.lineTo(sx+p.x*sc, sy+p.y*sc));
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(251,146,60,0.18)'; ctx.fill();
+      ctx.strokeStyle = '#fb923c'; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.font = 'bold 11px "M PLUS Rounded 1c"'; ctx.fillStyle = '#555577'; ctx.textAlign = 'center';
+      ctx.fillText('2cm', sx+2*sc, sy-8);
+      ctx.fillText('6cm', sx+5*sc+16, sy+3*sc);
+      ctx.fillText('5cm', sx+2.5*sc, sy+6*sc+14);
+      ctx.fillText('2cm', sx-14, sy+3*sc);
+    }
+  }
+];
+
+let currentQuiz = 0;
+let quizAnswered = false;
+
+function loadQuiz() {
+  quizAnswered = false;
+  const q = quizData[currentQuiz % quizData.length];
+  document.getElementById('quiz-q').textContent = q.label;
+  document.getElementById('result-msg').className = 'result-msg';
+  document.getElementById('quiz-hint').className = 'hint-box';
+
+  qctx.clearRect(0, 0, quizCanvas.width, quizCanvas.height);
+  q.draw(qctx, quizCanvas.width);
+
+  const choices = [...[q.answer, ...q.wrongs]].sort(() => Math.random() - 0.5);
+  const container = document.getElementById('quiz-choices');
+  container.innerHTML = '';
+  choices.forEach(val => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = val + ' cm²';
+    btn.onclick = () => {
+      if (quizAnswered) return;
+      quizAnswered = true;
+      container.querySelectorAll('.choice-btn').forEach(b => b.style.pointerEvents = 'none');
+      const msg = document.getElementById('result-msg');
+      if (val === q.answer) {
+        btn.classList.add('correct');
+        msg.textContent = '🎉 せいかい！すごい！';
+        msg.className = 'result-msg show ok';
+      } else {
+        btn.classList.add('wrong');
+        container.querySelectorAll('.choice-btn').forEach(b => {
+          if (parseInt(b.textContent) === q.answer) b.classList.add('correct');
+        });
+        msg.textContent = `😊 正解は ${q.answer}cm² だよ！ヒントを見てみよう`;
+        msg.className = 'result-msg show ng';
+      }
+    };
+    container.appendChild(btn);
+  });
+}
+
+window.showQuizHint = function() {
+  const q = quizData[currentQuiz % quizData.length];
+  const h = document.getElementById('quiz-hint');
+  h.textContent = '💡 ' + q.hint;
+  h.className = 'hint-box show';
+};
+
+window.nextQuiz = function() {
+  currentQuiz++;
+  loadQuiz();
+};
+
+loadQuiz();
+</script>
+</body>
+</html>

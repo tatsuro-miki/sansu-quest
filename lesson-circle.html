@@ -339,11 +339,11 @@ function animStep() {
     rafId = requestAnimationFrame(animStep);
     return;
   }
-  animProgress += 0.004 * animDir;
+  animProgress += 0.006 * animDir;
   if (animProgress >= 1) {
     animProgress = 1;
     animDir = -1;
-    pauseTimer = 90; // 約1.5秒停止（60fps×1.5）
+    pauseTimer = 180; // 約1.5秒停止（60fps×1.5）
   }
   if (animProgress <= 0) {
     animProgress = 0;

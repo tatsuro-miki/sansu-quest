@@ -331,7 +331,28 @@ function drawSplitCircle(n, progress) {
 
 slider.addEventListener('input', () => { slices = parseInt(slider.value); document.getElementById('sliceCount').textContent = slices; if (!animating) drawSplitCircle(slices, 0); });
 
-function animStep() { animProgress += 0.004 * animDir; if (animProgress >= 1) { animProgress = 1; animDir = -1; } if (animProgress <= 0) { animProgress = 0; animDir = 1; } drawSplitCircle(slices, animProgress); rafId = requestAnimationFrame(animStep); }
+let pauseTimer = 0;
+
+function animStep() {
+  if (pauseTimer > 0) {
+    pauseTimer--;
+    rafId = requestAnimationFrame(animStep);
+    return;
+  }
+  animProgress += 0.004 * animDir;
+  if (animProgress >= 1) {
+    animProgress = 1;
+    animDir = -1;
+    pauseTimer = 90; // 約1.5秒停止（60fps×1.5）
+  }
+  if (animProgress <= 0) {
+    animProgress = 0;
+    animDir = 1;
+    pauseTimer = 30; // 円に戻った時も少し停止
+  }
+  drawSplitCircle(slices, animProgress);
+  rafId = requestAnimationFrame(animStep);
+}
 function toggleAnimation() { animating = !animating; document.getElementById('animBtnText').textContent = animating ? '⏸ 停止' : '▶ アニメ開始'; if (animating) animStep(); else cancelAnimationFrame(rafId); }
 function resetAnim() { cancelAnimationFrame(rafId); animating = false; animProgress = 0; animDir = 1; document.getElementById('animBtnText').textContent = '▶ アニメ開始'; drawSplitCircle(slices, 0); }
 drawSplitCircle(8, 0);

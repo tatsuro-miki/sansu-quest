@@ -4,201 +4,522 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>さんすうクエスト</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=M+PLUS+Rounded 1c:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#1a1a2e;--card:#16213e;--primary:#e94560;--primary2:#ff6b6b;--gold:#ffd700;--gold2:#ffb347;--xp:#4ade80;--blue:#60a5fa;--purple:#a78bfa;--orange:#fb923c;--text:#f0f0f0;--text2:#94a3b8;--heart:#ef4444;--radius:20px;--glow-primary:0 0 24px rgba(233,69,96,.4);--glow-gold:0 0 24px rgba(255,215,0,.3);}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Nunito','M PLUS Rounded 1c',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(233,69,96,.12) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(96,165,250,.1) 0%,transparent 50%);pointer-events:none;}
-.app{max-width:640px;margin:0 auto;padding:16px 16px 100px;position:relative;z-index:1;}
-/* topbar */
-.topbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:10px 14px;background:var(--card);border-radius:16px;border:1px solid rgba(255,255,255,.06);}
-.user-name{font-size:.88rem;font-weight:900;color:var(--gold);}
-.streak-pill{display:flex;align-items:center;gap:4px;background:linear-gradient(135deg,#ff6b35,#ff9a6c);padding:5px 12px;border-radius:20px;font-weight:900;font-size:.85rem;box-shadow:0 4px 16px rgba(255,107,53,.35);}
-.streak-pill.shake{animation:headShake .4s ease;}
-.xp-pill{display:flex;align-items:center;gap:4px;background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.3);padding:5px 12px;border-radius:20px;font-weight:900;font-size:.85rem;color:var(--xp);}
-.hearts{display:flex;gap:2px;font-size:1.2rem;}
-.heart.lost{opacity:.22;transform:scale(.7);}
-.logout-btn{margin-left:auto;font-family:inherit;font-size:.72rem;font-weight:800;padding:5px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--text2);cursor:pointer;}
-.logout-btn:hover{color:var(--text);}
-/* level */
-.level-section{margin-bottom:14px;}
-.level-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
-.level-badge-big{display:flex;align-items:center;gap:7px;font-weight:900;font-size:.95rem;}
-.level-orb{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;color:#1a1a2e;box-shadow:var(--glow-gold);}
-.xp-next{font-size:.75rem;color:var(--text2);}
-.level-bar-wrap{height:9px;background:rgba(255,255,255,.08);border-radius:10px;overflow:hidden;}
-.level-bar{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--xp),#22d3ee);box-shadow:0 0 10px rgba(74,222,128,.5);transition:width .6s cubic-bezier(.34,1.56,.64,1);}
-/* daily */
-.daily-goal{background:var(--card);border-radius:var(--radius);padding:14px 18px;margin-bottom:14px;border:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:12px;}
-.goal-icon{font-size:2rem;}
-.goal-text{flex:1;}
-.goal-title{font-weight:900;font-size:.9rem;margin-bottom:3px;}
-.goal-sub{font-size:.75rem;color:var(--text2);}
-.goal-ring{width:50px;height:50px;flex-shrink:0;position:relative;}
-.goal-ring svg{transform:rotate(-90deg);}
-.ring-bg{fill:none;stroke:rgba(255,255,255,.08);stroke-width:5;}
-.ring-fg{fill:none;stroke:var(--gold);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.34,1.56,.64,1);filter:drop-shadow(0 0 6px rgba(255,215,0,.5));}
-.ring-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.72rem;color:var(--gold);}
-/* categories */
-.categories{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
-.cat-btn{background:var(--card);border:2px solid rgba(255,255,255,.06);border-radius:14px;padding:9px 5px;cursor:pointer;text-align:center;font-family:inherit;transition:.2s;color:var(--text);}
-.cat-btn .icon{font-size:1.4rem;display:block;margin-bottom:2px;}
-.cat-btn .label{font-size:.68rem;font-weight:700;color:var(--text2);}
-.cat-btn.active{border-color:var(--primary);background:rgba(233,69,96,.12);box-shadow:var(--glow-primary);}
-.cat-btn:hover{transform:translateY(-2px);}
-/* question */
-.question-card{background:var(--card);border-radius:var(--radius);border:1px solid rgba(255,255,255,.06);padding:26px 22px 22px;margin-bottom:12px;position:relative;overflow:hidden;animation:cardIn .4s cubic-bezier(.34,1.56,.64,1);}
-.question-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--purple),var(--blue));}
-.q-meta{display:flex;gap:7px;margin-bottom:14px;align-items:center;}
-.q-cat{font-size:.68rem;font-weight:800;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,.08);color:var(--text2);}
-.q-lv{font-size:.68rem;font-weight:800;padding:3px 9px;border-radius:20px;}
-.lv1{background:rgba(74,222,128,.15);color:var(--xp);}
-.lv2{background:rgba(251,146,60,.15);color:var(--orange);}
-.lv3{background:rgba(233,69,96,.15);color:var(--primary2);}
-.q-xp{margin-left:auto;font-size:.75rem;font-weight:800;color:var(--xp);}
-.q-text{font-size:1.75rem;font-weight:900;text-align:center;margin-bottom:16px;line-height:1.5;white-space:pre-line;}
-/* hint */
-.hint-btn{font-family:inherit;font-size:.78rem;font-weight:800;padding:6px 14px;border-radius:20px;border:2px solid rgba(167,139,250,.4);background:rgba(167,139,250,.1);color:var(--purple);cursor:pointer;transition:.2s;}
-.hint-btn:hover{background:rgba(167,139,250,.2);}
-.hint-box{background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);border-radius:12px;padding:9px 12px;font-size:.85rem;color:var(--purple);text-align:center;font-weight:700;margin-top:8px;animation:popIn .25s ease;}
-/* answer */
-.answer-area{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:6px;}
-.answer-input{font-family:inherit;font-size:1.7rem;font-weight:900;width:140px;padding:10px 14px;text-align:center;background:rgba(255,255,255,.05);color:var(--text);border:2px solid rgba(255,255,255,.12);border-radius:14px;outline:none;transition:.2s;}
-.answer-input:focus{border-color:var(--primary);background:rgba(233,69,96,.08);}
-.answer-input.correct{border-color:var(--xp);background:rgba(74,222,128,.08);}
-.answer-input.wrong{border-color:var(--heart);animation:shake .3s ease;}
-.submit-btn{font-family:inherit;font-size:.95rem;font-weight:900;padding:12px 20px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;border:none;border-radius:14px;cursor:pointer;box-shadow:var(--glow-primary);transition:.2s;}
-.submit-btn:hover{transform:translateY(-2px);}
-/* fraction */
-.frac-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:4px;}
-.frac-wrap input{font-family:inherit;font-size:1.2rem;font-weight:900;width:76px;padding:7px;text-align:center;background:rgba(255,255,255,.05);color:var(--text);border:2px solid rgba(255,255,255,.12);border-radius:10px;outline:none;}
-.frac-wrap input:focus{border-color:var(--blue);}
-.frac-line{width:76px;height:3px;background:var(--text);border-radius:2px;}
-/* choices */
-.choices{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%;margin-top:6px;}
-.choice-btn{font-family:inherit;font-size:.9rem;font-weight:800;padding:13px 9px;background:rgba(255,255,255,.05);color:var(--text);border:2px solid rgba(255,255,255,.1);border-radius:14px;cursor:pointer;transition:.2s;}
-.choice-btn:hover{border-color:var(--blue);background:rgba(96,165,250,.1);transform:translateY(-2px);}
-.choice-btn.ok{border-color:var(--xp);background:rgba(74,222,128,.12);color:var(--xp);}
-.choice-btn.ng{border-color:var(--heart);background:rgba(239,68,68,.12);color:var(--heart);}
-/* memo */
-.memo-wrap{margin-top:12px;}
-.memo-toggle{font-family:inherit;font-size:.75rem;font-weight:800;padding:5px 13px;border-radius:20px;border:2px solid rgba(96,165,250,.3);background:rgba(96,165,250,.08);color:var(--blue);cursor:pointer;display:flex;align-items:center;gap:4px;margin:0 auto;transition:.2s;}
-.memo-toggle:hover{background:rgba(96,165,250,.15);}
-.memo-area{margin-top:8px;animation:popIn .25s ease;}
-.memo-label{font-size:.68rem;color:var(--text2);font-weight:700;margin-bottom:5px;text-align:center;}
-.memo-textarea{width:100%;min-height:80px;padding:10px 12px;font-family:'M PLUS Rounded 1c',sans-serif;font-size:.95rem;background:rgba(255,255,255,.04);color:var(--text);border:2px solid rgba(96,165,250,.25);border-radius:12px;outline:none;resize:vertical;line-height:1.6;}
-.memo-textarea:focus{border-color:var(--blue);}
-/* feedback */
-.feedback{min-height:50px;border-radius:14px;padding:11px 15px;text-align:center;font-weight:800;font-size:.95rem;margin-bottom:10px;}
-.feedback.ok{background:rgba(74,222,128,.12);color:var(--xp);border:1px solid rgba(74,222,128,.25);animation:popIn .3s ease;}
-.feedback.ng{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25);}
-/* next */
-.next-btn{font-family:inherit;font-size:1.05rem;font-weight:900;padding:15px 36px;border-radius:16px;border:none;cursor:pointer;display:block;margin:0 auto;background:linear-gradient(135deg,#4ade80,#22d3ee);color:#1a1a2e;box-shadow:0 4px 20px rgba(74,222,128,.35);animation:popIn .3s ease;transition:.2s;}
-.next-btn:hover{transform:translateY(-3px);}
-/* gameover */
-.gameover-card{background:var(--card);border-radius:var(--radius);padding:32px 22px;text-align:center;border:1px solid rgba(239,68,68,.3);box-shadow:0 0 40px rgba(239,68,68,.15);animation:popIn .4s ease;}
-.gameover-card h2{font-size:1.7rem;font-weight:900;margin-bottom:10px;color:var(--heart);}
-.gameover-card p{color:var(--text2);margin-bottom:20px;}
-.revive-btn{font-family:inherit;font-size:1rem;font-weight:900;padding:13px 28px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;border:none;border-radius:14px;cursor:pointer;box-shadow:var(--glow-primary);margin:6px;transition:.2s;}
-.revive-btn:hover{transform:translateY(-2px);}
-.revive-btn.ghost{background:rgba(255,255,255,.08);box-shadow:none;}
-/* badges */
-.badges-section{margin-top:18px;}
-.badges-title{font-size:.8rem;font-weight:900;color:var(--text2);margin-bottom:9px;letter-spacing:.08em;}
-.badges-grid{display:flex;gap:7px;flex-wrap:wrap;}
-.badge-item{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;position:relative;transition:.2s;}
-.badge-item.locked{filter:grayscale(1);opacity:.2;}
-.badge-item.unlocked{background:rgba(255,215,0,.1);border:2px solid rgba(255,215,0,.3);box-shadow:var(--glow-gold);}
-.badge-item.unlocked:hover{transform:scale(1.15);}
-.badge-tip{position:absolute;bottom:110%;left:50%;transform:translateX(-50%);background:#0f0f1a;color:var(--text);font-size:.65rem;font-weight:700;padding:3px 7px;border-radius:7px;white-space:nowrap;opacity:0;pointer-events:none;transition:.15s;z-index:10;}
-.badge-item:hover .badge-tip{opacity:1;}
-/* modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:999;animation:fadeIn .3s ease;}
-.modal-box{background:var(--card);border-radius:22px;padding:36px 28px;text-align:center;max-width:340px;width:90%;border:1px solid rgba(255,215,0,.2);box-shadow:var(--glow-gold);animation:popIn .4s cubic-bezier(.34,1.56,.64,1);}
-.modal-box h2{font-size:1.5rem;font-weight:900;margin-bottom:8px;}
-.modal-box p{color:var(--text2);white-space:pre-line;margin-bottom:8px;}
-.modal-xp{font-size:1.8rem;font-weight:900;color:var(--xp);margin:10px 0;}
-.modal-close{font-family:inherit;font-size:1rem;font-weight:900;padding:13px 36px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1a2e;border:none;border-radius:13px;cursor:pointer;margin-top:14px;box-shadow:var(--glow-gold);transition:.2s;}
-.modal-close:hover{transform:translateY(-2px);}
-/* effects */
-.combo-pop{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);font-size:3.2rem;font-weight:900;pointer-events:none;z-index:9999;animation:comboPop .9s ease forwards;text-shadow:0 0 20px rgba(255,215,0,.8);}
-.xp-pop{position:fixed;top:38%;left:50%;transform:translateX(-50%);pointer-events:none;z-index:9998;font-size:1.1rem;font-weight:900;color:var(--xp);text-shadow:0 0 10px rgba(74,222,128,.6);animation:xpFloat .9s ease forwards;}
-/* save indicator */
-.save-dot{position:fixed;bottom:16px;right:16px;width:8px;height:8px;border-radius:50%;background:var(--xp);opacity:0;transition:opacity .3s;z-index:999;}
-.save-dot.saving{opacity:1;animation:pulse 1s infinite;}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
-/* 難易度選択 */
-.diff-select{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
-.diff-btn{font-family:inherit;background:var(--card);border:2px solid rgba(255,255,255,.06);border-radius:14px;padding:10px 6px;cursor:pointer;text-align:center;transition:.2s;color:var(--text);}
-.diff-btn .diff-icon{font-size:1.3rem;display:block;margin-bottom:2px;}
-.diff-btn .diff-label{font-size:.72rem;font-weight:800;color:var(--text2);display:block;}
-.diff-btn .diff-multi{font-size:.68rem;font-weight:900;color:var(--xp);display:block;margin-top:2px;}
-.diff-btn.active.easy{border-color:#4ade80;background:rgba(74,222,128,.12);}
-.diff-btn.active.mid{border-color:#fb923c;background:rgba(251,146,60,.12);}
-.diff-btn.active.mid .diff-multi{color:#fb923c;}
-.diff-btn.active.hard{border-color:var(--primary);background:rgba(233,69,96,.12);}
-.diff-btn.active.hard .diff-multi{color:var(--primary);}
-.diff-btn:hover{transform:translateY(-2px);}
-/* ===== テストモード ===== */
-.test-mode-btn{width:100%;font-family:inherit;font-size:1rem;font-weight:900;padding:14px 20px;background:linear-gradient(135deg,#3b82f6,#60a5fa);color:white;border:none;border-radius:16px;cursor:pointer;box-shadow:0 4px 20px rgba(96,165,250,.35);transition:.2s;text-align:center;}
-.test-mode-btn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(96,165,250,.5);}
-.test-mode-btn:disabled{opacity:.5;pointer-events:none;}
-/* テスト中UI */
-.test-header{display:flex;align-items:center;justify-content:space-between;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.25);border-radius:16px;padding:12px 16px;margin-bottom:14px;}
-.test-timer{font-size:2rem;font-weight:900;color:#60a5fa;min-width:50px;text-align:center;transition:.3s;}
-.test-timer.danger{color:var(--primary);animation:timerPulse .5s ease infinite;}
-.test-progress{font-size:.9rem;font-weight:800;color:var(--text2);}
-.test-score-big{font-size:1rem;font-weight:900;color:var(--xp);}
-/* テスト結果 */
-.test-result-card{background:var(--card);border-radius:var(--radius);padding:32px 22px;text-align:center;border:1px solid rgba(96,165,250,.3);box-shadow:0 0 40px rgba(96,165,250,.15);animation:popIn .4s ease;}
-.test-result-card h2{font-size:1.6rem;font-weight:900;margin-bottom:8px;}
-.test-result-score{font-size:3.5rem;font-weight:900;color:#60a5fa;display:block;margin:10px 0;}
-.test-result-best{font-size:.85rem;color:var(--gold);margin-bottom:20px;}
-.test-retry-btn{font-family:inherit;font-size:1rem;font-weight:900;padding:13px 28px;background:linear-gradient(135deg,#3b82f6,#60a5fa);color:white;border:none;border-radius:14px;cursor:pointer;margin:5px;transition:.2s;}
-.test-retry-btn:hover{transform:translateY(-2px);}
-.test-retry-btn.ghost{background:rgba(255,255,255,.08);}
-@keyframes timerPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-/* テストLvバッジ */
-.test-lv-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:900;background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.3);margin-bottom:10px;} */
-/* 正解フラッシュ */
-.correct-flash{position:fixed;inset:0;background:rgba(74,222,128,.18);pointer-events:none;z-index:9990;animation:flashIn .35s ease forwards;}
-@keyframes flashIn{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
-/* 不正解フラッシュ */
-.wrong-flash{position:fixed;inset:0;background:rgba(239,68,68,.22);pointer-events:none;z-index:9990;animation:wrongFlash .4s ease forwards;}
-@keyframes wrongFlash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
-/* コイン */
-.coin{position:fixed;font-size:1.5rem;pointer-events:none;z-index:9995;animation:coinFall var(--dur,1.2s) ease forwards;}
-@keyframes coinFall{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}60%{opacity:1}100%{opacity:0;transform:translateY(var(--ty,220px)) rotate(var(--rot,360deg)) scale(.4)}}
-/* スター */
-.star-burst{position:fixed;font-size:1.8rem;pointer-events:none;z-index:9994;animation:starBurst .8s cubic-bezier(.34,1.56,.64,1) forwards;}
-@keyframes starBurst{0%{opacity:0;transform:translate(-50%,-50%) scale(0)}50%{opacity:1;transform:translate(var(--tx,0px),var(--ty,0px)) scale(1.4)}100%{opacity:0;transform:translate(var(--tx2,0px),var(--ty2,0px)) scale(.5)}}
-/* レベルアップ全画面 */
-.levelup-overlay{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(255,215,0,.3) 0%,rgba(26,26,46,.95) 70%);z-index:9980;display:flex;align-items:center;justify-content:center;animation:lvFadeIn .4s ease;}
-.levelup-content{text-align:center;animation:lvPop .6s cubic-bezier(.34,1.56,.64,1);}
-.levelup-content .lv-big{font-size:6rem;display:block;margin-bottom:8px;animation:lvSpin 1s ease;}
-.levelup-content h2{font-size:2.2rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold2),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
-.levelup-content p{color:var(--text2);font-size:1rem;margin-bottom:20px;}
-.levelup-close{font-family:inherit;font-size:1rem;font-weight:900;padding:13px 36px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1a2e;border:none;border-radius:14px;cursor:pointer;box-shadow:var(--glow-gold);}
-@keyframes lvFadeIn{from{opacity:0}to{opacity:1}}
-@keyframes lvPop{0%{opacity:0;transform:scale(.3) translateY(40px)}100%{opacity:1;transform:none}}
-@keyframes lvSpin{0%{transform:rotate(-20deg) scale(.5)}60%{transform:rotate(10deg) scale(1.2)}100%{transform:rotate(0deg) scale(1)}}
-/* ハート減少アニメ */
-.heart.hit{animation:heartHit .4s ease;}
-@keyframes heartHit{0%{transform:scale(1)}30%{transform:scale(1.6)}60%{transform:scale(.6)}100%{transform:scale(.7);opacity:.22}}
-/* animations */
-@keyframes cardIn{from{opacity:0;transform:scale(.92) translateY(12px)}to{opacity:1;transform:none}}
-@keyframes popIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
-@keyframes headShake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes comboPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}40%{opacity:1;transform:translate(-50%,-65%) scale(1.3)}70%{opacity:1;transform:translate(-50%,-70%) scale(1)}100%{opacity:0;transform:translate(-50%,-90%) scale(.7)}}
-@keyframes xpFloat{0%{opacity:0;transform:translateX(-50%) translateY(0)}20%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-70px)}}
+/* ============================================================
+   nosawa Kids Design System v1.0 — game.html
+   index.htmlと統一したデザイントークン
+============================================================ */
+:root {
+  --bg:       #f0f4ff;
+  --surface:  #ffffff;
+  --surface2: #e8eeff;
+  --surface3: #dde5ff;
+  --border:   rgba(0,0,0,0.08);
+  --border2:  rgba(0,0,0,0.15);
+
+  --primary:  #e94560;
+  --primary2: #ff8fa3;
+  --blue:     #4f8ef7;
+  --blue2:    #a5c4fd;
+  --gold:     #f5a623;
+  --gold2:    #ffd980;
+  --xp:       #2db87a;
+  --xp2:      #7de8b8;
+  --orange:   #fb923c;
+  --purple:   #9f7aea;
+  --heart:    #e94560;
+
+  --text:     #1a1a2e;
+  --text2:    #555577;
+  --text3:    #9999bb;
+
+  --radius:    20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+
+  /* 後方互換（アニメ等で使われている変数名をそのまま残す） */
+  --card:     var(--surface);
+  --glow-primary: 0 4px 20px rgba(233,69,96,.25);
+  --glow-gold:    0 4px 20px rgba(245,166,35,.25);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', 'M PLUS Rounded 1c', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--text);
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse at 15% 10%, rgba(79,142,247,0.10) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 90%, rgba(233,69,96,0.08) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+.app { max-width: 640px; margin: 0 auto; padding: 16px 16px 100px; position: relative; z-index: 1; }
+
+/* ============================================================
+   Topbar
+============================================================ */
+.topbar {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px; padding: 10px 14px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border2);
+}
+.user-name { font-size: .88rem; font-weight: 900; color: var(--gold); }
+.streak-pill {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--primary);
+  padding: 5px 12px; border-radius: 20px;
+  font-weight: 900; font-size: .85rem; color: white;
+}
+.streak-pill.shake { animation: headShake .4s ease; }
+.xp-pill {
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(45,184,122,0.12);
+  border: 1.5px solid rgba(45,184,122,0.3);
+  padding: 5px 12px; border-radius: 20px;
+  font-weight: 900; font-size: .85rem; color: var(--xp);
+}
+.hearts { display: flex; gap: 2px; font-size: 1.2rem; }
+.heart.lost { opacity: .22; transform: scale(.7); }
+.logout-btn {
+  margin-left: auto;
+  font-family: inherit; font-size: .72rem; font-weight: 800;
+  padding: 5px 10px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border2);
+  background: var(--surface2); color: var(--text2); cursor: pointer;
+  transition: background .15s;
+}
+.logout-btn:hover { background: var(--surface3); color: var(--text); }
+
+/* ============================================================
+   Level
+============================================================ */
+.level-section { margin-bottom: 14px; }
+.level-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.level-badge-big { display: flex; align-items: center; gap: 7px; font-weight: 900; font-size: .95rem; }
+.level-orb {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: .8rem; color: white;
+  box-shadow: var(--glow-gold);
+}
+.xp-next { font-size: .75rem; color: var(--text2); font-weight: 700; }
+.level-bar-wrap {
+  height: 9px; background: var(--surface3);
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border2);
+}
+.level-bar {
+  height: 100%; border-radius: 10px;
+  background: linear-gradient(90deg, var(--xp), var(--blue));
+  transition: width .6s cubic-bezier(.34,1.56,.64,1);
+}
+
+/* ============================================================
+   Daily
+============================================================ */
+.daily-goal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px 18px; margin-bottom: 14px;
+  border: 1.5px solid var(--border2);
+  display: flex; align-items: center; gap: 12px;
+}
+.goal-icon { font-size: 2rem; }
+.goal-text { flex: 1; }
+.goal-title { font-weight: 900; font-size: .9rem; margin-bottom: 3px; }
+.goal-sub { font-size: .75rem; color: var(--text2); font-weight: 700; }
+.goal-ring { width: 50px; height: 50px; flex-shrink: 0; position: relative; }
+.goal-ring svg { transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: var(--surface3); stroke-width: 5; }
+.ring-fg {
+  fill: none; stroke: var(--gold); stroke-width: 5; stroke-linecap: round;
+  transition: stroke-dashoffset .6s cubic-bezier(.34,1.56,.64,1);
+}
+.ring-text {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: .72rem; color: var(--gold);
+}
+
+/* ============================================================
+   Categories
+============================================================ */
+.categories {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 8px; margin-bottom: 14px;
+}
+.cat-btn {
+  background: var(--surface);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-md);
+  padding: 9px 5px; cursor: pointer;
+  text-align: center; font-family: inherit;
+  transition: .2s; color: var(--text);
+}
+.cat-btn .icon { font-size: 1.4rem; display: block; margin-bottom: 2px; }
+.cat-btn .label { font-size: .68rem; font-weight: 800; color: var(--text2); }
+.cat-btn.active {
+  border-color: var(--primary);
+  background: rgba(233,69,96,0.08);
+}
+.cat-btn:hover { transform: translateY(-2px); }
+
+/* ============================================================
+   難易度
+============================================================ */
+.diff-select { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+.diff-btn {
+  font-family: inherit;
+  background: var(--surface);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-md);
+  padding: 10px 6px; cursor: pointer;
+  text-align: center; transition: .2s; color: var(--text);
+}
+.diff-btn .diff-icon  { font-size: 1.3rem; display: block; margin-bottom: 2px; }
+.diff-btn .diff-label { font-size: .72rem; font-weight: 800; color: var(--text2); display: block; }
+.diff-btn .diff-multi { font-size: .68rem; font-weight: 900; color: var(--xp); display: block; margin-top: 2px; }
+.diff-btn.active.easy  { border-color: var(--xp);    background: rgba(45,184,122,0.08); }
+.diff-btn.active.mid   { border-color: var(--orange); background: rgba(251,146,60,0.08); }
+.diff-btn.active.mid .diff-multi { color: var(--orange); }
+.diff-btn.active.hard  { border-color: var(--primary); background: rgba(233,69,96,0.08); }
+.diff-btn.active.hard .diff-multi { color: var(--primary); }
+.diff-btn:hover { transform: translateY(-2px); }
+
+/* ============================================================
+   テストモードボタン
+============================================================ */
+.test-mode-btn {
+  width: 100%;
+  font-family: inherit; font-size: 1rem; font-weight: 900;
+  padding: 14px 20px;
+  background: var(--blue);
+  color: white; border: none; border-radius: var(--radius-md);
+  cursor: pointer; box-shadow: 0 4px 16px rgba(79,142,247,.3);
+  transition: .2s; text-align: center;
+}
+.test-mode-btn:hover { opacity: .88; transform: translateY(-2px); }
+.test-mode-btn:disabled { opacity: .4; pointer-events: none; }
+
+/* ============================================================
+   問題カード
+============================================================ */
+.question-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border2);
+  padding: 24px 20px 20px;
+  margin-bottom: 12px;
+  position: relative; overflow: hidden;
+  animation: cardIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+.question-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--purple), var(--blue));
+}
+.q-meta { display: flex; gap: 7px; margin-bottom: 14px; align-items: center; }
+.q-cat {
+  font-size: .68rem; font-weight: 800;
+  padding: 3px 9px; border-radius: 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+}
+.q-lv { font-size: .68rem; font-weight: 800; padding: 3px 9px; border-radius: 20px; }
+.lv1 { background: rgba(45,184,122,0.12); color: var(--xp); }
+.lv2 { background: rgba(251,146,60,0.12); color: var(--orange); }
+.lv3 { background: rgba(233,69,96,0.12); color: var(--primary); }
+.q-xp { margin-left: auto; font-size: .75rem; font-weight: 800; color: var(--xp); }
+.q-text { font-size: 1.75rem; font-weight: 900; text-align: center; margin-bottom: 16px; line-height: 1.5; white-space: pre-line; color: var(--text); }
+
+/* ヒント */
+.hint-btn {
+  font-family: inherit; font-size: .78rem; font-weight: 800;
+  padding: 6px 14px; border-radius: 20px;
+  border: 1.5px solid rgba(159,122,234,0.35);
+  background: rgba(159,122,234,0.08); color: var(--purple);
+  cursor: pointer; transition: .2s;
+}
+.hint-btn:hover { background: rgba(159,122,234,0.16); }
+.hint-box {
+  background: rgba(159,122,234,0.08);
+  border: 1px solid rgba(159,122,234,0.25);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px; font-size: .85rem; color: var(--purple);
+  text-align: center; font-weight: 700; margin-top: 8px;
+  animation: popIn .25s ease;
+}
+
+/* 回答エリア */
+.answer-area {
+  display: flex; gap: 10px; justify-content: center;
+  align-items: center; flex-wrap: wrap; margin-top: 6px;
+}
+.answer-input {
+  font-family: inherit; font-size: 1.7rem; font-weight: 900;
+  width: 140px; padding: 10px 14px; text-align: center;
+  background: var(--surface2); color: var(--text);
+  border: 1.5px solid var(--border2); border-radius: var(--radius-md);
+  outline: none; transition: .2s;
+}
+.answer-input:focus { border-color: var(--primary); background: rgba(233,69,96,0.05); }
+.answer-input.correct { border-color: var(--xp); background: rgba(45,184,122,0.06); }
+.answer-input.wrong   { border-color: var(--heart); animation: shake .3s ease; }
+
+.submit-btn {
+  font-family: inherit; font-size: .95rem; font-weight: 900;
+  padding: 12px 20px;
+  background: var(--primary); color: white;
+  border: none; border-radius: var(--radius-md);
+  cursor: pointer; box-shadow: var(--glow-primary); transition: .2s;
+}
+.submit-btn:hover { opacity: .88; transform: translateY(-1px); }
+
+/* 分数 */
+.frac-wrap { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; }
+.frac-wrap input {
+  font-family: inherit; font-size: 1.2rem; font-weight: 900;
+  width: 76px; padding: 7px; text-align: center;
+  background: var(--surface2); color: var(--text);
+  border: 1.5px solid var(--border2); border-radius: var(--radius-sm); outline: none;
+}
+.frac-wrap input:focus { border-color: var(--blue); }
+.frac-line { width: 76px; height: 2px; background: var(--text); border-radius: 1px; }
+
+/* 選択肢 */
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; width: 100%; margin-top: 6px; }
+.choice-btn {
+  font-family: inherit; font-size: .9rem; font-weight: 800;
+  padding: 13px 9px;
+  background: var(--surface2); color: var(--text);
+  border: 1.5px solid var(--border2); border-radius: var(--radius-md);
+  cursor: pointer; transition: .2s;
+}
+.choice-btn:hover { border-color: var(--blue); background: rgba(79,142,247,0.08); transform: translateY(-2px); }
+.choice-btn.ok { border-color: var(--xp); background: rgba(45,184,122,0.10); color: var(--xp); }
+.choice-btn.ng { border-color: var(--heart); background: rgba(233,69,96,0.10); color: var(--heart); }
+
+/* メモ */
+.memo-wrap { margin-top: 12px; }
+.memo-toggle {
+  font-family: inherit; font-size: .75rem; font-weight: 800;
+  padding: 5px 13px; border-radius: 20px;
+  border: 1.5px solid rgba(79,142,247,0.3);
+  background: rgba(79,142,247,0.06); color: var(--blue);
+  cursor: pointer; display: flex; align-items: center; gap: 4px;
+  margin: 0 auto; transition: .2s;
+}
+.memo-toggle:hover { background: rgba(79,142,247,0.12); }
+.memo-area { margin-top: 8px; animation: popIn .25s ease; }
+.memo-label { font-size: .68rem; color: var(--text2); font-weight: 700; margin-bottom: 5px; text-align: center; }
+.memo-textarea {
+  width: 100%; min-height: 80px; padding: 10px 12px;
+  font-family: 'M PLUS Rounded 1c', sans-serif; font-size: .95rem;
+  background: var(--surface2); color: var(--text);
+  border: 1.5px solid rgba(79,142,247,0.25); border-radius: var(--radius-md);
+  outline: none; resize: vertical; line-height: 1.6;
+}
+.memo-textarea:focus { border-color: var(--blue); }
+
+/* フィードバック */
+.feedback {
+  min-height: 50px; border-radius: var(--radius-md);
+  padding: 11px 15px; text-align: center;
+  font-weight: 800; font-size: .95rem; margin-bottom: 10px;
+}
+.feedback.ok { background: rgba(45,184,122,0.10); color: var(--xp); border: 1px solid rgba(45,184,122,0.25); animation: popIn .3s ease; }
+.feedback.ng { background: rgba(233,69,96,0.10); color: var(--primary); border: 1px solid rgba(233,69,96,0.25); }
+
+/* 次へボタン */
+.next-btn {
+  font-family: inherit; font-size: 1.05rem; font-weight: 900;
+  padding: 15px 36px; border-radius: var(--radius-md); border: none;
+  cursor: pointer; display: block; margin: 0 auto;
+  background: var(--xp); color: white;
+  box-shadow: 0 4px 16px rgba(45,184,122,0.3);
+  animation: popIn .3s ease; transition: .2s;
+}
+.next-btn:hover { opacity: .88; transform: translateY(-2px); }
+
+/* ============================================================
+   ゲームオーバー
+============================================================ */
+.gameover-card {
+  background: var(--surface);
+  border-radius: var(--radius); padding: 32px 22px;
+  text-align: center;
+  border: 1.5px solid rgba(233,69,96,0.3);
+  animation: popIn .4s ease;
+}
+.gameover-card h2 { font-size: 1.7rem; font-weight: 900; margin-bottom: 10px; color: var(--heart); }
+.gameover-card p  { color: var(--text2); font-weight: 700; margin-bottom: 20px; }
+.revive-btn {
+  font-family: inherit; font-size: 1rem; font-weight: 900;
+  padding: 13px 28px;
+  background: var(--primary); color: white;
+  border: none; border-radius: var(--radius-md);
+  cursor: pointer; margin: 6px; transition: .2s;
+}
+.revive-btn:hover { opacity: .88; transform: translateY(-2px); }
+.revive-btn.ghost {
+  background: var(--surface2);
+  border: 1.5px solid var(--border2);
+  color: var(--text2);
+}
+
+/* ============================================================
+   バッジ
+============================================================ */
+.badges-section { margin-top: 18px; }
+.badges-title { font-size: .8rem; font-weight: 900; color: var(--text2); margin-bottom: 9px; letter-spacing: .08em; }
+.badges-grid { display: flex; gap: 7px; flex-wrap: wrap; }
+.badge-item {
+  width: 48px; height: 48px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; position: relative; transition: .2s;
+}
+.badge-item.locked  { filter: grayscale(1); opacity: .2; }
+.badge-item.unlocked {
+  background: rgba(245,166,35,0.10);
+  border: 1.5px solid rgba(245,166,35,0.3);
+}
+.badge-item.unlocked:hover { transform: scale(1.15); }
+.badge-tip {
+  position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: white;
+  font-size: .65rem; font-weight: 700;
+  padding: 3px 7px; border-radius: 7px;
+  white-space: nowrap; opacity: 0; pointer-events: none;
+  transition: .15s; z-index: 10;
+}
+.badge-item:hover .badge-tip { opacity: 1; }
+
+/* ============================================================
+   モーダル
+============================================================ */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999; animation: fadeIn .3s ease;
+}
+.modal-box {
+  background: var(--surface);
+  border-radius: var(--radius); padding: 36px 28px;
+  text-align: center; max-width: 340px; width: 90%;
+  border: 1.5px solid rgba(245,166,35,0.3);
+  animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+.modal-box h2 { font-size: 1.5rem; font-weight: 900; margin-bottom: 8px; }
+.modal-box p  { color: var(--text2); white-space: pre-line; margin-bottom: 8px; font-weight: 700; }
+.modal-xp  { font-size: 1.8rem; font-weight: 900; color: var(--xp); margin: 10px 0; }
+.modal-close {
+  font-family: inherit; font-size: 1rem; font-weight: 900;
+  padding: 13px 36px;
+  background: var(--gold); color: white;
+  border: none; border-radius: var(--radius-md);
+  cursor: pointer; margin-top: 14px; transition: .2s;
+}
+.modal-close:hover { opacity: .88; transform: translateY(-2px); }
+
+/* ============================================================
+   テストモード
+============================================================ */
+.test-header {
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(79,142,247,0.08);
+  border: 1.5px solid rgba(79,142,247,0.25);
+  border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 14px;
+}
+.test-timer {
+  font-size: 2rem; font-weight: 900; color: var(--blue);
+  min-width: 50px; text-align: center; transition: .3s;
+}
+.test-timer.danger { color: var(--primary); animation: timerPulse .5s ease infinite; }
+.test-progress  { font-size: .9rem; font-weight: 800; color: var(--text2); }
+.test-score-big { font-size: 1rem; font-weight: 900; color: var(--xp); }
+.test-lv-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: .72rem; font-weight: 900;
+  background: rgba(79,142,247,0.12); color: var(--blue);
+  border: 1px solid rgba(79,142,247,0.3); margin-bottom: 10px;
+}
+.test-result-card {
+  background: var(--surface);
+  border-radius: var(--radius); padding: 32px 22px;
+  text-align: center;
+  border: 1.5px solid rgba(79,142,247,0.3);
+  animation: popIn .4s ease;
+}
+.test-result-card h2   { font-size: 1.6rem; font-weight: 900; margin-bottom: 8px; }
+.test-result-score     { font-size: 3.5rem; font-weight: 900; color: var(--blue); display: block; margin: 10px 0; }
+.test-result-best      { font-size: .85rem; color: var(--gold); font-weight: 700; margin-bottom: 20px; }
+.test-retry-btn {
+  font-family: inherit; font-size: 1rem; font-weight: 900;
+  padding: 13px 28px;
+  background: var(--blue); color: white;
+  border: none; border-radius: var(--radius-md);
+  cursor: pointer; margin: 5px; transition: .2s;
+}
+.test-retry-btn:hover { opacity: .88; transform: translateY(-2px); }
+.test-retry-btn.ghost { background: var(--surface2); border: 1.5px solid var(--border2); color: var(--text2); }
+
+/* ============================================================
+   エフェクト系（変更なし）
+============================================================ */
+.combo-pop { position: fixed; top: 40%; left: 50%; transform: translate(-50%,-50%); font-size: 3.2rem; font-weight: 900; pointer-events: none; z-index: 9999; animation: comboPop .9s ease forwards; }
+.xp-pop { position: fixed; top: 38%; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 9998; font-size: 1.1rem; font-weight: 900; color: var(--xp); animation: xpFloat .9s ease forwards; }
+.save-dot { position: fixed; bottom: 16px; right: 16px; width: 8px; height: 8px; border-radius: 50%; background: var(--xp); opacity: 0; transition: opacity .3s; z-index: 999; }
+.save-dot.saving { opacity: 1; animation: pulse 1s infinite; }
+.correct-flash { position: fixed; inset: 0; background: rgba(45,184,122,0.16); pointer-events: none; z-index: 9990; animation: flashIn .35s ease forwards; }
+.wrong-flash   { position: fixed; inset: 0; background: rgba(233,69,96,0.18); pointer-events: none; z-index: 9990; animation: wrongFlash .4s ease forwards; }
+.coin { position: fixed; font-size: 1.5rem; pointer-events: none; z-index: 9995; animation: coinFall var(--dur,1.2s) ease forwards; }
+.star-burst { position: fixed; font-size: 1.8rem; pointer-events: none; z-index: 9994; animation: starBurst .8s cubic-bezier(.34,1.56,.64,1) forwards; }
+.levelup-overlay { position: fixed; inset: 0; background: rgba(240,244,255,0.92); z-index: 9980; display: flex; align-items: center; justify-content: center; animation: lvFadeIn .4s ease; }
+.levelup-content { text-align: center; animation: lvPop .6s cubic-bezier(.34,1.56,.64,1); }
+.levelup-content .lv-big { font-size: 6rem; display: block; margin-bottom: 8px; animation: lvSpin 1s ease; }
+.levelup-content h2 { font-size: 2.2rem; font-weight: 900; color: var(--gold); margin-bottom: 6px; }
+.levelup-content p { color: var(--text2); font-size: 1rem; font-weight: 700; margin-bottom: 20px; }
+.levelup-close { font-family: inherit; font-size: 1rem; font-weight: 900; padding: 13px 36px; background: var(--gold); color: white; border: none; border-radius: var(--radius-md); cursor: pointer; }
+.heart.hit { animation: heartHit .4s ease; }
+
+/* ============================================================
+   アニメーション（変更なし）
+============================================================ */
+@keyframes pulse      { 0%,100%{transform:scale(1)}50%{transform:scale(1.4)} }
+@keyframes cardIn     { from{opacity:0;transform:scale(.92) translateY(12px)}to{opacity:1;transform:none} }
+@keyframes popIn      { from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)} }
+@keyframes shake      { 0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)} }
+@keyframes headShake  { 0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)} }
+@keyframes fadeIn     { from{opacity:0}to{opacity:1} }
+@keyframes comboPop   { 0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}40%{opacity:1;transform:translate(-50%,-65%) scale(1.3)}70%{opacity:1;transform:translate(-50%,-70%) scale(1)}100%{opacity:0;transform:translate(-50%,-90%) scale(.7)} }
+@keyframes xpFloat    { 0%{opacity:0;transform:translateX(-50%) translateY(0)}20%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-70px)} }
+@keyframes flashIn    { 0%{opacity:0}20%{opacity:1}100%{opacity:0} }
+@keyframes wrongFlash { 0%{opacity:0}15%{opacity:1}100%{opacity:0} }
+@keyframes coinFall   { 0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}60%{opacity:1}100%{opacity:0;transform:translateY(var(--ty,220px)) rotate(var(--rot,360deg)) scale(.4)} }
+@keyframes starBurst  { 0%{opacity:0;transform:translate(-50%,-50%) scale(0)}50%{opacity:1;transform:translate(var(--tx,0px),var(--ty,0px)) scale(1.4)}100%{opacity:0;transform:translate(var(--tx2,0px),var(--ty2,0px)) scale(.5)} }
+@keyframes lvFadeIn   { from{opacity:0}to{opacity:1} }
+@keyframes lvPop      { 0%{opacity:0;transform:scale(.3) translateY(40px)}100%{opacity:1;transform:none} }
+@keyframes lvSpin     { 0%{transform:rotate(-20deg) scale(.5)}60%{transform:rotate(10deg) scale(1.2)}100%{transform:rotate(0deg) scale(1)} }
+@keyframes heartHit   { 0%{transform:scale(1)}30%{transform:scale(1.6)}60%{transform:scale(.6)}100%{transform:scale(.7);opacity:.22} }
+@keyframes timerPulse { 0%,100%{transform:scale(1)}50%{transform:scale(1.1)} }
 </style>
 </head>
 <body>
 <div class="app" id="app" style="display:none">
-  <!-- topbar -->
   <div class="topbar">
     <span class="user-name" id="ui-username"></span>
     <div class="streak-pill" id="streak-pill">🔥 <span id="ui-streak">0</span>日</div>
@@ -206,7 +527,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="hearts" id="ui-hearts"></div>
     <button class="logout-btn" onclick="logout()">ログアウト</button>
   </div>
-  <!-- level -->
   <div class="level-section">
     <div class="level-info">
       <div class="level-badge-big">
@@ -217,7 +537,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
     <div class="level-bar-wrap"><div class="level-bar" id="ui-lv-bar" style="width:0%"></div></div>
   </div>
-  <!-- daily -->
   <div class="daily-goal">
     <div class="goal-icon">📅</div>
     <div class="goal-text">
@@ -232,14 +551,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <div class="ring-text" id="ui-ring-text">0/10</div>
     </div>
   </div>
-  <!-- categories -->
   <div class="categories">
     <button class="cat-btn active" onclick="setCategory(0)"><span class="icon">🔢</span><span class="label">四則</span></button>
     <button class="cat-btn" onclick="setCategory(1)"><span class="icon">🍕</span><span class="label">分数</span></button>
     <button class="cat-btn" onclick="setCategory(2)"><span class="icon">🔸</span><span class="label">小数</span></button>
     <button class="cat-btn" onclick="setCategory(3)"><span class="icon">📖</span><span class="label">文章</span></button>
   </div>
-  <!-- 難易度選択 -->
   <div class="diff-select" id="diff-select">
     <button class="diff-btn active" id="diff-easy" onclick="setDifficulty('easy')">
       <span class="diff-icon">🌱</span><span class="diff-label">かんたん</span><span class="diff-multi">×1</span>
@@ -251,16 +568,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <span class="diff-icon">💀</span><span class="diff-label">むずかしい</span><span class="diff-multi">×2</span>
     </button>
   </div>
-  <!-- テストモードボタン -->
   <div id="test-mode-wrap" style="display:none;margin-bottom:14px;">
     <button class="test-mode-btn" id="test-mode-btn" onclick="startTestMode()">
       ⚡ テストモードに挑戦！
       <span id="test-lv-label" style="font-size:.75rem;opacity:.8;display:block;margin-top:2px"></span>
     </button>
   </div>
-  <!-- main -->
   <div id="main-area"></div>
-  <!-- badges -->
   <div class="badges-section">
     <div class="badges-title">🏅 じっせき</div>
     <div class="badges-grid" id="badges-grid"></div>
@@ -268,6 +582,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 </div>
 <div class="save-dot" id="save-dot"></div>
 
+<!-- ロジック部分は元のgame.htmlのscriptタグをそのままここに貼り付けてください -->
+<!-- （Firebaseロジック・問題生成・ゲームロジックは変更なし） -->
 <script type="module">
 import { FIREBASE_CONFIG } from './firebase.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -276,21 +592,12 @@ import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/fireb
 const app = initializeApp(FIREBASE_CONFIG);
 const db  = getFirestore(app);
 
-// ===== 定数 =====
 const HEARTS_MAX = 5;
 const DAILY_GOAL = 10;
 function dailyGoal(lv){ return DAILY_GOAL; }
 const RANK_NAMES = [
-  'はじめての冒険者',   // Lv1-10
-  '計算の見習い',       // Lv11-20
-  '算数の戦士',         // Lv21-30
-  '数式の魔法使い',     // Lv31-40
-  '算術マスター',       // Lv41-50
-  '計算の賢者',         // Lv51-60
-  '数学の魔導士',       // Lv61-70
-  '算数キング',         // Lv71-80
-  '計算の神',           // Lv81-90
-  '伝説の計算王'        // Lv91-100
+  'はじめての冒険者','計算の見習い','算数の戦士','数式の魔法使い','算術マスター',
+  '計算の賢者','数学の魔導士','算数キング','計算の神','伝説の計算王'
 ];
 const MAX_LV = 100;
 function xpForLv(lv){ return lv >= MAX_LV ? Infinity : Math.floor(80 + lv * 12 + lv * lv * 0.8); }
@@ -303,9 +610,8 @@ const BADGES = [
   {id:'total50',icon:'💯',name:'累計50問'},{id:'total200',icon:'🚀',name:'累計200問'},
   {id:'fraction1',icon:'🍕',name:'分数5問正解'},{id:'word1',icon:'📖',name:'文章題5問正解'}
 ];
-// ===== テストモード定数 =====
 const TEST_UNLOCK_LV = 5;
-const TEST_TIME = 60; // 秒
+const TEST_TIME = 60;
 const TEST_Q_COUNT = 10;
 const TEST_LEVELS = [
   {lv:1,unlockLv:5, name:'テストLv1',cats:[0],    diff:'easy', desc:'足し算・引き算'},
@@ -314,774 +620,132 @@ const TEST_LEVELS = [
   {lv:4,unlockLv:16,name:'テストLv4',cats:[0,1,2,3],diff:'hard',desc:'全カテゴリ混合'},
   {lv:5,unlockLv:20,name:'テストLv5',cats:[0,1,2,3],diff:'hard',desc:'🔥鬼モード'},
 ];
-function getTestLv(userLv){
-  let tl=TEST_LEVELS[0];
-  for(const t of TEST_LEVELS){ if(userLv>=t.unlockLv) tl=t; }
-  return tl;
-}
+function getTestLv(userLv){ let tl=TEST_LEVELS[0]; for(const t of TEST_LEVELS){ if(userLv>=t.unlockLv) tl=t; } return tl; }
 const XP_TBL = {lv1:10,lv2:15,lv3:25};
-const DIFF_MULTI = {easy:1, mid:1.5, hard:2}; // 難易度XP倍率
+const DIFF_MULTI = {easy:1, mid:1.5, hard:2};
 const DIFF_LABELS = {easy:'かんたん', mid:'ふつう', hard:'むずかしい'};
 const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const gcd=(a,b)=>b===0?a:gcd(b,a%b);
 const shuffle=a=>[...a].sort(()=>Math.random()-.5);
 const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;};
 
-// ===== 状態 =====
 let username='', save={}, category=0, difficulty='easy', question=null, answered=false;
 let hintVisible=false, memoVisible=false;
 let saveTimer=null;
-// テストモード状態
 let testMode=false, testTimer=null, testTimeLeft=0;
 let testCorrect=0, testTotal=0, testCurrentQ=null, testAnswered=false;
 
-// ===== Firestore保存（デバウンス800ms）=====
 function persistSave() {
   document.getElementById('save-dot').classList.add('saving');
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
-    try {
-      await setDoc(doc(db,'users',username), save);
-    } catch(e){ console.error('save error',e); }
+    try { await setDoc(doc(db,'users',username), save); } catch(e){ console.error('save error',e); }
     document.getElementById('save-dot').classList.remove('saving');
   }, 800);
 }
 
-// ===== 起動 =====
 async function init() {
   username = sessionStorage.getItem('sq_user');
   if (!username) { location.href='index.html'; return; }
-
-  // ローカルキャッシュで即表示 → バックグラウンドでFirestore同期
   const cached = sessionStorage.getItem('sq_data');
   if (cached) save = JSON.parse(cached);
-
-  try {
-    const snap = await getDoc(doc(db,'users',username));
-    if (snap.exists()) save = snap.data();
-  } catch(e){ console.warn('load from cache only'); }
-
-  // ログイン処理
+  try { const snap = await getDoc(doc(db,'users',username)); if (snap.exists()) save = snap.data(); } catch(e){}
   const today = todayStr();
   const yesterday = (()=>{const d=new Date();d.setDate(d.getDate()-1);return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;})();
-  if (save.lastLogin !== today) {
-    save.loginDays = save.lastLogin===yesterday ? (save.loginDays||0)+1 : 1;
-    save.streak = save.loginDays;
-    save.lastLogin = today;
-  }
+  if (save.lastLogin !== today) { save.loginDays = save.lastLogin===yesterday ? (save.loginDays||0)+1 : 1; save.streak = save.loginDays; save.lastLogin = today; }
   if (save.dailyDate !== today) { save.dailyDone=0; save.dailyDate=today; save.hearts=HEARTS_MAX; }
-  // ハートリジェネ（30分で1個）
   const elapsed = Date.now()-(save.lastHeartRegen||Date.now());
   const regen = Math.floor(elapsed/(30*60*1000));
   if (regen>0) { save.hearts=Math.min(HEARTS_MAX,(save.hearts||0)+regen); save.lastHeartRegen=Date.now(); }
   persistSave();
-
   document.getElementById('app').style.display='block';
   renderUI(); renderBadges();
   if ((save.hearts||0)<=0) renderGameOver(); else nextQuestion();
 }
 
-// ===== UI更新 =====
 function renderUI() {
   document.getElementById('ui-username').textContent='👤 '+username;
   document.getElementById('ui-streak').textContent=save.streak||0;
   document.getElementById('ui-xp').textContent=save.xp||0;
-  // hearts
   const hEl=document.getElementById('ui-hearts'); hEl.innerHTML='';
   for(let i=0;i<HEARTS_MAX;i++){const s=document.createElement('span');s.className='heart'+(i>=(save.hearts||0)?' lost':'');s.textContent='❤️';hEl.appendChild(s);}
-  // level
   const lv=save.level||1, xp=save.xp||0, max=xpForLv(lv);
   document.getElementById('ui-lv-orb').textContent=lv;
   document.getElementById('ui-lv-name').textContent=lvName(lv);
   document.getElementById('ui-xp-next').textContent=max===Infinity?'MAX':`${xp} / ${max} XP`;
   document.getElementById('ui-lv-bar').style.width=max===Infinity?'100%':`${Math.min(100,xp/max*100)}%`;
-  // daily
-  const DAILY_GOAL=dailyGoal(save.level||1); const done=Math.min(save.dailyDone||0,DAILY_GOAL), pct=done/DAILY_GOAL;
+  const _dg=dailyGoal(save.level||1); const done=Math.min(save.dailyDone||0,_dg), pct=done/_dg;
   document.getElementById('ui-ring').style.strokeDashoffset=138.2*(1-pct);
-  document.getElementById('ui-ring-text').textContent=`${done}/${DAILY_GOAL}`;
-  document.getElementById('ui-goal-title').textContent=done>=DAILY_GOAL?'🎉 クリア済み':'今日のノルマ';
-  document.getElementById('ui-goal-sub').textContent=done>=DAILY_GOAL?'✅ 今日のノルマ達成！':`あと ${DAILY_GOAL-done} 問でノルマ達成！（目標${DAILY_GOAL}問）`;
-  // テストボタン表示
+  document.getElementById('ui-ring-text').textContent=`${done}/${_dg}`;
+  document.getElementById('ui-goal-title').textContent=done>=_dg?'🎉 クリア済み':'今日のノルマ';
+  document.getElementById('ui-goal-sub').textContent=done>=_dg?'✅ 今日のノルマ達成！':`あと ${_dg-done} 問でノルマ達成！（目標${_dg}問）`;
   const lv2=save.level||1;
   const wrap=document.getElementById('test-mode-wrap');
-  if(wrap){
-    if(lv2>=TEST_UNLOCK_LV){
-      wrap.style.display='block';
-      const tl=getTestLv(lv2);
-      const label=document.getElementById('test-lv-label');
-      if(label) label.textContent=`${tl.name}（${tl.desc}）${save.bestTestScore?'| ベスト: '+save.bestTestScore+'点':''}`;
-    } else {
-      wrap.style.display='none';
-    }
-  }
+  if(wrap){ if(lv2>=TEST_UNLOCK_LV){ wrap.style.display='block'; const tl=getTestLv(lv2); const label=document.getElementById('test-lv-label'); if(label) label.textContent=`${tl.name}（${tl.desc}）${save.bestTestScore?'| ベスト: '+save.bestTestScore+'点':''}`; } else { wrap.style.display='none'; } }
 }
 
-function renderBadges(){
-  const g=document.getElementById('badges-grid'); g.innerHTML='';
-  BADGES.forEach(b=>{
-    const el=document.createElement('div');
-    el.className='badge-item '+((save.unlockedBadges||[]).includes(b.id)?'unlocked':'locked');
-    el.innerHTML=`${b.icon}<div class="badge-tip">${b.name}</div>`;
-    g.appendChild(el);
-  });
-}
+function renderBadges(){ const g=document.getElementById('badges-grid'); g.innerHTML=''; BADGES.forEach(b=>{ const el=document.createElement('div'); el.className='badge-item '+((save.unlockedBadges||[]).includes(b.id)?'unlocked':'locked'); el.innerHTML=`${b.icon}<div class="badge-tip">${b.name}</div>`; g.appendChild(el); }); }
 
-// ===== 問題生成（難易度連動） =====
-// tier: 'easy' / 'mid' / 'hard'
-function genArithmetic(tier){
-  const op = tier==='easy' ? ['+','-'][R(0,1)]
-            : tier==='mid'  ? ['+','-','×','÷'][R(0,3)]
-            :                 ['+','-','×','÷'][R(0,3)];
-  let a,b,ans;
-  if(op==='+'){
-    if(tier==='easy'){a=R(1,20);b=R(1,20);}
-    else if(tier==='mid'){a=R(10,99);b=R(10,99);}
-    else {a=R(100,999);b=R(100,999);}
-    ans=a+b;
-  } else if(op==='-'){
-    if(tier==='easy'){a=R(5,20);b=R(1,a);} 
-    else if(tier==='mid'){a=R(20,99);b=R(10,a);}
-    else {a=R(100,999);b=R(10,a);}
-    ans=a-b;
-  } else if(op==='×'){
-    if(tier==='mid'){a=R(2,9);b=R(2,9);}
-    else {a=R(2,99);b=R(2,99);}
-    ans=a*b;
-  } else {
-    if(tier==='mid'){ans=R(2,20);b=R(2,9);}
-    else {ans=R(2,50);b=R(2,20);}
-    a=ans*b;
-  }
-  const lv = (op==='+'||op==='-') ? (a>99?'lv2':'lv1') : (a>20?'lv3':'lv2');
-  return {type:'number',lv,label:`四則(${op})`,text:`${a} ${op} ${b} ＝ ?`,answer:ans.toString(),hint:''};
-}
-function genFraction(tier){
-  // easyは分数なし→四則にフォールバック
-  if(tier==='easy') return genArithmetic('easy');
-  const t = tier==='mid' ? R(0,1) : R(0,2); // hardのみかけ算
-  if(t===0){const d1=R(2,6),d2=R(2,6),n1=R(1,d1-1),n2=R(1,d2-1),lcm=d1*d2/gcd(d1,d2),rn=n1*(lcm/d1)+n2*(lcm/d2),g=gcd(rn,lcm);return {type:'fraction',lv:'lv2',label:'分数たし算',text:`${n1}/${d1} ＋ ${n2}/${d2} ＝ ?`,hint:`公倍数は${lcm}`,answer:`${rn/g}/${lcm/g}`,na:rn/g,da:lcm/g};}
-  if(t===1){const d1=R(2,6),d2=R(2,6),lcm=d1*d2/gcd(d1,d2);let n1r=R(1,d1-1)*(lcm/d1),n2r=R(1,d2-1)*(lcm/d2);if(n1r<n2r)[n1r,n2r]=[n2r,n1r];const rn=n1r-n2r,g=gcd(rn||1,lcm);return {type:'fraction',lv:'lv2',label:'分数ひき算',text:`${n1r/(lcm/d1)}/${d1} ー ${n2r/(lcm/d2)||1}/${d2} ＝ ?`,hint:`公倍数は${lcm}`,answer:`${rn/g}/${lcm/g}`,na:rn/g,da:lcm/g};}
-  const n1=R(1,5),d1=R(2,7),n2=R(1,5),d2=R(2,7),rn=n1*n2,rd=d1*d2,g=gcd(rn,rd);
-  return {type:'fraction',lv:'lv3',label:'分数かけ算',text:`${n1}/${d1} × ${n2}/${d2} ＝ ?`,hint:'分子同士・分母同士をかけよう',answer:`${rn/g}/${rd/g}`,na:rn/g,da:rd/g};
-}
-function genDecimal(tier){
-  // easyは小数なし→四則にフォールバック
-  if(tier==='easy') return genArithmetic('easy');
-  const t = tier==='mid' ? R(0,1) : R(0,2);
-  if(t===0){const a=(R(10,99)/10).toFixed(1),b=(R(10,99)/10).toFixed(1),ans=((parseFloat(a)*10+parseFloat(b)*10)/10).toFixed(1);return {type:'number',lv:'lv2',label:'小数たし算',text:`${a} ＋ ${b} ＝ ?`,answer:ans,hint:''};}
-  if(t===1){let a=(R(10,99)/10).toFixed(1),b=(R(10,99)/10).toFixed(1);if(parseFloat(a)<parseFloat(b))[a,b]=[b,a];const ans=((parseFloat(a)*10-parseFloat(b)*10)/10).toFixed(1);return {type:'number',lv:'lv2',label:'小数ひき算',text:`${a} ー ${b} ＝ ?`,answer:ans,hint:''};}
-  const a=(R(2,9)/10).toFixed(1),b=R(2,9),ans=(parseFloat(a)*b).toFixed(1);
-  return {type:'number',lv:'lv3',label:'小数かけ算',text:`${a} × ${b} ＝ ?`,answer:ans,hint:''};
-}
-function genWord(tier){
-  // easyは文章題なし→四則にフォールバック
-  if(tier==='easy') return genArithmetic('easy');
-  // 小数を最大4桁で丸めるヘルパー
-  const round4=(n)=>Math.round(n*10000)/10000;
-  const midTs=[
-    ()=>{
-      const p=R(100,500),d=R(1,3)*10;
-      const s=Math.round(p*(100-d)/100);
-      return {type:'choice',lv:'lv2',label:'文章(割引)',
-        text:`${p}円の商品が${d}%引き。\nいくらになる？`,
-        hint:`${p}×(1-${d}/100)`,
-        answer:s.toString(),
-        choices:shuffle([s,p-d,Math.round(p*d/100),s+R(10,50)]).map(String)};
-    },
-    ()=>{
-      const tot=R(500,1500),r=R(2,4);
-      const a=Math.round(tot*r/(r+1));
-      return {type:'choice',lv:'lv2',label:'文章(割合)',
-        text:`${tot}円を ${r}:1 で分けます。\n多い方は何円？`,
-        hint:'全体÷(比の合計)×比',
-        answer:a.toString(),
-        choices:shuffle([a,a+R(20,100),tot-a,Math.round(tot/r)]).map(String)};
-    },
-  ];
-  const hardTs=[
-    ()=>{
-      // 速さ問題：割り切れる数値を選ぶ（時速×分÷60が整数になるよう調整）
-      const t=R(1,6)*10; // 10,20,30,40,50,60分
-      const s=R(3,12)*10; // 30〜120km（10の倍数）
-      const d=Math.round(s*t/60*10)/10; // 小数1桁まで
-      const wrong1=Math.round(s*t/60*10)/10+R(1,5);
-      const wrong2=Math.round(s*t*10)/10; // ÷60忘れバージョン（ひっかけ）
-      const wrong3=Math.max(1,d-R(1,5));
-      return {type:'choice',lv:'lv3',label:'文章(速さ)',
-        text:`時速${s}kmの電車が${t}分走りました。\n何km進みましたか？`,
-        hint:'速さ×時間÷60',
-        answer:d.toString(),
-        choices:shuffle([d,wrong1,wrong2,wrong3]).map(String)};
-    },
-    ()=>{
-      const r=R(3,8);
-      const area=round4(r*r*3.14);
-      const ans=area.toString();
-      return {type:'choice',lv:'lv3',label:'文章(面積)',
-        text:`半径${r}cmの円の面積は？\n（円周率3.14）`,
-        hint:'半径×半径×3.14',
-        answer:ans,
-        choices:shuffle([area,round4(r*2*3.14),r*r,round4((r+1)*(r+1)*3.14)]).map(String)};
-    },
-  ];
-  const pool = tier==='hard' ? [...midTs,...hardTs] : midTs;
-  return pool[R(0,pool.length-1)]();
-}
-function gen(){
-  // カテゴリに応じたtier決定（分数・小数・文章はeasyを選んでもmid以上で生成）
-  let tier = difficulty;
-  if((category===1||category===2||category===3) && tier==='easy') tier='mid';
-  switch(category){
-    case 0: return genArithmetic(tier);
-    case 1: return genFraction(tier);
-    case 2: return genDecimal(tier);
-    case 3: return genWord(tier);
-  }
-}
+function genArithmetic(tier){ const op=tier==='easy'?['+','-'][R(0,1)]:tier==='mid'?['+','-','×','÷'][R(0,3)]:['+','-','×','÷'][R(0,3)]; let a,b,ans; if(op==='+'){if(tier==='easy'){a=R(1,20);b=R(1,20);}else if(tier==='mid'){a=R(10,99);b=R(10,99);}else{a=R(100,999);b=R(100,999);}ans=a+b;}else if(op==='-'){if(tier==='easy'){a=R(5,20);b=R(1,a);}else if(tier==='mid'){a=R(20,99);b=R(10,a);}else{a=R(100,999);b=R(10,a);}ans=a-b;}else if(op==='×'){if(tier==='mid'){a=R(2,9);b=R(2,9);}else{a=R(2,99);b=R(2,99);}ans=a*b;}else{if(tier==='mid'){ans=R(2,20);b=R(2,9);}else{ans=R(2,50);b=R(2,20);}a=ans*b;} const lv=(op==='+'||op==='-')?(a>99?'lv2':'lv1'):(a>20?'lv3':'lv2'); return{type:'number',lv,label:`四則(${op})`,text:`${a} ${op} ${b} ＝ ?`,answer:ans.toString(),hint:''}; }
+function genFraction(tier){ if(tier==='easy') return genArithmetic('easy'); const t=tier==='mid'?R(0,1):R(0,2); if(t===0){const d1=R(2,6),d2=R(2,6),n1=R(1,d1-1),n2=R(1,d2-1),lcm=d1*d2/gcd(d1,d2),rn=n1*(lcm/d1)+n2*(lcm/d2),g=gcd(rn,lcm);return{type:'fraction',lv:'lv2',label:'分数たし算',text:`${n1}/${d1} ＋ ${n2}/${d2} ＝ ?`,hint:`公倍数は${lcm}`,answer:`${rn/g}/${lcm/g}`,na:rn/g,da:lcm/g};} if(t===1){const d1=R(2,6),d2=R(2,6),lcm=d1*d2/gcd(d1,d2);let n1r=R(1,d1-1)*(lcm/d1),n2r=R(1,d2-1)*(lcm/d2);if(n1r<n2r)[n1r,n2r]=[n2r,n1r];const rn=n1r-n2r,g=gcd(rn||1,lcm);return{type:'fraction',lv:'lv2',label:'分数ひき算',text:`${n1r/(lcm/d1)}/${d1} ー ${n2r/(lcm/d2)||1}/${d2} ＝ ?`,hint:`公倍数は${lcm}`,answer:`${rn/g}/${lcm/g}`,na:rn/g,da:lcm/g};} const n1=R(1,5),d1=R(2,7),n2=R(1,5),d2=R(2,7),rn=n1*n2,rd=d1*d2,g=gcd(rn,rd); return{type:'fraction',lv:'lv3',label:'分数かけ算',text:`${n1}/${d1} × ${n2}/${d2} ＝ ?`,hint:'分子同士・分母同士をかけよう',answer:`${rn/g}/${rd/g}`,na:rn/g,da:rd/g}; }
+function genDecimal(tier){ if(tier==='easy') return genArithmetic('easy'); const t=tier==='mid'?R(0,1):R(0,2); if(t===0){const a=(R(10,99)/10).toFixed(1),b=(R(10,99)/10).toFixed(1),ans=((parseFloat(a)*10+parseFloat(b)*10)/10).toFixed(1);return{type:'number',lv:'lv2',label:'小数たし算',text:`${a} ＋ ${b} ＝ ?`,answer:ans,hint:''};} if(t===1){let a=(R(10,99)/10).toFixed(1),b=(R(10,99)/10).toFixed(1);if(parseFloat(a)<parseFloat(b))[a,b]=[b,a];const ans=((parseFloat(a)*10-parseFloat(b)*10)/10).toFixed(1);return{type:'number',lv:'lv2',label:'小数ひき算',text:`${a} ー ${b} ＝ ?`,answer:ans,hint:''};} const a=(R(2,9)/10).toFixed(1),b=R(2,9),ans=(parseFloat(a)*b).toFixed(1); return{type:'number',lv:'lv3',label:'小数かけ算',text:`${a} × ${b} ＝ ?`,answer:ans,hint:''}; }
+function genWord(tier){ if(tier==='easy') return genArithmetic('easy'); const round4=(n)=>Math.round(n*10000)/10000; const midTs=[()=>{const p=R(100,500),d=R(1,3)*10,s=Math.round(p*(100-d)/100);return{type:'choice',lv:'lv2',label:'文章(割引)',text:`${p}円の商品が${d}%引き。\nいくらになる？`,hint:`${p}×(1-${d}/100)`,answer:s.toString(),choices:shuffle([s,p-d,Math.round(p*d/100),s+R(10,50)]).map(String)};},()=>{const tot=R(500,1500),r=R(2,4),a=Math.round(tot*r/(r+1));return{type:'choice',lv:'lv2',label:'文章(割合)',text:`${tot}円を ${r}:1 で分けます。\n多い方は何円？`,hint:'全体÷(比の合計)×比',answer:a.toString(),choices:shuffle([a,a+R(20,100),tot-a,Math.round(tot/r)]).map(String)};}]; const hardTs=[()=>{const t=R(1,6)*10,s=R(3,12)*10,d=Math.round(s*t/60*10)/10;return{type:'choice',lv:'lv3',label:'文章(速さ)',text:`時速${s}kmの電車が${t}分走りました。\n何km進みましたか？`,hint:'速さ×時間÷60',answer:d.toString(),choices:shuffle([d,d+R(1,5),Math.round(s*t*10)/10,Math.max(1,d-R(1,5))]).map(String)};},()=>{const r=R(3,8),area=round4(r*r*3.14),ans=area.toString();return{type:'choice',lv:'lv3',label:'文章(面積)',text:`半径${r}cmの円の面積は？\n（円周率3.14）`,hint:'半径×半径×3.14',answer:ans,choices:shuffle([area,round4(r*2*3.14),r*r,round4((r+1)*(r+1)*3.14)]).map(String)};}]; const pool=tier==='hard'?[...midTs,...hardTs]:midTs; return pool[R(0,pool.length-1)](); }
+function gen(){ let tier=difficulty; if((category===1||category===2||category===3)&&tier==='easy') tier='mid'; switch(category){case 0:return genArithmetic(tier);case 1:return genFraction(tier);case 2:return genDecimal(tier);case 3:return genWord(tier);} }
 
-// ===== カテゴリ・難易度切り替え =====
-window.setCategory = function(idx){
-  category=idx;
-  document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
-  nextQuestion();
-};
-window.setDifficulty = function(d){
-  difficulty=d;
-  ['easy','mid','hard'].forEach(k=>{
-    const el=document.getElementById('diff-'+k);
-    if(el){ el.classList.toggle('active',k===d); el.className='diff-btn'+(k===d?' active '+k:''); }
-  });
-  nextQuestion();
-};
+window.setCategory=function(idx){ category=idx; document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===idx)); nextQuestion(); };
+window.setDifficulty=function(d){ difficulty=d; ['easy','mid','hard'].forEach(k=>{const el=document.getElementById('diff-'+k);if(el){el.classList.toggle('active',k===d);el.className='diff-btn'+(k===d?' active '+k:'');}}); nextQuestion(); };
 
-// ===== 問題描画 =====
-function nextQuestion(){
-  if((save.hearts||0)<=0){renderGameOver();return;}
-  question=gen(); answered=false; hintVisible=false; memoVisible=false;
-  const lvLabel=question.lv==='lv1'?'かんたん':question.lv==='lv2'?'ふつう':'むずかしい';
-  const dispXp=Math.round((XP_TBL[question.lv]||10)*(DIFF_MULTI[difficulty]||1));
-  let ansHtml='';
-  if(question.type==='fraction'){
-    ansHtml=`<div class="frac-wrap"><input type="number" id="fn" placeholder="分子" min="0" max="9999"><div class="frac-line"></div><input type="number" id="fd" placeholder="分母" min="1" max="9999"></div><button class="submit-btn" onclick="doCheck()">こたえる</button>`;
-  } else if(question.type==='choice'){
-    ansHtml=`<div class="choices">${question.choices.map(c=>`<button class="choice-btn" onclick="doChoice('${c}',this)">${c}</button>`).join('')}</div>`;
-  } else {
-    ansHtml=`<input type="number" class="answer-input" id="main-inp" placeholder="?" autocomplete="off"><button class="submit-btn" onclick="doCheck()">こたえる</button>`;
-  }
-  document.getElementById('main-area').innerHTML=`
-    <div class="question-card">
-      <div class="q-meta">
-        <span class="q-cat">${question.label}</span>
-        <span class="q-lv ${question.lv}">${lvLabel}</span>
-        <span class="q-xp">+${dispXp}XP</span>
-      </div>
-      <div class="q-text">${question.text}</div>
-      ${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}
-      <div class="answer-area" id="ans-area">${ansHtml}</div>
-      <div class="memo-wrap">
-        <button class="memo-toggle" onclick="toggleMemo()">✏️ 計算メモを使う</button>
-        <div class="memo-area" id="memo-area" style="display:none">
-          <div class="memo-label">📝 ここにメモしてOK！答えが出たら上に入力しよう</div>
-          <textarea class="memo-textarea" placeholder="ここに計算を書こう&#10;例）123 × 45&#10;　120×45 = 5400&#10;　　3×45 = 135&#10;　合計 = 5535"></textarea>
-        </div>
-      </div>
-    </div>
-    <div class="feedback" id="fb"></div>
-    <div id="btn-area"></div>
-  `;
-  if(question.type==='number') setTimeout(()=>document.getElementById('main-inp')?.focus(),80);
-  if(question.type==='fraction'){
-    document.getElementById('fn').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('fd').focus();});
-    document.getElementById('fd').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();});
-    setTimeout(()=>document.getElementById('fn').focus(),80);
-  }
-  if(question.type==='number') document.getElementById('main-inp').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();});
-}
+function nextQuestion(){ if((save.hearts||0)<=0){renderGameOver();return;} question=gen(); answered=false; hintVisible=false; memoVisible=false; const lvLabel=question.lv==='lv1'?'かんたん':question.lv==='lv2'?'ふつう':'むずかしい'; const dispXp=Math.round((XP_TBL[question.lv]||10)*(DIFF_MULTI[difficulty]||1)); let ansHtml=''; if(question.type==='fraction'){ansHtml=`<div class="frac-wrap"><input type="number" id="fn" placeholder="分子" min="0" max="9999"><div class="frac-line"></div><input type="number" id="fd" placeholder="分母" min="1" max="9999"></div><button class="submit-btn" onclick="doCheck()">こたえる</button>`;}else if(question.type==='choice'){ansHtml=`<div class="choices">${question.choices.map(c=>`<button class="choice-btn" onclick="doChoice('${c}',this)">${c}</button>`).join('')}</div>`;}else{ansHtml=`<input type="number" class="answer-input" id="main-inp" placeholder="?" autocomplete="off"><button class="submit-btn" onclick="doCheck()">こたえる</button>`;} document.getElementById('main-area').innerHTML=`<div class="question-card"><div class="q-meta"><span class="q-cat">${question.label}</span><span class="q-lv ${question.lv}">${lvLabel}</span><span class="q-xp">+${dispXp}XP</span></div><div class="q-text">${question.text}</div>${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}<div class="answer-area" id="ans-area">${ansHtml}</div><div class="memo-wrap"><button class="memo-toggle" onclick="toggleMemo()">✏️ 計算メモを使う</button><div class="memo-area" id="memo-area" style="display:none"><div class="memo-label">📝 ここにメモしてOK！</div><textarea class="memo-textarea" placeholder="ここに計算を書こう"></textarea></div></div></div><div class="feedback" id="fb"></div><div id="btn-area"></div>`; if(question.type==='number') setTimeout(()=>document.getElementById('main-inp')?.focus(),80); if(question.type==='fraction'){document.getElementById('fn').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('fd').focus();});document.getElementById('fd').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();});setTimeout(()=>document.getElementById('fn').focus(),80);} if(question.type==='number') document.getElementById('main-inp').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();}); }
 
-// ===== 回答 =====
-window.doCheck=function(){
-  if(answered) return;
-  if(question.type==='fraction'){
-    const n=parseInt(document.getElementById('fn').value), d=parseInt(document.getElementById('fd').value);
-    if(isNaN(n)||isNaN(d)) return;
-    const g=gcd(Math.abs(n),d),rn=n/g,rd=d/g;
-    const cg=gcd(Math.abs(question.na),question.da),cn=question.na/cg,cd=question.da/cg;
-    rn===cn&&rd===cd?onCorrect():onWrong(`せいかいは ${question.na}/${question.da}`);
-  } else {
-    const inp=document.getElementById('main-inp');
-    if(!inp||inp.value==='') return;
-    // 小数4桁で丸めて比較（浮動小数点誤差対策）
-    const ua=(Math.round(parseFloat(inp.value)*10000)/10000).toString();
-    const qa=(Math.round(parseFloat(question.answer)*10000)/10000).toString();
-    if(ua===qa){inp.classList.add('correct');onCorrect();}
-    else{inp.classList.add('wrong');onWrong(`せいかいは ${question.answer}`);}
-  }
-};
-window.doChoice=function(val,btn){
-  if(answered) return;
-  document.querySelectorAll('.choice-btn').forEach(b=>b.style.pointerEvents='none');
-  if(val===question.answer){btn.classList.add('ok');onCorrect();}
-  else{btn.classList.add('ng');document.querySelectorAll('.choice-btn').forEach(b=>{if(b.textContent===question.answer)b.classList.add('ok');});onWrong(`せいかいは ${question.answer}`);}
-};
+window.doCheck=function(){ if(answered) return; if(question.type==='fraction'){const n=parseInt(document.getElementById('fn').value),d=parseInt(document.getElementById('fd').value);if(isNaN(n)||isNaN(d)) return;const g=gcd(Math.abs(n),d),rn=n/g,rd=d/g;const cg=gcd(Math.abs(question.na),question.da),cn=question.na/cg,cd=question.da/cg;rn===cn&&rd===cd?onCorrect():onWrong(`せいかいは ${question.na}/${question.da}`);}else{const inp=document.getElementById('main-inp');if(!inp||inp.value==='') return;const ua=(Math.round(parseFloat(inp.value)*10000)/10000).toString();const qa=(Math.round(parseFloat(question.answer)*10000)/10000).toString();if(ua===qa){inp.classList.add('correct');onCorrect();}else{inp.classList.add('wrong');onWrong(`せいかいは ${question.answer}`);}} };
+window.doChoice=function(val,btn){ if(answered) return; document.querySelectorAll('.choice-btn').forEach(b=>b.style.pointerEvents='none'); if(val===question.answer){btn.classList.add('ok');onCorrect();}else{btn.classList.add('ng');document.querySelectorAll('.choice-btn').forEach(b=>{if(b.textContent===question.answer)b.classList.add('ok');});onWrong(`せいかいは ${question.answer}`);} };
 
-function onCorrect(){
-  answered=true;
-  const baseXp = XP_TBL[question.lv];
-  const multi   = DIFF_MULTI[difficulty] || 1;
-  const xpAmt   = Math.round(baseXp * multi);
-  save.questionStreak=(save.questionStreak||0)+1;
-  const bonus=save.questionStreak%5===0?10:0;
-  const isCombo=save.questionStreak%3===0;
-  save.totalCorrect=(save.totalCorrect||0)+1;
-  save.catCorrect=save.catCorrect||[0,0,0,0];
-  save.catCorrect[category]=(save.catCorrect[category]||0)+1;
-  save.dailyDone=(save.dailyDone||0)+1;
-  // XP & level up
-  save.xp=(save.xp||0)+xpAmt+bonus;
-  let leveled=false;
-  while(save.level<MAX_LV && save.xp>=xpForLv(save.level)){
-    save.xp-=xpForLv(save.level); save.level++; leveled=true;
-  }
-  // ===== エフェクト・サウンド =====
-  flashScreen('correct-flash');
-  if(isCombo){
-    soundCombo();
-    spawnCoins(12);
-    spawnStars(6);
-  } else {
-    soundCorrect();
-    spawnCoins(5);
-    spawnStars(3);
-  }
-  if(leveled){
-    save.hearts=HEARTS_MAX;
-    setTimeout(()=>showLevelUpOverlay(save.level,lvName(save.level)),500);
-  }
-  // badges
-  checkBadges();
-  persistSave(); renderUI(); renderBadges();
-  // feedback
-  const msgs=['すごい！🎉','かんぺき！✨','よくできました！⭐','その調子！🔥','天才！🧠','完璧！💯'];
-  const diffTag = multi>1 ? ` ${DIFF_LABELS[difficulty]}ボーナス×${multi}！` : '';
-  setFeedback('ok', msgs[R(0,msgs.length-1)]+(bonus?` コンボ+${bonus}XP！`:'')+diffTag);
-  showXpPop(`+${xpAmt+bonus}XP`);
-  if(isCombo) showCombo(`🔥×${save.questionStreak}`);
-  const _dg=dailyGoal(save.level||1); if(save.dailyDone===_dg) setTimeout(()=>showModal('🎊 ノルマ達成！',`今日の${_dg}問クリア！\nまた明日もがんばろう！`,50),600);
-  showNextBtn();
-}
-function onWrong(msg){
-  answered=true;
-  save.questionStreak=0;
-  save.hearts=Math.max(0,(save.hearts||HEARTS_MAX)-1);
-  save.lastHeartRegen=Date.now();
-  persistSave(); renderUI();
-  // ===== エフェクト・サウンド =====
-  flashScreen('wrong-flash');
-  soundWrong();
-  soundHeartLost();
-  setFeedback('ng',`❌ ざんねん… ${msg}`);
-  document.getElementById('streak-pill').classList.add('shake');
-  setTimeout(()=>document.getElementById('streak-pill').classList.remove('shake'),500);
-  if(save.hearts<=0) setTimeout(renderGameOver,800); else showNextBtn();
-}
+function onCorrect(){ answered=true; const baseXp=XP_TBL[question.lv]; const multi=DIFF_MULTI[difficulty]||1; const xpAmt=Math.round(baseXp*multi); save.questionStreak=(save.questionStreak||0)+1; const bonus=save.questionStreak%5===0?10:0; const isCombo=save.questionStreak%3===0; save.totalCorrect=(save.totalCorrect||0)+1; save.catCorrect=save.catCorrect||[0,0,0,0]; save.catCorrect[category]=(save.catCorrect[category]||0)+1; save.dailyDone=(save.dailyDone||0)+1; save.xp=(save.xp||0)+xpAmt+bonus; let leveled=false; while(save.level<MAX_LV&&save.xp>=xpForLv(save.level)){save.xp-=xpForLv(save.level);save.level++;leveled=true;} flashScreen('correct-flash'); if(isCombo){soundCombo();spawnCoins(12);spawnStars(6);}else{soundCorrect();spawnCoins(5);spawnStars(3);} if(leveled){save.hearts=HEARTS_MAX;setTimeout(()=>showLevelUpOverlay(save.level,lvName(save.level)),500);} checkBadges(); persistSave(); renderUI(); renderBadges(); const msgs=['すごい！🎉','かんぺき！✨','よくできました！⭐','その調子！🔥','天才！🧠','完璧！💯']; const diffTag=multi>1?` ${DIFF_LABELS[difficulty]}ボーナス×${multi}！`:''; setFeedback('ok',msgs[R(0,msgs.length-1)]+(bonus?` コンボ+${bonus}XP！`:'')+diffTag); showXpPop(`+${xpAmt+bonus}XP`); if(isCombo) showCombo(`🔥×${save.questionStreak}`); const _dg=dailyGoal(save.level||1); if(save.dailyDone===_dg) setTimeout(()=>showModal('🎊 ノルマ達成！',`今日の${_dg}問クリア！\nまた明日もがんばろう！`,50),600); showNextBtn(); }
+function onWrong(msg){ answered=true; save.questionStreak=0; save.hearts=Math.max(0,(save.hearts||HEARTS_MAX)-1); save.lastHeartRegen=Date.now(); persistSave(); renderUI(); flashScreen('wrong-flash'); soundWrong(); soundHeartLost(); setFeedback('ng',`❌ ざんねん… ${msg}`); document.getElementById('streak-pill').classList.add('shake'); setTimeout(()=>document.getElementById('streak-pill').classList.remove('shake'),500); if(save.hearts<=0) setTimeout(renderGameOver,800); else showNextBtn(); }
 
-function checkBadges(){
-  const ub=save.unlockedBadges||[];
-  const add=(id,cond)=>{if(cond&&!ub.includes(id)){ub.push(id);showCombo('🏅');}};
-  add('first',save.totalCorrect>=1);add('streak3',save.questionStreak>=3);add('streak7',save.questionStreak>=7);
-  add('daily1',save.dailyDone>=dailyGoal(save.level||1));add('day3',(save.loginDays||0)>=3);add('day7',(save.loginDays||0)>=7);
-  add('lv3',(save.level||1)>=3);add('lv5',(save.level||1)>=5);
-  add('total50',save.totalCorrect>=50);add('total200',save.totalCorrect>=200);
-  add('fraction1',(save.catCorrect||[])[1]>=5);add('word1',(save.catCorrect||[])[3]>=5);
-  save.unlockedBadges=ub;
-}
+function checkBadges(){ const ub=save.unlockedBadges||[]; const add=(id,cond)=>{if(cond&&!ub.includes(id)){ub.push(id);showCombo('🏅');}}; add('first',save.totalCorrect>=1);add('streak3',save.questionStreak>=3);add('streak7',save.questionStreak>=7);add('daily1',save.dailyDone>=dailyGoal(save.level||1));add('day3',(save.loginDays||0)>=3);add('day7',(save.loginDays||0)>=7);add('lv3',(save.level||1)>=3);add('lv5',(save.level||1)>=5);add('total50',save.totalCorrect>=50);add('total200',save.totalCorrect>=200);add('fraction1',(save.catCorrect||[])[1]>=5);add('word1',(save.catCorrect||[])[3]>=5); save.unlockedBadges=ub; }
 
-function setFeedback(type,text){const el=document.getElementById('fb');if(!el)return;el.className=`feedback ${type}`;el.textContent=text;}
-function showNextBtn(){const a=document.getElementById('btn-area');if(!a)return;const b=document.createElement('button');b.className='next-btn';b.textContent='つぎの もんだい →';b.onclick=nextQuestion;a.appendChild(b);}
+function setFeedback(type,text){ const el=document.getElementById('fb');if(!el)return;el.className=`feedback ${type}`;el.textContent=text; }
+function showNextBtn(){ const a=document.getElementById('btn-area');if(!a)return;const b=document.createElement('button');b.className='next-btn';b.textContent='つぎの もんだい →';b.onclick=nextQuestion;a.appendChild(b); }
 
-// ===== ゲームオーバー =====
-function renderGameOver(){
-  document.getElementById('main-area').innerHTML=`
-    <div class="gameover-card">
-      <h2>💔 ハートがなくなった！</h2>
-      <p>30分ごとにハートが回復するよ。<br>また後でチャレンジしよう！</p>
-      <p style="margin-bottom:20px;font-size:.85rem;color:var(--text2)">今日の正解: <strong style="color:var(--xp)">${save.dailyDone||0}</strong> 問 / 累計: <strong style="color:var(--gold)">${save.totalCorrect||0}</strong> 問</p>
-      <button class="revive-btn" onclick="checkRevive()">❤️ ハートを確認する</button>
-      <button class="revive-btn ghost" onclick="logout()">ログアウト</button>
-    </div>`;
-}
-window.checkRevive=function(){
-  const elapsed=Date.now()-(save.lastHeartRegen||Date.now());
-  const regen=Math.floor(elapsed/(30*60*1000));
-  if(regen>0||save.hearts>0){
-    save.hearts=Math.min(HEARTS_MAX,(save.hearts||0)+regen);
-    save.lastHeartRegen=Date.now();
-    persistSave(); renderUI(); nextQuestion();
-  } else {
-    const mins=Math.ceil((30*60*1000-(Date.now()-(save.lastHeartRegen||Date.now())))/60000);
-    alert(`あと約${mins}分でハートが回復します！`);
-  }
-};
+function renderGameOver(){ document.getElementById('main-area').innerHTML=`<div class="gameover-card"><h2>💔 ハートがなくなった！</h2><p>30分ごとにハートが回復するよ。<br>また後でチャレンジしよう！</p><p style="margin-bottom:20px;font-size:.85rem;color:var(--text2)">今日の正解: <strong style="color:var(--xp)">${save.dailyDone||0}</strong> 問 / 累計: <strong style="color:var(--gold)">${save.totalCorrect||0}</strong> 問</p><button class="revive-btn" onclick="checkRevive()">❤️ ハートを確認する</button><button class="revive-btn ghost" onclick="logout()">ログアウト</button></div>`; }
+window.checkRevive=function(){ const elapsed=Date.now()-(save.lastHeartRegen||Date.now()); const regen=Math.floor(elapsed/(30*60*1000)); if(regen>0||save.hearts>0){save.hearts=Math.min(HEARTS_MAX,(save.hearts||0)+regen);save.lastHeartRegen=Date.now();persistSave();renderUI();nextQuestion();}else{const mins=Math.ceil((30*60*1000-(Date.now()-(save.lastHeartRegen||Date.now())))/60000);alert(`あと約${mins}分でハートが回復します！`);} };
 
-// ===== ヒント / メモ =====
-window.toggleHint=function(){
-  hintVisible=!hintVisible;
-  const box=document.getElementById('hint-box'),btn=document.getElementById('hint-btn');
-  if(box) box.style.display=hintVisible?'block':'none';
-  if(btn) btn.textContent=hintVisible?'💡 ヒントを隠す':'💡 ヒントを見る';
-};
-window.toggleMemo=function(){
-  memoVisible=!memoVisible;
-  const area=document.getElementById('memo-area');
-  if(area){area.style.display=memoVisible?'block':'none';if(memoVisible)setTimeout(()=>area.querySelector('textarea')?.focus(),80);}
-};
+window.toggleHint=function(){ hintVisible=!hintVisible; const box=document.getElementById('hint-box'),btn=document.getElementById('hint-btn'); if(box) box.style.display=hintVisible?'block':'none'; if(btn) btn.textContent=hintVisible?'💡 ヒントを隠す':'💡 ヒントを見る'; };
+window.toggleMemo=function(){ memoVisible=!memoVisible; const area=document.getElementById('memo-area'); if(area){area.style.display=memoVisible?'block':'none';if(memoVisible)setTimeout(()=>area.querySelector('textarea')?.focus(),80);} };
 
-// ===== モーダル / エフェクト =====
-function showModal(title,body,xp){
-  const ov=document.createElement('div');ov.className='modal-overlay';
-  ov.innerHTML=`<div class="modal-box"><span style="font-size:3.5rem;display:block;margin-bottom:10px">🏆</span><h2>${title}</h2><p>${body}</p>${xp?`<div class="modal-xp">+${xp} XP</div>`:''}<button class="modal-close" onclick="this.closest('.modal-overlay').remove()">やった！</button></div>`;
-  document.body.appendChild(ov);
-  if(xp){save.xp=(save.xp||0)+xp;persistSave();renderUI();}
-}
-function showCombo(text){const el=document.createElement('div');el.className='combo-pop';el.textContent=text;document.body.appendChild(el);setTimeout(()=>el.remove(),950);}
-function showXpPop(text){const el=document.createElement('div');el.className='xp-pop';el.textContent=text;document.body.appendChild(el);setTimeout(()=>el.remove(),950);}
+function showModal(title,body,xp){ const ov=document.createElement('div');ov.className='modal-overlay';ov.innerHTML=`<div class="modal-box"><span style="font-size:3.5rem;display:block;margin-bottom:10px">🏆</span><h2>${title}</h2><p>${body}</p>${xp?`<div class="modal-xp">+${xp} XP</div>`:''}<button class="modal-close" onclick="this.closest('.modal-overlay').remove()">やった！</button></div>`;document.body.appendChild(ov);if(xp){save.xp=(save.xp||0)+xp;persistSave();renderUI();} }
+function showCombo(text){ const el=document.createElement('div');el.className='combo-pop';el.textContent=text;document.body.appendChild(el);setTimeout(()=>el.remove(),950); }
+function showXpPop(text){ const el=document.createElement('div');el.className='xp-pop';el.textContent=text;document.body.appendChild(el);setTimeout(()=>el.remove(),950); }
 
-// ===== 🎵 ASMRサウンドシステム（Web Audio API） =====
 let _actx=null;
-function getACtx(){
-  if(!_actx) _actx=new(window.AudioContext||window.webkitAudioContext)();
-  return _actx;
-}
+function getACtx(){ if(!_actx) _actx=new(window.AudioContext||window.webkitAudioContext)(); return _actx; }
+function playNote(freq,duration,vol,delay=0){ try{const ctx=getACtx();const now=ctx.currentTime+delay;const osc=ctx.createOscillator();const g=ctx.createGain();osc.type='sine';osc.frequency.value=freq;g.gain.setValueAtTime(0,now);g.gain.linearRampToValueAtTime(vol,now+0.01);g.gain.exponentialRampToValueAtTime(0.001,now+duration);osc.connect(g);g.connect(ctx.destination);osc.start(now);osc.stop(now+duration+0.05);}catch(e){} }
+function soundCorrect(){ try{const ctx=getACtx();const now=ctx.currentTime;const bufLen=Math.floor(ctx.sampleRate*0.06);const noiseBuf=ctx.createBuffer(1,bufLen,ctx.sampleRate);const nd=noiseBuf.getChannelData(0);for(let i=0;i<bufLen;i++) nd[i]=(Math.random()*2-1)*(1-i/bufLen);const src=ctx.createBufferSource();src.buffer=noiseBuf;const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1400;bp.Q.value=1.2;const ng=ctx.createGain();ng.gain.value=0.12;src.connect(bp);bp.connect(ng);ng.connect(ctx.destination);src.start(now);src.stop(now+0.07);playNote(660,0.5,0.07,0.03);playNote(880,0.7,0.04,0.12);}catch(e){} }
+function soundCombo(){ [0,0.1].forEach(d=>{try{const ctx=getACtx();const now=ctx.currentTime+d;const bufLen=Math.floor(ctx.sampleRate*0.05);const buf=ctx.createBuffer(1,bufLen,ctx.sampleRate);const data=buf.getChannelData(0);for(let i=0;i<bufLen;i++) data[i]=(Math.random()*2-1)*(1-i/bufLen);const src=ctx.createBufferSource();src.buffer=buf;const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1200;bp.Q.value=1.0;const g=ctx.createGain();g.gain.value=0.1;src.connect(bp);bp.connect(g);g.connect(ctx.destination);src.start(now);src.stop(now+0.06);}catch(e){}});playNote(523,0.8,0.06,0.25);playNote(659,0.8,0.05,0.38);playNote(784,1.0,0.05,0.51); }
+function soundWrong(){ try{const ctx=getACtx();const now=ctx.currentTime;const osc=ctx.createOscillator();osc.type='sine';osc.frequency.setValueAtTime(200,now);osc.frequency.exponentialRampToValueAtTime(130,now+0.28);const g=ctx.createGain();g.gain.setValueAtTime(0.09,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.32);const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=500;osc.connect(lp);lp.connect(g);g.connect(ctx.destination);osc.start(now);osc.stop(now+0.35);}catch(e){} }
+function soundHeartLost(){ playNote(160,0.2,0.06,0.05); }
+function soundLevelUp(){ [523,659,784,1047,1319].forEach((freq,i)=>{playNote(freq,1.2,0.07,i*0.12);}); }
 
-function makeReverb(ctx, duration=0.4, decay=0.3){
-  // 軽量版：短めのバッファ
-  const len=Math.floor(ctx.sampleRate*duration);
-  const buf=ctx.createBuffer(1,len,ctx.sampleRate);
-  const d=buf.getChannelData(0);
-  for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);
-  const conv=ctx.createConvolver();
-  conv.buffer=buf;
-  return conv;
-}
+function flashScreen(className){ const el=document.createElement('div');el.className=className;document.body.appendChild(el);setTimeout(()=>el.remove(),400); }
+function spawnCoins(count=8){ const emojis=['⭐','🌟','💫','✨','🪙'];for(let i=0;i<count;i++){setTimeout(()=>{const el=document.createElement('div');el.className='coin';el.textContent=emojis[Math.floor(Math.random()*emojis.length)];const x=20+Math.random()*60;const ty=(120+Math.random()*120)+'px';const rot=(-360+Math.random()*720)+'deg';const dur=(0.9+Math.random()*0.6)+'s';el.style.cssText=`left:${x}vw;top:15vh;--ty:${ty};--rot:${rot};--dur:${dur}`;document.body.appendChild(el);setTimeout(()=>el.remove(),1500);},i*60);} }
+function spawnStars(count=5){ const cx=window.innerWidth/2,cy=window.innerHeight*0.4;for(let i=0;i<count;i++){const el=document.createElement('div');el.className='star-burst';el.textContent=['⭐','💥','✨','🌟','💛'][i%5];const angle=(i/count)*2*Math.PI;const r1=60+Math.random()*40,r2=120+Math.random()*80;el.style.cssText=`left:${cx}px;top:${cy}px;--tx:${Math.cos(angle)*r1}px;--ty:${Math.sin(angle)*r1}px;--tx2:${Math.cos(angle)*r2}px;--ty2:${Math.sin(angle)*r2}px;animation-delay:${i*0.05}s`;document.body.appendChild(el);setTimeout(()=>el.remove(),900);} }
+function showLevelUpOverlay(level,name){ soundLevelUp(); const ov=document.createElement('div');ov.className='levelup-overlay';ov.innerHTML=`<div class="levelup-content"><span class="lv-big">🏆</span><h2>レベルアップ！</h2><p>レベル <strong style="color:var(--gold);font-size:1.4em">${level}</strong> になった！<br>「${name}」</p><p style="font-size:.85rem;margin-bottom:16px;color:var(--xp)">❤️ ハートが全回復！</p><button class="levelup-close" onclick="this.closest('.levelup-overlay').remove()">やったー！🎉</button></div>`;document.body.appendChild(ov);spawnCoins(16);spawnStars(8); }
 
-// シンプルなトーン再生（確実に鳴る基本関数）
-function playNote(freq,duration,vol,delay=0){
-  try{
-    const ctx=getACtx();
-    const now=ctx.currentTime+delay;
-    const osc=ctx.createOscillator();
-    const g=ctx.createGain();
-    osc.type='sine'; osc.frequency.value=freq;
-    g.gain.setValueAtTime(0,now);
-    g.gain.linearRampToValueAtTime(vol,now+0.01);
-    g.gain.exponentialRampToValueAtTime(0.001,now+duration);
-    osc.connect(g); g.connect(ctx.destination);
-    osc.start(now); osc.stop(now+duration+0.05);
-  }catch(e){}
-}
+window.logout=function(){ sessionStorage.removeItem('sq_user');sessionStorage.removeItem('sq_data');location.href='index.html'; };
 
-// ===== 正解：柔らかい2音＋余韻 =====
-function soundCorrect(){
-  try{
-    const ctx=getACtx();
-    const now=ctx.currentTime;
-    // ノイズ（ぺりっ感）
-    const bufLen=Math.floor(ctx.sampleRate*0.06);
-    const noiseBuf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
-    const nd=noiseBuf.getChannelData(0);
-    for(let i=0;i<bufLen;i++) nd[i]=(Math.random()*2-1)*(1-i/bufLen);
-    const src=ctx.createBufferSource(); src.buffer=noiseBuf;
-    const bp=ctx.createBiquadFilter(); bp.type='bandpass';
-    bp.frequency.value=1400; bp.Q.value=1.2;
-    const ng=ctx.createGain(); ng.gain.value=0.12;
-    src.connect(bp); bp.connect(ng); ng.connect(ctx.destination);
-    src.start(now); src.stop(now+0.07);
-    // やわらかいトーン2音
-    playNote(660, 0.5, 0.07, 0.03);
-    playNote(880, 0.7, 0.04, 0.12);
-  }catch(e){ console.error('soundCorrect',e); }
-}
+window.startTestMode=function(){ if((save.level||1)<TEST_UNLOCK_LV) return; testMode=true;testCorrect=0;testTotal=0;testAnswered=false;testTimeLeft=TEST_TIME; document.querySelector('.categories').style.display='none';document.getElementById('diff-select').style.display='none';document.getElementById('test-mode-wrap').style.display='none'; renderTestUI();testNextQuestion();startTestTimer(); };
 
-// ===== コンボ：ぺりぺり×2＋低チャイム =====
-function soundCombo(){
-  [0, 0.1].forEach(d=>{
-    try{
-      const ctx=getACtx();
-      const now=ctx.currentTime+d;
-      const bufLen=Math.floor(ctx.sampleRate*0.05);
-      const buf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
-      const data=buf.getChannelData(0);
-      for(let i=0;i<bufLen;i++) data[i]=(Math.random()*2-1)*(1-i/bufLen);
-      const src=ctx.createBufferSource(); src.buffer=buf;
-      const bp=ctx.createBiquadFilter(); bp.type='bandpass';
-      bp.frequency.value=1200; bp.Q.value=1.0;
-      const g=ctx.createGain(); g.gain.value=0.1;
-      src.connect(bp); bp.connect(g); g.connect(ctx.destination);
-      src.start(now); src.stop(now+0.06);
-    }catch(e){}
-  });
-  playNote(523, 0.8, 0.06, 0.25);
-  playNote(659, 0.8, 0.05, 0.38);
-  playNote(784, 1.0, 0.05, 0.51);
-}
-
-// ===== 不正解：低くこもった音 =====
-function soundWrong(){
-  try{
-    const ctx=getACtx();
-    const now=ctx.currentTime;
-    const osc=ctx.createOscillator(); osc.type='sine';
-    osc.frequency.setValueAtTime(200,now);
-    osc.frequency.exponentialRampToValueAtTime(130,now+0.28);
-    const g=ctx.createGain();
-    g.gain.setValueAtTime(0.09,now);
-    g.gain.exponentialRampToValueAtTime(0.001,now+0.32);
-    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=500;
-    osc.connect(lp); lp.connect(g); g.connect(ctx.destination);
-    osc.start(now); osc.stop(now+0.35);
-  }catch(e){}
-}
-
-// ===== ハート消失 =====
-function soundHeartLost(){
-  playNote(160, 0.2, 0.06, 0.05);
-}
-
-// ===== レベルアップ：上昇チャイム =====
-function soundLevelUp(){
-  [523,659,784,1047,1319].forEach((freq,i)=>{
-    playNote(freq, 1.2, 0.07, i*0.12);
-  });
-}
-// ===== ✨ ビジュアルエフェクト =====
-function flashScreen(className){
-  const el=document.createElement('div');
-  el.className=className;
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(),400);
-}
-function spawnCoins(count=8){
-  const emojis=['⭐','🌟','💫','✨','🪙'];
-  for(let i=0;i<count;i++){
-    setTimeout(()=>{
-      const el=document.createElement('div');
-      el.className='coin';
-      el.textContent=emojis[Math.floor(Math.random()*emojis.length)];
-      const x=20+Math.random()*60; // vw
-      const ty=(120+Math.random()*120)+'px';
-      const rot=(-360+Math.random()*720)+'deg';
-      const dur=(0.9+Math.random()*0.6)+'s';
-      el.style.cssText=`left:${x}vw;top:15vh;--ty:${ty};--rot:${rot};--dur:${dur}`;
-      document.body.appendChild(el);
-      setTimeout(()=>el.remove(),1500);
-    },i*60);
-  }
-}
-function spawnStars(count=5){
-  const cx=window.innerWidth/2, cy=window.innerHeight*0.4;
-  for(let i=0;i<count;i++){
-    const el=document.createElement('div');
-    el.className='star-burst';
-    el.textContent=['⭐','💥','✨','🌟','💛'][i%5];
-    const angle=(i/count)*2*Math.PI;
-    const r1=60+Math.random()*40, r2=120+Math.random()*80;
-    el.style.cssText=`left:${cx}px;top:${cy}px;--tx:${Math.cos(angle)*r1}px;--ty:${Math.sin(angle)*r1}px;--tx2:${Math.cos(angle)*r2}px;--ty2:${Math.sin(angle)*r2}px;animation-delay:${i*0.05}s`;
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(),900);
-  }
-}
-function showLevelUpOverlay(level,name){
-  soundLevelUp();
-  const ov=document.createElement('div');
-  ov.className='levelup-overlay';
-  ov.innerHTML=`
-    <div class="levelup-content">
-      <span class="lv-big">🏆</span>
-      <h2>レベルアップ！</h2>
-      <p>レベル <strong style="color:var(--gold);font-size:1.4em">${level}</strong> になった！<br>「${name}」</p>
-      <p style="font-size:.85rem;margin-bottom:16px;color:var(--xp)">❤️ ハートが全回復！</p>
-      <button class="levelup-close" onclick="this.closest('.levelup-overlay').remove()">やったー！🎉</button>
-    </div>`;
-  document.body.appendChild(ov);
-  spawnCoins(16);
-  spawnStars(8);
-}
-
-window.logout=function(){sessionStorage.removeItem('sq_user');sessionStorage.removeItem('sq_data');location.href='index.html';};
-
-window.startTestMode = function(){
-  if((save.level||1) < TEST_UNLOCK_LV) return;
-  testMode=true; testCorrect=0; testTotal=0; testAnswered=false;
-  testTimeLeft=TEST_TIME;
-  document.querySelector('.categories').style.display='none';
-  document.getElementById('diff-select').style.display='none';
-  document.getElementById('test-mode-wrap').style.display='none';
-  renderTestUI();
-  testNextQuestion();
-  startTestTimer();
-};
-
-function renderTestUI(){
-  const tl=getTestLv(save.level||1);
-  document.getElementById('main-area').innerHTML=`
-    <div class="test-header">
-      <div>
-        <div class="test-lv-badge">${tl.name}</div>
-        <div class="test-progress">問題 <span id="t-qno">1</span>/${TEST_Q_COUNT}</div>
-        <div class="test-score-big">✅ <span id="t-correct">0</span> 正解</div>
-      </div>
-      <div class="test-timer" id="t-timer">${TEST_TIME}</div>
-    </div>
-    <div id="t-question-area"></div>`;
-}
-
-function startTestTimer(){
-  clearInterval(testTimer);
-  testTimer=setInterval(()=>{
-    testTimeLeft--;
-    const el=document.getElementById('t-timer');
-    if(el){
-      el.textContent=testTimeLeft;
-      if(testTimeLeft<=10) el.classList.add('danger');
-    }
-    if(testTimeLeft<=0){ clearInterval(testTimer); endTest(); }
-  },1000);
-}
-
-function testNextQuestion(){
-  if(testTotal>=TEST_Q_COUNT){ clearInterval(testTimer); endTest(); return; }
-  testAnswered=false;
-  const tl=getTestLv(save.level||1);
-  const cat=tl.cats[Math.floor(Math.random()*tl.cats.length)];
-  const q=generateQuestion(cat, tl.diff==='hard'?'hard':tl.diff==='mid'?'mid':'easy');
-  testCurrentQ=q;
-  document.getElementById('t-qno').textContent=testTotal+1;
-  renderTestQuestion(q);
-}
-
-function generateQuestion(cat, tier){
-  switch(cat){
-    case 0: return genArithmetic(tier);
-    case 1: return genFraction(tier);
-    case 2: return genDecimal(tier);
-    case 3: return genWord(tier);
-    default: return genArithmetic(tier);
-  }
-}
-
-function renderTestQuestion(q){
-  const area=document.getElementById('t-question-area');
-  if(!area) return;
-  let ansHtml='';
-  if(q.type==='fraction'){
-    ansHtml=`<div class="answer-area"><div class="frac-wrap">
-      <input type="number" id="t-fn" placeholder="分子" style="width:70px;font-size:1.1rem;padding:7px;text-align:center;background:rgba(255,255,255,.05);color:var(--text);border:2px solid rgba(255,255,255,.12);border-radius:10px;outline:none;">
-      <div class="frac-line"></div>
-      <input type="number" id="t-fd" placeholder="分母" style="width:70px;font-size:1.1rem;padding:7px;text-align:center;background:rgba(255,255,255,.05);color:var(--text);border:2px solid rgba(255,255,255,.12);border-radius:10px;outline:none;">
-    </div><button class="submit-btn" onclick="submitTestAnswer()">→</button></div>`;
-  } else if(q.type==='choice'){
-    ansHtml=`<div class="choices">${q.choices.map(c=>`<button class="choice-btn" onclick="submitTestChoice('${c}',this)">${c}</button>`).join('')}</div>`;
-  } else {
-    ansHtml=`<div class="answer-area"><input class="answer-input" id="t-ans" type="number" inputmode="numeric" placeholder="こたえ" style="font-size:1.5rem;"><button class="submit-btn" onclick="submitTestAnswer()">→</button></div>`;
-  }
-  area.innerHTML=`
-    <div class="question-card" style="animation:cardIn .3s ease">
-      <div class="q-text">${q.text}</div>
-      ${ansHtml}
-      <div class="feedback" id="t-fb" style="margin-top:10px;min-height:36px;"></div>
-    </div>`;
-  if(q.type==='number') {
-    const inp=document.getElementById('t-ans');
-    if(inp){
-      inp.addEventListener('keydown',e=>{if(e.key==='Enter')submitTestAnswer();});
-      setTimeout(()=>inp.focus(),80);
-    }
-  } else if(q.type==='fraction'){
-    setTimeout(()=>document.getElementById('t-fn')?.focus(),80);
-  }
-}
-
-function testJudge(correct){
-  testAnswered=true; testTotal++;
-  if(correct){
-    testCorrect++;
-    soundCorrect(); flashScreen('correct-flash');
-    document.getElementById('t-fb').className='feedback ok';
-    document.getElementById('t-fb').textContent='✅ せいかい！';
-    document.getElementById('t-correct').textContent=testCorrect;
-    setTimeout(()=>testNextQuestion(),600);
-  } else {
-    soundWrong(); flashScreen('wrong-flash');
-    document.getElementById('t-fb').className='feedback ng';
-    document.getElementById('t-fb').textContent=`❌ こたえは ${testCurrentQ.answer}`;
-    document.getElementById('t-correct').textContent=testCorrect;
-    setTimeout(()=>testNextQuestion(),900);
-  }
-}
-
-window.submitTestAnswer = function(){
-  if(testAnswered) return;
-  if(testCurrentQ.type==='fraction'){
-    const fn=parseInt(document.getElementById('t-fn')?.value,10);
-    const fd=parseInt(document.getElementById('t-fd')?.value,10);
-    if(isNaN(fn)||isNaN(fd)) return;
-    const g=gcd(fn,fd); const correct=(fn/g===testCurrentQ.na && fd/g===testCurrentQ.da);
-    testJudge(correct);
-  } else {
-    const inp=document.getElementById('t-ans');
-    if(!inp) return;
-    const val=parseFloat(inp.value);
-    if(isNaN(val)) return;
-    testJudge(val.toString()===testCurrentQ.answer);
-  }
-};
-
-window.submitTestChoice = function(val, btn){
-  if(testAnswered) return;
-  const correct=(val===testCurrentQ.answer);
-  btn.classList.add(correct?'ok':'ng');
-  testJudge(correct);
-};
-
-function endTest(){
-  testMode=false;
-  clearInterval(testTimer);
-  const tl=getTestLv(save.level||1);
-  const timeBonus=Math.round(Math.max(0,testTimeLeft)/TEST_TIME*30);
-  const score=testCorrect*7+timeBonus;
-  const isNew=score>(save.bestTestScore||0);
-  // ベストスコア更新
-  if(isNew){
-    save.bestTestScore=score;
-    save.bestTestLv=tl.lv;
-    persistSave();
-  }
-  // エフェクト
-  if(testCorrect>=8){ soundLevelUp(); spawnCoins(16); spawnStars(8); }
-  else if(testCorrect>=5){ soundCombo(); spawnCoins(8); }
-
-  document.getElementById('main-area').innerHTML=`
-    <div class="test-result-card">
-      <div class="test-lv-badge">${tl.name}（${tl.desc}）</div>
-      <h2>⚡ テスト結果！</h2>
-      <span class="test-result-score">${score}<small style="font-size:1.2rem">点</small></span>
-      <div style="font-size:.9rem;color:var(--text2);margin-bottom:6px">
-        正解 ${testCorrect}/${testTotal} 問（${testCorrect*7}点）＋ 時間ボーナス ${timeBonus}点
-      </div>
-      ${isNew?`<div class="test-result-best">🏅 ベストスコア更新！</div>`:`<div class="test-result-best">ベスト: ${save.bestTestScore||0}点</div>`}
-      <button class="test-retry-btn" onclick="window.startTestMode()">🔁 もう一度</button>
-      <button class="test-retry-btn ghost" onclick="backToNormal()">📚 通常モードへ</button>
-    </div>`;
-}
-
-window.backToNormal = function(){
-  testMode=false;
-  clearInterval(testTimer);
-  document.querySelector('.categories').style.display='';
-  document.getElementById('diff-select').style.display='';
-  renderUI();
-  nextQuestion();
-};
+function renderTestUI(){ const tl=getTestLv(save.level||1); document.getElementById('main-area').innerHTML=`<div class="test-header"><div><div class="test-lv-badge">${tl.name}</div><div class="test-progress">問題 <span id="t-qno">1</span>/${TEST_Q_COUNT}</div><div class="test-score-big">✅ <span id="t-correct">0</span> 正解</div></div><div class="test-timer" id="t-timer">${TEST_TIME}</div></div><div id="t-question-area"></div>`; }
+function startTestTimer(){ clearInterval(testTimer);testTimer=setInterval(()=>{testTimeLeft--;const el=document.getElementById('t-timer');if(el){el.textContent=testTimeLeft;if(testTimeLeft<=10)el.classList.add('danger');}if(testTimeLeft<=0){clearInterval(testTimer);endTest();}},1000); }
+function testNextQuestion(){ if(testTotal>=TEST_Q_COUNT){clearInterval(testTimer);endTest();return;} testAnswered=false;const tl=getTestLv(save.level||1);const cat=tl.cats[Math.floor(Math.random()*tl.cats.length)];const q=generateQuestion(cat,tl.diff);testCurrentQ=q;document.getElementById('t-qno').textContent=testTotal+1;renderTestQuestion(q); }
+function generateQuestion(cat,tier){ switch(cat){case 0:return genArithmetic(tier);case 1:return genFraction(tier);case 2:return genDecimal(tier);case 3:return genWord(tier);default:return genArithmetic(tier);} }
+function renderTestQuestion(q){ const area=document.getElementById('t-question-area');if(!area) return;let ansHtml='';if(q.type==='fraction'){ansHtml=`<div class="answer-area"><div class="frac-wrap"><input type="number" id="t-fn" placeholder="分子" style="width:70px;font-size:1.1rem;padding:7px;text-align:center;background:var(--surface2);color:var(--text);border:1.5px solid var(--border2);border-radius:var(--radius-sm);outline:none;"><div class="frac-line"></div><input type="number" id="t-fd" placeholder="分母" style="width:70px;font-size:1.1rem;padding:7px;text-align:center;background:var(--surface2);color:var(--text);border:1.5px solid var(--border2);border-radius:var(--radius-sm);outline:none;"></div><button class="submit-btn" onclick="submitTestAnswer()">→</button></div>`;}else if(q.type==='choice'){ansHtml=`<div class="choices">${q.choices.map(c=>`<button class="choice-btn" onclick="submitTestChoice('${c}',this)">${c}</button>`).join('')}</div>`;}else{ansHtml=`<div class="answer-area"><input class="answer-input" id="t-ans" type="number" inputmode="numeric" placeholder="こたえ" style="font-size:1.5rem;"><button class="submit-btn" onclick="submitTestAnswer()">→</button></div>`;} area.innerHTML=`<div class="question-card" style="animation:cardIn .3s ease"><div class="q-text">${q.text}</div>${ansHtml}<div class="feedback" id="t-fb" style="margin-top:10px;min-height:36px;"></div></div>`;if(q.type==='number'){const inp=document.getElementById('t-ans');if(inp){inp.addEventListener('keydown',e=>{if(e.key==='Enter')submitTestAnswer();});setTimeout(()=>inp.focus(),80);}}else if(q.type==='fraction'){setTimeout(()=>document.getElementById('t-fn')?.focus(),80);} }
+function testJudge(correct){ testAnswered=true;testTotal++;if(correct){testCorrect++;soundCorrect();flashScreen('correct-flash');document.getElementById('t-fb').className='feedback ok';document.getElementById('t-fb').textContent='✅ せいかい！';document.getElementById('t-correct').textContent=testCorrect;setTimeout(()=>testNextQuestion(),600);}else{soundWrong();flashScreen('wrong-flash');document.getElementById('t-fb').className='feedback ng';document.getElementById('t-fb').textContent=`❌ こたえは ${testCurrentQ.answer}`;document.getElementById('t-correct').textContent=testCorrect;setTimeout(()=>testNextQuestion(),900);} }
+window.submitTestAnswer=function(){ if(testAnswered) return;if(testCurrentQ.type==='fraction'){const fn=parseInt(document.getElementById('t-fn')?.value,10);const fd=parseInt(document.getElementById('t-fd')?.value,10);if(isNaN(fn)||isNaN(fd)) return;const g=gcd(fn,fd);const correct=(fn/g===testCurrentQ.na&&fd/g===testCurrentQ.da);testJudge(correct);}else{const inp=document.getElementById('t-ans');if(!inp) return;const val=parseFloat(inp.value);if(isNaN(val)) return;testJudge(val.toString()===testCurrentQ.answer);} };
+window.submitTestChoice=function(val,btn){ if(testAnswered) return;const correct=(val===testCurrentQ.answer);btn.classList.add(correct?'ok':'ng');testJudge(correct); };
+function endTest(){ testMode=false;clearInterval(testTimer);const tl=getTestLv(save.level||1);const timeBonus=Math.round(Math.max(0,testTimeLeft)/TEST_TIME*30);const score=testCorrect*7+timeBonus;const isNew=score>(save.bestTestScore||0);if(isNew){save.bestTestScore=score;save.bestTestLv=tl.lv;persistSave();}if(testCorrect>=8){soundLevelUp();spawnCoins(16);spawnStars(8);}else if(testCorrect>=5){soundCombo();spawnCoins(8);}document.getElementById('main-area').innerHTML=`<div class="test-result-card"><div class="test-lv-badge">${tl.name}（${tl.desc}）</div><h2>⚡ テスト結果！</h2><span class="test-result-score">${score}<small style="font-size:1.2rem">点</small></span><div style="font-size:.9rem;color:var(--text2);font-weight:700;margin-bottom:6px">正解 ${testCorrect}/${testTotal} 問（${testCorrect*7}点）＋ 時間ボーナス ${timeBonus}点</div>${isNew?`<div class="test-result-best">🏅 ベストスコア更新！</div>`:`<div class="test-result-best">ベスト: ${save.bestTestScore||0}点</div>`}<button class="test-retry-btn" onclick="window.startTestMode()">🔁 もう一度</button><button class="test-retry-btn ghost" onclick="backToNormal()">📚 通常モードへ</button></div>`; }
+window.backToNormal=function(){ testMode=false;clearInterval(testTimer);document.querySelector('.categories').style.display='';document.getElementById('diff-select').style.display='';renderUI();nextQuestion(); };
 
 init();
 </script>

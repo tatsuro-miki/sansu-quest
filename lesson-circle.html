@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>円の面積のひみつ｜さんすうクエスト</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap');
+
+  :root {
+    --pink: #FF6B9D;
+    --purple: #C084FC;
+    --yellow: #FFD93D;
+    --mint: #6EE7B7;
+    --bg: #FFF0F7;
+    --dark: #3D1A4E;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* 戻るボタン */
+  .back-bar {
+    padding: 12px 16px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 14px; font-weight: 700;
+    padding: 8px 16px; border-radius: 20px;
+    border: 2px solid #E8D5FF;
+    background: white; color: #9B59B6;
+    cursor: pointer; text-decoration: none;
+    transition: .15s;
+  }
+  .back-btn:hover { background: #F3E8FF; }
+
+  body::before {
+    content: '✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧';
+    position: fixed;
+    top: 10px; left: 0; right: 0;
+    text-align: center;
+    color: #FFAED4; font-size: 12px;
+    letter-spacing: 8px; opacity: 0.6;
+  }
+
+  header {
+    text-align: center;
+    padding: 20px 20px 16px;
+  }
+  header h1 {
+    font-family: 'Kaisei Decol', serif;
+    font-size: clamp(22px, 5vw, 38px);
+    color: var(--dark); line-height: 1.3;
+  }
+  header h1 span { color: var(--pink); }
+  header p { margin-top: 6px; color: #9B59B6; font-size: 14px; }
+
+  .container { max-width: 800px; margin: 0 auto; padding: 0 20px 20px; }
+
+  .step-card {
+    background: white;
+    border-radius: 24px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(255,107,157,0.12);
+    border: 2px solid #FFD6E8;
+    position: relative; overflow: hidden;
+  }
+  .step-card::before {
+    content: '';
+    position: absolute; top: -40px; right: -40px;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: linear-gradient(135deg, #FFD6E8, #E8D5FF);
+    opacity: 0.5;
+  }
+  .step-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: white; padding: 4px 14px; border-radius: 20px;
+    font-size: 13px; font-weight: 700; margin-bottom: 12px;
+  }
+  .step-card h2 { font-size: 17px; color: var(--dark); margin-bottom: 14px; }
+
+  .canvas-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+
+  canvas {
+    border-radius: 16px; background: #FDF4FF;
+    border: 2px solid #E8D5FF; max-width: 100%;
+  }
+  .slider-wrap { width: 100%; max-width: 340px; }
+  .slider-label {
+    display: flex; justify-content: space-between;
+    font-size: 13px; color: #9B59B6; margin-bottom: 6px; font-weight: 700;
+  }
+  input[type=range] {
+    width: 100%; -webkit-appearance: none;
+    height: 8px; border-radius: 4px;
+    background: linear-gradient(to right, var(--pink), var(--purple));
+    outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 24px; height: 24px;
+    border-radius: 50%; background: white;
+    border: 3px solid var(--pink); cursor: pointer;
+    box-shadow: 0 2px 8px rgba(255,107,157,0.4);
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 24px; border-radius: 50px; border: none;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 14px; font-weight: 800; cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: white; box-shadow: 0 4px 16px rgba(255,107,157,0.4);
+  }
+  .btn-secondary {
+    background: white; color: var(--pink); border: 2px solid var(--pink);
+  }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+  .formula-box {
+    background: linear-gradient(135deg, #FFF0F7, #F3E8FF);
+    border: 2px dashed var(--purple);
+    border-radius: 16px; padding: 18px; text-align: center; margin-top: 14px;
+  }
+  .formula-box .formula {
+    font-family: 'Kaisei Decol', serif;
+    font-size: clamp(18px, 4vw, 28px);
+    color: var(--dark); margin: 6px 0;
+  }
+  .formula-box .formula span { color: var(--pink); font-weight: 700; }
+  .formula-box p { font-size: 13px; color: #9B59B6; }
+
+  .answer-box {
+    background: linear-gradient(135deg, var(--yellow), #FFB347);
+    border-radius: 16px; padding: 14px 20px;
+    text-align: center; margin-top: 14px;
+  }
+  .answer-box .answer-num {
+    font-family: 'Kaisei Decol', serif;
+    font-size: clamp(26px, 6vw, 44px);
+    color: var(--dark); font-weight: 700;
+  }
+  .answer-box p { font-size: 13px; color: #7B4F00; margin-top: 2px; }
+
+  .quiz-question { font-size: 15px; color: var(--dark); font-weight: 700; margin-bottom: 12px; line-height: 1.6; }
+  .quiz-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .choice-btn {
+    padding: 13px; border-radius: 14px;
+    border: 2px solid #E8D5FF; background: white;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: all .2s; color: var(--dark);
+  }
+  .choice-btn:hover { border-color: var(--pink); background: #FFF0F7; }
+  .choice-btn.correct { background: #D1FAE5; border-color: #10B981; color: #065F46; }
+  .choice-btn.wrong   { background: #FFE4E4; border-color: #EF4444; color: #7F1D1D; }
+
+  .result-msg {
+    text-align: center; font-size: 18px; font-weight: 800;
+    padding: 10px; border-radius: 12px; display: none;
+  }
+  .result-msg.show { display: block; animation: popIn .3s ease; }
+  .result-msg.ok { color: #065F46; background: #D1FAE5; }
+  .result-msg.ng { color: #7F1D1D; background: #FFE4E4; }
+
+  @keyframes popIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hint-box {
+    background: #FFFBEB; border: 2px solid var(--yellow);
+    border-radius: 14px; padding: 12px 16px;
+    font-size: 13px; color: #92400E; line-height: 1.7;
+    margin-top: 12px; display: none;
+  }
+  .hint-box.show { display: block; animation: fadeIn .3s ease; }
+
+  .desc { font-size: 13px; color: #7B6B8A; line-height: 1.8; margin-bottom: 12px; }
+  .highlight { background: linear-gradient(transparent 60%, #FFD6E8 60%); font-weight: 700; color: var(--dark); }
+
+  footer { text-align: center; padding: 24px; color: #C084FC; font-size: 13px; }
+  .sparkle { display: inline-block; animation: spin 3s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- 戻るボタン -->
+<div class="back-bar">
+  <a class="back-btn" href="game.html">← ゲームにもどる</a>
+</div>
+
+<header>
+  <h1>🌸 円の面積の<span>ひみつ</span> 🌸</h1>
+  <p>なぜ「半径 × 半径 × 3.14」なの？いっしょに発見しよう！</p>
+</header>
+
+<div class="container">
+
+  <div class="step-card">
+    <div class="step-badge">✦ STEP 1</div>
+    <h2>円をケーキみたいに切ってみよう🍰</h2>
+    <p class="desc">円をたくさんの三角形に切り分けると…<span class="highlight">長方形に近い形</span>になるんだ！スライダーで分割数を変えてみよう✨</p>
+    <div class="canvas-wrap">
+      <canvas id="circleCanvas" width="320" height="210"></canvas>
+      <div class="slider-wrap">
+        <div class="slider-label"><span>分割数</span><span id="sliceCount">8</span></div>
+        <input type="range" id="sliceSlider" min="4" max="64" value="8" step="2">
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="toggleAnimation()"><span id="animBtnText">▶ アニメ開始</span></button>
+        <button class="btn btn-secondary" onclick="resetAnim()">↺ リセット</button>
+      </div>
+    </div>
+    <div class="formula-box">
+      <p>並べた形はどんどん…</p>
+      <div class="formula">「たて = <span>半径</span>、よこ = <span>円周の半分</span>」の長方形に！</div>
+      <p>長方形の面積 ＝ たて × よこ ＝ 半径 × （半径 × π）</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-badge">✦ STEP 2</div>
+    <h2>だから、この公式になる！</h2>
+    <p class="desc">半径を変えると面積がどう変わるか見てみよう📐</p>
+    <div class="canvas-wrap">
+      <canvas id="formulaCanvas" width="320" height="190"></canvas>
+      <div class="slider-wrap">
+        <div class="slider-label"><span>半径</span><span id="radiusVal">5</span> cm</div>
+        <input type="range" id="radiusSlider" min="1" max="10" value="5" step="1">
+      </div>
+    </div>
+    <div class="formula-box">
+      <div class="formula">面積 ＝ <span>半径 × 半径</span> × 3.14</div>
+    </div>
+    <div class="answer-box" id="areaAnswer">
+      <p>半径 <span id="rNum">5</span>cm の円の面積は…</p>
+      <div class="answer-num" id="areaNum">78.5</div>
+      <p>cm²</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-badge">✦ STEP 3</div>
+    <h2>チャレンジクイズ🌟</h2>
+    <p class="quiz-question" id="quizQ">半径が <strong id="quizR">4</strong> cm の円の面積はどれ？</p>
+    <div class="quiz-choices" id="quizChoices"></div>
+    <div class="result-msg" id="resultMsg"></div>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn btn-secondary" onclick="showHint()">💡 ヒント</button>
+      <button class="btn btn-primary" onclick="nextQuiz()">つぎの問題 →</button>
+    </div>
+    <div class="hint-box" id="hintBox"></div>
+  </div>
+
+  <!-- 戻るボタン（下） -->
+  <div style="text-align:center; margin-top:8px;">
+    <a class="back-btn" href="game.html" style="font-size:15px; padding:12px 28px;">🎮 ゲームにもどる</a>
+  </div>
+
+</div>
+
+<footer>
+  <span class="sparkle">✦</span> さんすうクエスト <span class="sparkle">✦</span>
+</footer>
+
+<script>
+// STEP1
+const canvas1 = document.getElementById('circleCanvas');
+const ctx1 = canvas1.getContext('2d');
+const slider = document.getElementById('sliceSlider');
+let slices = 8, animating = false, animProgress = 0, animDir = 1, rafId = null;
+
+function drawSplitCircle(n, progress) {
+  ctx1.clearRect(0, 0, canvas1.width, canvas1.height);
+  const cx = canvas1.width / 2, cy = 105, r = 80;
+  const angleStep = (Math.PI * 2) / n;
+  const colors = ['#FF6B9D','#C084FC','#FFD93D','#6EE7B7','#F472B6','#818CF8','#FCD34D','#34D399'];
+  if (progress < 0.5) {
+    for (let i = 0; i < n; i++) {
+      const s = -Math.PI/2 + angleStep*i, e = s + angleStep;
+      ctx1.beginPath(); ctx1.moveTo(cx, cy); ctx1.arc(cx, cy, r, s, e); ctx1.closePath();
+      ctx1.fillStyle = colors[i % colors.length]; ctx1.globalAlpha = 0.85;
+      ctx1.fill(); ctx1.strokeStyle = 'white'; ctx1.lineWidth = 1.5; ctx1.stroke(); ctx1.globalAlpha = 1;
+    }
+  } else {
+    const p = (progress - 0.5) / 0.5;
+    const targetW = r * Math.PI, startX = cx - targetW/2, startY = cy - r/2;
+    for (let i = 0; i < n; i++) {
+      const flip = i % 2 === 1;
+      const pieceW = targetW / n, tx = startX + i * pieceW, ty = startY;
+      const midAngle = -Math.PI/2 + angleStep*(i+0.5);
+      const ox = cx + (r*0.5)*Math.cos(midAngle) - pieceW/2;
+      const oy = cy + (r*0.5)*Math.sin(midAngle) - r/2;
+      ctx1.save();
+      ctx1.translate(ox + (tx-ox)*p + pieceW/2, oy + (ty-oy)*p + r/2);
+      if (flip) ctx1.scale(1, -1);
+      ctx1.beginPath(); ctx1.moveTo(-pieceW/2, r/2); ctx1.lineTo(pieceW/2, r/2); ctx1.lineTo(0, -r/2); ctx1.closePath();
+      ctx1.fillStyle = colors[i % colors.length]; ctx1.globalAlpha = 0.85;
+      ctx1.fill(); ctx1.strokeStyle = 'white'; ctx1.lineWidth = 1; ctx1.stroke(); ctx1.globalAlpha = 1;
+      ctx1.restore();
+    }
+    if (p > 0.8) {
+      ctx1.font = 'bold 11px "M PLUS Rounded 1c"'; ctx1.fillStyle = '#C084FC'; ctx1.textAlign = 'center';
+      ctx1.globalAlpha = (p-0.8)/0.2;
+      ctx1.fillText('← よこ：円周の半分 →', cx, startY + r + 20);
+      ctx1.fillText('たて：半径', cx - targetW/2 - 28, cy);
+      ctx1.globalAlpha = 1;
+    }
+  }
+}
+
+slider.addEventListener('input', () => { slices = parseInt(slider.value); document.getElementById('sliceCount').textContent = slices; if (!animating) drawSplitCircle(slices, 0); });
+
+function animStep() { animProgress += 0.008 * animDir; if (animProgress >= 1) { animProgress = 1; animDir = -1; } if (animProgress <= 0) { animProgress = 0; animDir = 1; } drawSplitCircle(slices, animProgress); rafId = requestAnimationFrame(animStep); }
+function toggleAnimation() { animating = !animating; document.getElementById('animBtnText').textContent = animating ? '⏸ 停止' : '▶ アニメ開始'; if (animating) animStep(); else cancelAnimationFrame(rafId); }
+function resetAnim() { cancelAnimationFrame(rafId); animating = false; animProgress = 0; animDir = 1; document.getElementById('animBtnText').textContent = '▶ アニメ開始'; drawSplitCircle(slices, 0); }
+drawSplitCircle(8, 0);
+
+// STEP2
+const canvas2 = document.getElementById('formulaCanvas');
+const ctx2 = canvas2.getContext('2d');
+const radiusSlider = document.getElementById('radiusSlider');
+
+function drawFormulaCircle(r) {
+  ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+  const cx = canvas2.width/2, cy = canvas2.height/2, maxR = 80;
+  const scale = (r/10)*maxR;
+  const grad = ctx2.createRadialGradient(cx - scale*0.2, cy - scale*0.2, 0, cx, cy, scale);
+  grad.addColorStop(0, '#FFB3D1'); grad.addColorStop(0.6, '#FF6B9D'); grad.addColorStop(1, '#C084FC');
+  ctx2.beginPath(); ctx2.arc(cx, cy, scale, 0, Math.PI*2);
+  ctx2.fillStyle = grad; ctx2.globalAlpha = 0.9; ctx2.fill(); ctx2.globalAlpha = 1;
+  ctx2.beginPath(); ctx2.moveTo(cx, cy); ctx2.lineTo(cx + scale, cy);
+  ctx2.strokeStyle = 'white'; ctx2.lineWidth = 2.5; ctx2.setLineDash([4,3]); ctx2.stroke(); ctx2.setLineDash([]);
+  ctx2.font = 'bold 12px "M PLUS Rounded 1c"'; ctx2.fillStyle = 'white'; ctx2.textAlign = 'center';
+  ctx2.fillText(`半径 ${r}cm`, cx + scale/2, cy - 7);
+}
+
+function updateArea() {
+  const r = parseInt(radiusSlider.value);
+  document.getElementById('radiusVal').textContent = r;
+  document.getElementById('rNum').textContent = r;
+  document.getElementById('areaNum').textContent = (r*r*3.14).toFixed(2);
+  drawFormulaCircle(r);
+}
+radiusSlider.addEventListener('input', updateArea);
+updateArea();
+
+// STEP3
+const quizData = [
+  { r: 4,  correct: 50.24,  wrongs: [25.12, 62.8, 40.0] },
+  { r: 3,  correct: 28.26,  wrongs: [18.84, 9.42, 37.68] },
+  { r: 6,  correct: 113.04, wrongs: [56.52, 94.2, 75.36] },
+  { r: 5,  correct: 78.5,   wrongs: [31.4, 15.7, 98.0] },
+  { r: 7,  correct: 153.86, wrongs: [43.96, 21.98, 200.0] },
+  { r: 2,  correct: 12.56,  wrongs: [6.28, 25.12, 18.84] },
+];
+let currentQuiz = 0, answered = false;
+
+function loadQuiz() {
+  answered = false;
+  const q = quizData[currentQuiz % quizData.length];
+  document.getElementById('quizR').textContent = q.r;
+  document.getElementById('resultMsg').className = 'result-msg';
+  document.getElementById('hintBox').className = 'hint-box';
+  const choices = [...[q.correct, ...q.wrongs]].sort(() => Math.random()-0.5);
+  const container = document.getElementById('quizChoices');
+  container.innerHTML = '';
+  choices.forEach(val => {
+    const btn = document.createElement('button'); btn.className = 'choice-btn'; btn.textContent = val + ' cm²';
+    btn.onclick = () => {
+      if (answered) return; answered = true;
+      const msg = document.getElementById('resultMsg');
+      if (val === q.correct) { btn.classList.add('correct'); msg.textContent = '🎉 せいかい！すごい！'; msg.className = 'result-msg show ok'; }
+      else { btn.classList.add('wrong'); container.querySelectorAll('.choice-btn').forEach(b => { if (parseFloat(b.textContent) === q.correct) b.classList.add('correct'); }); msg.textContent = `😊 正解は ${q.correct} cm² だよ！また挑戦しよう`; msg.className = 'result-msg show ng'; }
+    };
+    container.appendChild(btn);
+  });
+}
+
+function showHint() { const q = quizData[currentQuiz % quizData.length]; const h = document.getElementById('hintBox'); h.innerHTML = `💡 公式は「半径 × 半径 × 3.14」だよ！<br>半径 = ${q.r} cm だから…<br><strong>${q.r} × ${q.r} × 3.14 = ?</strong>`; h.className = 'hint-box show'; }
+function nextQuiz() { currentQuiz++; loadQuiz(); }
+loadQuiz();
+</script>
+</body>
+</html>

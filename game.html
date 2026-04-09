@@ -699,6 +699,7 @@ async function init() {
   document.getElementById('app').style.display='block';
   renderUI(); renderBadges();
   if ((save.hearts||0)<=0) renderGameOver(); else nextQuestion();
+  renderLessonCorner(category);  // ← この1行を追加
 }
 
 function renderUI() {

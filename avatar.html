@@ -256,18 +256,9 @@ body::before {
     <div class="avatar-panel">
       <h2>👗 わたしのキャラ</h2>
       <div class="avatar-stage">
-        <svg id="avatar-svg" viewBox="0 0 140 180" xmlns="http://www.w3.org/2000/svg">
-          <!-- ベース：体 -->
-          <g id="layer-body"></g>
-          <!-- 服 -->
-          <g id="layer-clothes"></g>
-          <!-- 顔 -->
-          <g id="layer-face"></g>
-          <!-- 髪 -->
-          <g id="layer-hair"></g>
-          <!-- アクセサリー -->
-          <g id="layer-accessory"></g>
-        </svg>
+        <div id="avatar-layers" style="position:relative;width:140px;height:180px;">
+          <img id="layer-base" src="./base.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;">
+        </div>
       </div>
       <div class="avatar-name-display" id="avatar-username">よみこみちゅう...</div>
     </div>

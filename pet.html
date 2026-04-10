@@ -366,6 +366,9 @@ header h1 span { color: var(--gold); }
       <button class="feed-btn" id="feed-btn" onclick="feedPet()">
         🍖 エサをあげる
       </button>
+      <div id="tap-charges" style="position:relative;z-index:2;font-size:13px;font-weight:800;color:var(--text2);margin-top:8px;">
+        🖐️ なでる のこり 3回
+      </div>
     </div>
 
     <div class="pet-status">
@@ -676,6 +679,13 @@ function updateStatus() {
   const food = petData.food || 0;
   feedBtn.disabled = food <= 0;
   feedBtn.textContent = food > 0 ? `🍖 エサをあげる（${food}こ）` : '🍖 エサがないよ…';
+
+  const charges = petData.tapCharges ?? 3;
+  const tapEl = document.getElementById('tap-charges');
+  if (tapEl) {
+    tapEl.textContent = `🖐️ なでる のこり ${charges}回`;
+    tapEl.style.color = charges === 0 ? 'var(--text3)' : 'var(--text2)';
+  }
 }
 
 function updateRecords() {

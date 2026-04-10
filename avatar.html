@@ -99,7 +99,7 @@ body::before {
   letter-spacing: .05em;
 }
 .avatar-stage {
-  width: 220px; height: 340px;  /* ← 大きくする */
+  width: 180px; height: 300px;
   background: linear-gradient(160deg, #fce4f0 0%, #ede0ff 100%);
   border-radius: 16px; border: 2px solid var(--border2);
   display: flex; align-items: center; justify-content: center;
@@ -256,9 +256,9 @@ body::before {
     <div class="avatar-panel">
       <h2>👗 わたしのキャラ</h2>
       <div class="avatar-stage">
-        <div id="avatar-layers" style="position:relative;width:200px;height:320px;">
+        <div id="avatar-layers" style="position:relative;width:180px;height:300px;overflow:hidden;">
           <img id="layer-base" src="./base.png" 
-            style="width:200px;height:auto;display:block;margin:0 auto;">
+            style="position:absolute;width:180px;height:auto;left:0;top:0;">
         </div>
       </div>
       <div class="avatar-name-display" id="avatar-username">よみこみちゅう...</div>

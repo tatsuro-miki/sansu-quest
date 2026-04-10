@@ -596,7 +596,17 @@ async function init() {
     petData.happy = Math.max(10, (petData.happy || 50) - 15);
     petData.fullness = Math.max(10, (petData.fullness || 50) - 20);
   }
-
+  // なで回復処理（30分ごとに1回、最大3回）
+  const TAP_MAX = 3;
+  const TAP_REGEN_MS = 30 * 60 * 1000;
+  const now = Date.now();
+  const elapsed = now - (petData.lastTapRegen || now);
+  const regen = Math.floor(elapsed / TAP_REGEN_MS);
+  if (regen > 0) {
+    petData.tapCharges = Math.min(TAP_MAX, (petData.tapCharges || TAP_MAX) + regen);
+    petData.lastTapRegen = now;
+  }
+  if (petData.tapCharges === undefined) petData.tapCharges = TAP_MAX;
   updateFoodDisplay();
 
   if (petData.type) {
@@ -707,16 +717,18 @@ window.feedPet = function() {
 // なでる
 // ============================================================
 window.petTap = function() {
+  if ((petData.tapCharges || 0) <= 0) {
+    showToast('なでは30分後に回復するよ！', 'ng');
+    return;
+  }
+  petData.tapCharges = (petData.tapCharges || 1) - 1;
+  petData.lastTapRegen = petData.lastTapRegen || Date.now();
   petData.happy = Math.min(100, (petData.happy || 50) + 8);
   petData.totalTap = (petData.totalTap || 0) + 1;
 
   const speeches = SPEECHES[petData.type].tap;
   setSpeech(speeches[Math.floor(Math.random() * speeches.length)]);
-  renderPet('happy');
   spawnHearts(2);
-
-  setTimeout(() => renderPet('idle'), 1500);
-
   updateStatus();
   updateRecords();
   persist();

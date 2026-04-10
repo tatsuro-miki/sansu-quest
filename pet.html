@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>マイペット｜さんすうクエスト</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f0f4ff;
+  --surface: #ffffff;
+  --surface2: #e8eeff;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.15);
+  --primary: #e94560;
+  --blue: #4f8ef7;
+  --gold: #f5a623;
+  --mint: #2db87a;
+  --purple: #9f7aea;
+  --orange: #fb923c;
+  --text: #1a1a2e;
+  --text2: #555577;
+  --text3: #9999bb;
+  --radius: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+
+  /* ハムスター用 */
+  --ham-main: #e8b89a;
+  --ham-belly: #f5dbc8;
+  --ham-ear: #d4887a;
+  --ham-nose: #c46060;
+  --ham-eye: #3d2010;
+  --ham-cheek: #f0a0a0;
+
+  /* 猫用 */
+  --cat-main: #f0c060;
+  --cat-stripe: #d89030;
+  --cat-belly: #fff8ee;
+  --cat-nose: #e87090;
+  --cat-eye: #3d8030;
+  --cat-inner-ear: #f08090;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', 'M PLUS Rounded 1c', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(79,142,247,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(245,166,35,0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.back-bar { padding: 12px 16px; max-width: 680px; margin: 0 auto; position: relative; z-index: 1; }
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: inherit; font-size: 14px; font-weight: 800;
+  padding: 8px 16px; border-radius: 20px;
+  border: 1.5px solid var(--border2);
+  background: white; color: var(--text2);
+  cursor: pointer; text-decoration: none; transition: .15s;
+}
+.back-btn:hover { background: var(--surface2); }
+
+.app { max-width: 680px; margin: 0 auto; padding: 0 16px 40px; position: relative; z-index: 1; }
+
+header { text-align: center; padding: 4px 0 20px; }
+header h1 { font-size: clamp(22px, 5vw, 32px); font-weight: 900; color: var(--text); }
+header h1 span { color: var(--gold); }
+
+/* エサストック */
+.food-bar {
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  background: white; border-radius: var(--radius-md);
+  border: 1.5px solid var(--border2);
+  padding: 12px 20px; margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.food-count {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 900; font-size: 18px; color: var(--gold);
+}
+.food-icon { font-size: 24px; }
+.food-hint { font-size: 12px; color: var(--text3); font-weight: 700; }
+
+/* ペット選択 */
+.pet-select-screen {
+  text-align: center;
+}
+.pet-select-title {
+  font-size: 18px; font-weight: 900; color: var(--text);
+  margin-bottom: 8px;
+}
+.pet-select-sub {
+  font-size: 13px; color: var(--text2); font-weight: 700;
+  margin-bottom: 24px;
+}
+.pet-choices {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  max-width: 480px; margin: 0 auto;
+}
+.pet-choice-card {
+  background: white; border-radius: var(--radius);
+  border: 2px solid var(--border2);
+  padding: 24px 16px; cursor: pointer;
+  transition: .2s; text-align: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.pet-choice-card:hover { transform: translateY(-4px); border-color: var(--gold); box-shadow: 0 8px 24px rgba(245,166,35,0.2); }
+.pet-choice-card .pet-emoji { font-size: 64px; display: block; margin-bottom: 12px; }
+.pet-choice-card .pet-name { font-size: 18px; font-weight: 900; color: var(--text); margin-bottom: 4px; }
+.pet-choice-card .pet-desc { font-size: 12px; color: var(--text2); font-weight: 700; }
+.pet-choice-card.ham:hover { border-color: var(--ham-main); box-shadow: 0 8px 24px rgba(232,184,154,0.3); }
+.pet-choice-card.cat:hover { border-color: var(--cat-main); box-shadow: 0 8px 24px rgba(240,192,96,0.3); }
+
+/* メイン画面 */
+.pet-main { display: none; }
+.pet-main.show { display: block; }
+
+.pet-stage-wrap {
+  background: white; border-radius: var(--radius);
+  border: 1.5px solid var(--border2);
+  padding: 28px 20px 20px;
+  margin-bottom: 16px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  position: relative; overflow: hidden;
+}
+
+.pet-room-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, #e8f4ff 0%, #d8eaff 60%, #c8d8f0 100%);
+  z-index: 0;
+}
+.pet-room-floor {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 40%;
+  background: linear-gradient(180deg, #ddb880 0%, #c8a060 100%);
+  border-radius: 0 0 var(--radius) var(--radius);
+  z-index: 0;
+}
+
+.pet-name-badge {
+  position: relative; z-index: 2;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.9);
+  border: 1.5px solid var(--border2);
+  border-radius: 20px; padding: 4px 14px;
+  font-size: 13px; font-weight: 900; color: var(--text2);
+  margin-bottom: 12px;
+}
+
+.pet-svg-wrap {
+  position: relative; z-index: 2;
+  width: 200px; height: 200px;
+  margin: 0 auto 8px;
+  cursor: pointer;
+}
+
+.pet-svg-wrap svg {
+  width: 100%; height: 100%;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15));
+  transition: transform .15s;
+}
+.pet-svg-wrap:hover svg { transform: scale(1.05); }
+.pet-svg-wrap:active svg { transform: scale(0.96); }
+
+/* アニメーション状態 */
+.pet-svg-wrap.happy svg { animation: petBounce .4s ease; }
+.pet-svg-wrap.eating svg { animation: petNom .6s ease; }
+.pet-svg-wrap.idle svg { animation: petIdle 3s ease-in-out infinite; }
+
+@keyframes petBounce {
+  0%,100%{transform:translateY(0) scale(1)}
+  30%{transform:translateY(-20px) scale(1.08)}
+  60%{transform:translateY(-8px) scale(1.04)}
+}
+@keyframes petNom {
+  0%,100%{transform:scale(1)}
+  20%{transform:scale(1.12) rotate(-5deg)}
+  40%{transform:scale(0.95) rotate(3deg)}
+  60%{transform:scale(1.08) rotate(-3deg)}
+  80%{transform:scale(1.02)}
+}
+@keyframes petIdle {
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
+
+/* 吹き出し */
+.speech-bubble {
+  position: relative; z-index: 3;
+  background: white; border: 1.5px solid var(--border2);
+  border-radius: 16px; padding: 8px 16px;
+  font-size: 14px; font-weight: 800; color: var(--text);
+  display: inline-block; margin-bottom: 12px;
+  min-height: 38px; min-width: 120px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: opacity .3s;
+}
+.speech-bubble::after {
+  content: '';
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 8px solid transparent;
+  border-top-color: white;
+  margin-top: -1px;
+}
+.speech-bubble::before {
+  content: '';
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 9px solid transparent;
+  border-top-color: var(--border2);
+}
+
+/* ハート・星エフェクト */
+.heart-burst {
+  position: absolute; z-index: 10;
+  font-size: 20px; pointer-events: none;
+  animation: heartFloat 1s ease forwards;
+}
+@keyframes heartFloat {
+  0%{opacity:1;transform:translateY(0) scale(1)}
+  100%{opacity:0;transform:translateY(-60px) scale(1.4)}
+}
+
+/* エサやりボタン */
+.feed-btn {
+  font-family: inherit; font-size: 16px; font-weight: 900;
+  padding: 14px 32px; border-radius: 50px; border: none;
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  color: white; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(245,166,35,0.4);
+  transition: .2s; display: block; margin: 0 auto;
+  position: relative; z-index: 2;
+}
+.feed-btn:hover { opacity: .9; transform: translateY(-2px); }
+.feed-btn:active { transform: scale(0.96); }
+.feed-btn:disabled { opacity: .4; pointer-events: none; }
+
+/* ステータス */
+.pet-status {
+  background: white; border-radius: var(--radius-md);
+  border: 1.5px solid var(--border2);
+  padding: 16px 20px; margin-bottom: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.status-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.status-row:last-child { margin-bottom: 0; }
+.status-label { font-size: 13px; font-weight: 800; color: var(--text2); min-width: 60px; }
+.status-bar-wrap {
+  flex: 1; height: 10px; background: var(--surface2);
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border2);
+}
+.status-bar {
+  height: 100%; border-radius: 10px;
+  transition: width .6s cubic-bezier(.34,1.56,.64,1);
+}
+.status-bar.happy { background: linear-gradient(90deg, var(--gold), var(--orange)); }
+.status-bar.full  { background: linear-gradient(90deg, var(--mint), #6EE7B7); }
+.status-val { font-size: 13px; font-weight: 900; color: var(--text2); min-width: 36px; text-align: right; }
+
+/* 実績 */
+.pet-record {
+  background: white; border-radius: var(--radius-md);
+  border: 1.5px solid var(--border2);
+  padding: 16px 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.record-title { font-size: 12px; font-weight: 900; color: var(--text3); letter-spacing: .08em; margin-bottom: 12px; }
+.record-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.record-item { text-align: center; }
+.record-num { font-size: 22px; font-weight: 900; color: var(--gold); display: block; }
+.record-lbl { font-size: 11px; font-weight: 700; color: var(--text2); }
+
+/* ペット変更ボタン */
+.change-pet-btn {
+  font-family: inherit; font-size: 13px; font-weight: 800;
+  padding: 8px 18px; border-radius: 20px;
+  border: 1.5px solid var(--border2);
+  background: var(--surface2); color: var(--text2);
+  cursor: pointer; display: block; margin: 16px auto 0;
+  transition: .15s;
+}
+.change-pet-btn:hover { background: var(--surface); color: var(--text); }
+
+/* トースト */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: white;
+  padding: 10px 24px; border-radius: 20px;
+  font-weight: 800; font-size: 14px;
+  opacity: 0; pointer-events: none; z-index: 9999;
+  transition: opacity .3s; white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+.toast.ok { background: var(--mint); }
+.toast.ng { background: var(--primary); }
+</style>
+</head>
+<body>
+
+<div class="back-bar">
+  <a class="back-btn" href="game.html">← ゲームにもどる</a>
+</div>
+
+<div class="app">
+  <header>
+    <h1>🐾 マイ<span>ペット</span></h1>
+  </header>
+
+  <!-- エサストック -->
+  <div class="food-bar">
+    <div class="food-count">
+      <span class="food-icon">🍖</span>
+      <span id="food-count">0</span> こ
+    </div>
+    <div class="food-hint">5問といたら1こもらえるよ！</div>
+  </div>
+
+  <!-- ペット選択画面 -->
+  <div class="pet-select-screen" id="pet-select">
+    <div class="pet-select-title">ペットをえらんでね🐾</div>
+    <div class="pet-select-sub">いちどえらんだら、ずっといっしょだよ！</div>
+    <div class="pet-choices">
+      <div class="pet-choice-card ham" onclick="selectPet('hamster')">
+        <span class="pet-emoji">🐹</span>
+        <div class="pet-name">ハムスター</div>
+        <div class="pet-desc">もふもふでかわいい！<br>ほっぺがふくらむよ</div>
+      </div>
+      <div class="pet-choice-card cat" onclick="selectPet('cat')">
+        <span class="pet-emoji">🐱</span>
+        <div class="pet-name">ねこ</div>
+        <div class="pet-desc">きままでマイペース！<br>ゴロゴロいうよ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ペットメイン画面 -->
+  <div class="pet-main" id="pet-main">
+
+    <div class="pet-stage-wrap">
+      <div class="pet-room-bg"></div>
+      <div class="pet-room-floor"></div>
+
+      <div class="pet-name-badge" id="pet-name-badge">🐾 ペットのなまえ</div>
+
+      <div class="speech-bubble" id="speech-bubble">よんでくれてうれしいな！</div>
+
+      <div class="pet-svg-wrap idle" id="pet-svg-wrap" onclick="petTap()">
+        <svg id="pet-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- ペットSVGはJSで描画 -->
+        </svg>
+      </div>
+
+      <button class="feed-btn" id="feed-btn" onclick="feedPet()">
+        🍖 エサをあげる
+      </button>
+    </div>
+
+    <div class="pet-status">
+      <div class="status-row">
+        <span class="status-label">😊 きもち</span>
+        <div class="status-bar-wrap">
+          <div class="status-bar happy" id="bar-happy" style="width:50%"></div>
+        </div>
+        <span class="status-val" id="val-happy">50%</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">🍖 おなか</span>
+        <div class="status-bar-wrap">
+          <div class="status-bar full" id="bar-full" style="width:50%"></div>
+        </div>
+        <span class="status-val" id="val-full">50%</span>
+      </div>
+    </div>
+
+    <div class="pet-record">
+      <div class="record-title">🏅 きろく</div>
+      <div class="record-grid">
+        <div class="record-item">
+          <span class="record-num" id="rec-feed">0</span>
+          <span class="record-lbl">エサやり回数</span>
+        </div>
+        <div class="record-item">
+          <span class="record-num" id="rec-tap">0</span>
+          <span class="record-lbl">なでた回数</span>
+        </div>
+        <div class="record-item">
+          <span class="record-num" id="rec-days">0</span>
+          <span class="record-lbl">いっしょにいた日</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="change-pet-btn" onclick="confirmChangePet()">ペットをかえる</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { FIREBASE_CONFIG } from './firebase.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const app = initializeApp(FIREBASE_CONFIG);
+const db = getFirestore(app);
+
+// ============================================================
+// セリフ
+// ============================================================
+const SPEECHES = {
+  hamster: {
+    idle:    ['ちゅー！','おなかすいたよ〜','あそぼ？','むにゅ…','ほっぺふくれてる！'],
+    feed:    ['もぐもぐ！おいしい！','やったー！エサだ！','ちゅちゅ♪','もっとほしいな…','おいしすぎる！'],
+    tap:     ['きゅー！','なでてくれてうれしい！','むにゅむにゅ','すきだよ！','またなでて♪'],
+    happy:   ['さいこう！','うれしすぎる！','ぴょんぴょん！'],
+    hungry:  ['おなかぺこぺこ…','エサちょうだい…','ちゅ…（よわよわ）'],
+  },
+  cat: {
+    idle:    ['にゃー','…（無視）','ゴロゴロ…','みゃう','なんか用？'],
+    feed:    ['にゃ！（うれしい）','ゴロゴロゴロ…','まあ、たべてあげる','にゃにゃにゃ！','おいしいにゃ'],
+    tap:     ['ゴロゴロ…','みゃ♪','もっとなでて','…（しぶしぶ受け入れる）','にゃー！'],
+    happy:   ['ゴロゴロゴロ！','にゃにゃ！','きもちいい〜'],
+    hungry:  ['にゃ…（おなかすいた）','みゃーん…','ご飯まだ？'],
+  },
+};
+
+// ============================================================
+// SVG描画
+// ============================================================
+function drawHamster(svg, mood) {
+  const happy = mood === 'happy' || mood === 'eating';
+  svg.innerHTML = `
+    <!-- 耳 -->
+    <ellipse cx="68" cy="72" rx="18" ry="16" fill="#e8b89a"/>
+    <ellipse cx="132" cy="72" rx="18" ry="16" fill="#e8b89a"/>
+    <ellipse cx="68" cy="72" rx="11" ry="10" fill="#d4887a"/>
+    <ellipse cx="132" cy="72" rx="11" ry="10" fill="#d4887a"/>
+    <!-- 体 -->
+    <ellipse cx="100" cy="148" rx="52" ry="40" fill="#e8b89a"/>
+    <!-- 顔 -->
+    <circle cx="100" cy="108" r="52" fill="#e8b89a"/>
+    <!-- ほっぺ -->
+    <ellipse cx="70" cy="115" rx="${happy?22:18}" ry="${happy?16:13}" fill="#f5dbc8"/>
+    <ellipse cx="130" cy="115" rx="${happy?22:18}" ry="${happy?16:13}" fill="#f5dbc8"/>
+    <!-- 赤ほっぺ -->
+    <ellipse cx="68" cy="118" rx="10" ry="7" fill="#f0a0a0" opacity=".6"/>
+    <ellipse cx="132" cy="118" rx="10" ry="7" fill="#f0a0a0" opacity=".6"/>
+    <!-- 目 -->
+    <circle cx="82" cy="100" r="8" fill="#3d2010"/>
+    <circle cx="118" cy="100" r="8" fill="#3d2010"/>
+    <circle cx="85" cy="97" r="3" fill="white"/>
+    <circle cx="121" cy="97" r="3" fill="white"/>
+    <!-- 鼻 -->
+    <ellipse cx="100" cy="113" rx="5" ry="4" fill="#c46060"/>
+    <!-- 口 -->
+    ${happy
+      ? `<path d="M88 120 Q100 132 112 120" fill="none" stroke="#c46060" stroke-width="2.5" stroke-linecap="round"/>`
+      : `<path d="M91 121 Q100 127 109 121" fill="none" stroke="#c46060" stroke-width="2" stroke-linecap="round"/>`
+    }
+    <!-- おてて -->
+    <ellipse cx="58" cy="155" rx="12" ry="9" fill="#e8b89a"/>
+    <ellipse cx="142" cy="155" rx="12" ry="9" fill="#e8b89a"/>
+    <!-- おなか -->
+    <ellipse cx="100" cy="155" rx="30" ry="24" fill="#f5dbc8"/>
+    <!-- しっぽ -->
+    <ellipse cx="148" cy="170" rx="10" ry="8" fill="#f5dbc8"/>
+  `;
+}
+
+function drawCat(svg, mood) {
+  const happy = mood === 'happy' || mood === 'eating';
+  const purring = mood === 'idle';
+  svg.innerHTML = `
+    <!-- 耳 -->
+    <polygon points="55,75 68,42 82,75" fill="#f0c060"/>
+    <polygon points="118,75 132,42 145,75" fill="#f0c060"/>
+    <polygon points="60,73 68,50 78,73" fill="#f08090"/>
+    <polygon points="122,73 132,50 140,73" fill="#f08090"/>
+    <!-- 体 -->
+    <ellipse cx="100" cy="152" rx="50" ry="38" fill="#f0c060"/>
+    <!-- しっぽ -->
+    <path d="M148 170 Q175 155 170 135 Q165 118 155 125" fill="none" stroke="#d89030" stroke-width="14" stroke-linecap="round"/>
+    <path d="M148 170 Q175 155 170 135 Q165 118 155 125" fill="none" stroke="#f0c060" stroke-width="10" stroke-linecap="round"/>
+    <!-- 顔 -->
+    <circle cx="100" cy="105" r="50" fill="#f0c060"/>
+    <!-- 縞模様 -->
+    <path d="M78 68 Q100 60 122 68" fill="none" stroke="#d89030" stroke-width="3" stroke-linecap="round"/>
+    <path d="M72 80 Q100 70 128 80" fill="none" stroke="#d89030" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- ほっぺ -->
+    <ellipse cx="68" cy="112" rx="10" ry="7" fill="#f9c0c0" opacity=".5"/>
+    <ellipse cx="132" cy="112" rx="10" ry="7" fill="#f9c0c0" opacity=".5"/>
+    <!-- 目 -->
+    ${happy
+      ? `<path d="M76 96 Q82 88 88 96" fill="none" stroke="#3d8030" stroke-width="3" stroke-linecap="round"/>
+         <path d="M112 96 Q118 88 124 96" fill="none" stroke="#3d8030" stroke-width="3" stroke-linecap="round"/>`
+      : `<ellipse cx="82" cy="97" rx="8" ry="${purring?6:9}" fill="#3d8030"/>
+         <ellipse cx="118" cy="97" rx="8" ry="${purring?6:9}" fill="#3d8030"/>
+         <ellipse cx="82" cy="97" rx="3" ry="${purring?5:8}" fill="#1a1a1a"/>
+         <ellipse cx="118" cy="97" rx="3" ry="${purring?5:8}" fill="#1a1a1a"/>
+         <circle cx="85" cy="94" r="2.5" fill="white"/>
+         <circle cx="121" cy="94" r="2.5" fill="white"/>`
+    }
+    <!-- 鼻 -->
+    <ellipse cx="100" cy="110" rx="5" ry="4" fill="#e87090"/>
+    <!-- 口 -->
+    ${happy
+      ? `<path d="M88 116 Q100 128 112 116" fill="none" stroke="#c46060" stroke-width="2.5" stroke-linecap="round"/>
+         <path d="M100 110 L100 116" stroke="#c46060" stroke-width="2"/>`
+      : `<path d="M92 116 Q100 122 108 116" fill="none" stroke="#c46060" stroke-width="2" stroke-linecap="round"/>
+         <path d="M100 110 L100 115" stroke="#c46060" stroke-width="2"/>`
+    }
+    <!-- ひげ -->
+    <line x1="50" y1="108" x2="82" y2="112" stroke="#c8a060" stroke-width="1.5"/>
+    <line x1="50" y1="116" x2="82" y2="115" stroke="#c8a060" stroke-width="1.5"/>
+    <line x1="118" y1="112" x2="150" y2="108" stroke="#c8a060" stroke-width="1.5"/>
+    <line x1="118" y1="115" x2="150" y2="116" stroke="#c8a060" stroke-width="1.5"/>
+    <!-- おなか -->
+    <ellipse cx="100" cy="158" rx="28" ry="22" fill="#fff8ee"/>
+    <!-- 前足 -->
+    <ellipse cx="65" cy="168" rx="14" ry="10" fill="#f0c060"/>
+    <ellipse cx="135" cy="168" rx="14" ry="10" fill="#f0c060"/>
+  `;
+}
+
+// ============================================================
+// 状態管理
+// ============================================================
+let username = '';
+let save = {};
+let petData = {};
+let speechTimer = null;
+
+const DEFAULT_PET = {
+  type: null,
+  food: 0,
+  happy: 50,
+  fullness: 50,
+  totalFeed: 0,
+  totalTap: 0,
+  days: 0,
+  lastDate: '',
+  questionsForFood: 0,
+};
+
+async function init() {
+  username = sessionStorage.getItem('sq_user');
+  if (!username) { location.href = 'index.html'; return; }
+
+  try {
+    const snap = await getDoc(doc(db, 'users', username));
+    if (snap.exists()) save = snap.data();
+  } catch(e) {}
+
+  if (!save.pet) save.pet = { ...DEFAULT_PET };
+  petData = save.pet;
+
+  // 日付チェック（連続日数）
+  const today = new Date().toLocaleDateString('ja-JP');
+  if (petData.lastDate !== today) {
+    petData.days = (petData.days || 0) + 1;
+    petData.lastDate = today;
+    // 時間経過でhappyとfullnessが自然減少
+    petData.happy = Math.max(10, (petData.happy || 50) - 15);
+    petData.fullness = Math.max(10, (petData.fullness || 50) - 20);
+  }
+
+  updateFoodDisplay();
+
+  if (petData.type) {
+    showPetMain();
+  } else {
+    document.getElementById('pet-select').style.display = 'block';
+  }
+}
+
+async function persist() {
+  save.pet = petData;
+  try { await setDoc(doc(db, 'users', username), save); } catch(e) {}
+}
+
+// ============================================================
+// ペット選択
+// ============================================================
+window.selectPet = function(type) {
+  if (petData.type && !confirm('ペットをかえますか？きろくはリセットされます。')) return;
+  petData = { ...DEFAULT_PET, type, lastDate: new Date().toLocaleDateString('ja-JP') };
+  save.pet = petData;
+  persist();
+  showPetMain();
+  showToast(`${type === 'hamster' ? 'ハムスター' : 'ねこ'}をえらんだよ！🎉`, 'ok');
+};
+
+window.confirmChangePet = function() {
+  if (confirm('ペットをかえますか？きろくはリセットされます。')) {
+    petData = { ...DEFAULT_PET };
+    save.pet = petData;
+    persist();
+    document.getElementById('pet-main').classList.remove('show');
+    document.getElementById('pet-select').style.display = 'block';
+  }
+};
+
+// ============================================================
+// メイン画面表示
+// ============================================================
+function showPetMain() {
+  document.getElementById('pet-select').style.display = 'none';
+  const main = document.getElementById('pet-main');
+  main.classList.add('show');
+
+  const isHam = petData.type === 'hamster';
+  document.getElementById('pet-name-badge').textContent = isHam ? '🐹 ハムスター' : '🐱 ねこ';
+
+  renderPet('idle');
+  updateStatus();
+  updateRecords();
+  startIdleSpeech();
+}
+
+function renderPet(mood) {
+  const svg = document.getElementById('pet-svg');
+  const wrap = document.getElementById('pet-svg-wrap');
+  if (petData.type === 'hamster') drawHamster(svg, mood);
+  else drawCat(svg, mood);
+
+  wrap.className = 'pet-svg-wrap ' + mood;
+}
+
+function updateStatus() {
+  const h = Math.min(100, Math.max(0, petData.happy || 50));
+  const f = Math.min(100, Math.max(0, petData.fullness || 50));
+  document.getElementById('bar-happy').style.width = h + '%';
+  document.getElementById('bar-full').style.width = f + '%';
+  document.getElementById('val-happy').textContent = h + '%';
+  document.getElementById('val-full').textContent = f + '%';
+
+  const feedBtn = document.getElementById('feed-btn');
+  const food = petData.food || 0;
+  feedBtn.disabled = food <= 0;
+  feedBtn.textContent = food > 0 ? `🍖 エサをあげる（${food}こ）` : '🍖 エサがないよ…';
+}
+
+function updateRecords() {
+  document.getElementById('rec-feed').textContent = petData.totalFeed || 0;
+  document.getElementById('rec-tap').textContent = petData.totalTap || 0;
+  document.getElementById('rec-days').textContent = petData.days || 0;
+}
+
+function updateFoodDisplay() {
+  document.getElementById('food-count').textContent = petData.food || 0;
+}
+
+// ============================================================
+// エサやり
+// ============================================================
+window.feedPet = function() {
+  if ((petData.food || 0) <= 0) { showToast('エサがないよ！問題を解こう🎯', 'ng'); return; }
+
+  petData.food = Math.max(0, (petData.food || 0) - 1);
+  petData.fullness = Math.min(100, (petData.fullness || 50) + 25);
+  petData.happy = Math.min(100, (petData.happy || 50) + 15);
+  petData.totalFeed = (petData.totalFeed || 0) + 1;
+
+  const speeches = SPEECHES[petData.type].feed;
+  setSpeech(speeches[Math.floor(Math.random() * speeches.length)]);
+  renderPet('eating');
+  spawnHearts();
+
+  setTimeout(() => renderPet('happy'), 700);
+  setTimeout(() => renderPet('idle'), 2000);
+
+  updateFoodDisplay();
+  updateStatus();
+  updateRecords();
+  persist();
+};
+
+// ============================================================
+// なでる
+// ============================================================
+window.petTap = function() {
+  petData.happy = Math.min(100, (petData.happy || 50) + 8);
+  petData.totalTap = (petData.totalTap || 0) + 1;
+
+  const speeches = SPEECHES[petData.type].tap;
+  setSpeech(speeches[Math.floor(Math.random() * speeches.length)]);
+  renderPet('happy');
+  spawnHearts(2);
+
+  setTimeout(() => renderPet('idle'), 1500);
+
+  updateStatus();
+  updateRecords();
+  persist();
+};
+
+// ============================================================
+// 吹き出し・アニメ
+// ============================================================
+function setSpeech(text) {
+  const el = document.getElementById('speech-bubble');
+  el.textContent = text;
+  el.style.opacity = '1';
+  clearTimeout(speechTimer);
+  speechTimer = setTimeout(() => {
+    const idles = SPEECHES[petData.type].idle;
+    el.textContent = idles[Math.floor(Math.random() * idles.length)];
+  }, 3000);
+}
+
+function startIdleSpeech() {
+  if (!petData.type) return;
+  const idles = SPEECHES[petData.type].idle;
+  const hunger = SPEECHES[petData.type].hungry;
+  setInterval(() => {
+    if ((petData.fullness || 50) < 25) {
+      setSpeech(hunger[Math.floor(Math.random() * hunger.length)]);
+    } else {
+      setSpeech(idles[Math.floor(Math.random() * idles.length)]);
+    }
+  }, 6000);
+}
+
+function spawnHearts(count = 4) {
+  const wrap = document.getElementById('pet-svg-wrap');
+  const emojis = ['❤️','💕','✨','💖','⭐'];
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'heart-burst';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.cssText = `left:${30 + Math.random()*40}%;top:${10 + Math.random()*40}%`;
+      wrap.appendChild(el);
+      setTimeout(() => el.remove(), 1000);
+    }, i * 120);
+  }
+}
+
+// ============================================================
+// トースト
+// ============================================================
+let toastTimer = null;
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (type || '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, 2500);
+}
+
+init();
+</script>
+</body>
+</html>

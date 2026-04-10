@@ -576,6 +576,8 @@ const DEFAULT_PET = {
   days: 0,
   lastDate: '',
   questionsForFood: 0,
+  tapCharges: 0,       // ← 3から0に変更
+  lastTapRegen: null,
 };
 
 async function init() {
@@ -630,16 +632,15 @@ async function persist() {
 window.selectPet = function(type) {
   if (petData.type && !confirm('ペットをかえますか？きろくはリセットされます。')) return;
   
-  // tapChargesとlastTapRegenは引き継ぐ
-  const tapCharges = petData.tapCharges ?? 3;
+  const tapCharges = petData.tapCharges ?? 0;  // ← ?? 0 に変更
   const lastTapRegen = petData.lastTapRegen || null;
   
   petData = {
     ...DEFAULT_PET,
     type,
     lastDate: new Date().toLocaleDateString('ja-JP'),
-    tapCharges,       // ← 引き継ぐ
-    lastTapRegen,     // ← 引き継ぐ
+    tapCharges,
+    lastTapRegen,
   };
   save.pet = petData;
   persist();

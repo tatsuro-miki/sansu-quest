@@ -352,15 +352,7 @@ header h1 span { color: var(--gold); }
     </div>
     <div class="food-hint">5問といたら1こもらえるよ！</div>
   </div>
-    
-  <div class="exchange-bar">
-    <div class="exchange-title">🔄 こうかんショップ</div>
-    <div class="exchange-btns">
-      <button onclick="exchangeFood(3, 1)">🍖×3 → 🪙×1</button>
-      <button onclick="exchangeFood(10, 5)">🍖×10 → 🪙×5</button>
-      <button onclick="exchangeFood(30, 20)">🍖×30 → 🪙×20</button>
-    </div>
-  </div>
+
   <!-- ペット選択画面 -->
   <div class="pet-select-screen" id="pet-select">
     <div class="pet-select-title">ペットをえらんでね🐾</div>
@@ -381,6 +373,16 @@ header h1 span { color: var(--gold); }
 
   <!-- ペットメイン画面 -->
   <div class="pet-main" id="pet-main">
+
+    <!-- 修正3: こうかんショップをpet-mainの中に移動 -->
+    <div class="exchange-bar">
+      <div class="exchange-title">🔄 こうかんショップ</div>
+      <div class="exchange-btns">
+        <button onclick="exchangeFood(3, 1)">🍖×3 → 🪙×1</button>
+        <button onclick="exchangeFood(10, 5)">🍖×10 → 🪙×5</button>
+        <button onclick="exchangeFood(30, 20)">🍖×30 → 🪙×20</button>
+      </div>
+    </div>
 
     <div class="pet-stage-wrap">
       <div class="pet-room-bg"></div>
@@ -484,6 +486,7 @@ let petData = {};
 let speechTimer = null;
 let lottieAnim = null;
 let toastTimer = null;
+let saveLoaded = false; // 修正1: saveが正しく読み込まれたかを追跡するフラグ
 
 // ============================================================
 // Lottie
@@ -509,7 +512,11 @@ async function init() {
   try {
     const snap = await getDoc(doc(db, 'users', username));
     if (snap.exists()) save = snap.data();
-  } catch(e) {}
+    saveLoaded = true; // 修正1: 読み込み成功フラグ
+  } catch(e) {
+    console.error('セーブデータ読み込みエラー:', e);
+    saveLoaded = false; // 修正1: 読み込み失敗
+  }
 
   if (!save.pet) save.pet = { ...DEFAULT_PET };
   petData = save.pet;
@@ -541,9 +548,28 @@ async function init() {
   }
 }
 
+// 修正1: persist()を安全にする - 最新のsaveを再取得してからpetDataをマージし、merge:trueで保存
 async function persist() {
+  try {
+    // 最新のセーブデータをFirebaseから再取得して他ページの変更を保護
+    const snap = await getDoc(doc(db, 'users', username));
+    if (snap.exists()) {
+      save = snap.data();
+    }
+  } catch(e) {
+    console.error('persist: セーブデータ再取得エラー:', e);
+    // 再取得に失敗しても、saveLoadedがtrueなら初回読み込みのsaveを使う
+    if (!saveLoaded) {
+      console.error('persist: セーブデータが未読み込みのため保存をスキップ');
+      return; // saveが一度も正しく読み込まれていなければ保存しない
+    }
+  }
   save.pet = petData;
-  try { await setDoc(doc(db, 'users', username), save); } catch(e) {}
+  try {
+    await setDoc(doc(db, 'users', username), save, { merge: true });
+  } catch(e) {
+    console.error('persist: 保存エラー:', e);
+  }
 }
 
 // ============================================================
@@ -616,20 +642,26 @@ function updateStatus() {
   feedBtn.disabled = food <= 0;
   feedBtn.textContent = food > 0 ? `🍖 エサをあげる（${food}こ）` : '🍖 エサがないよ…';
   const charges = petData.tapCharges ?? 0;
-const tapEl = document.getElementById('tap-charges');
-const timerEl = document.getElementById('tap-regen-timer');
-if (tapEl) {
-  tapEl.childNodes[0].textContent = `🖐️ なでる のこり ${charges}回 `;
-  tapEl.style.color = charges === 0 ? 'var(--text3)' : 'var(--text2)';
-}
-if (timerEl && charges < TAP_MAX && petData.lastTapRegen) {
-  const elapsed = Date.now() - petData.lastTapRegen;
-  const remaining = TAP_REGEN_MS - (elapsed % TAP_REGEN_MS);
-  const mins = Math.ceil(remaining / 60000);
-  timerEl.textContent = `（あと約${mins}分で回復）`;
-} else if (timerEl) {
-  timerEl.textContent = '';
-}
+  const tapEl = document.getElementById('tap-charges');
+  const timerEl = document.getElementById('tap-regen-timer');
+  if (tapEl) {
+    tapEl.childNodes[0].textContent = `🖐️ なでる のこり ${charges}回 `;
+    tapEl.style.color = charges === 0 ? 'var(--text3)' : 'var(--text2)';
+  }
+  // 修正2: charges < TAP_MAX なら常にタイマー情報を表示
+  if (timerEl && charges < TAP_MAX) {
+    if (petData.lastTapRegen) {
+      const elapsed = Date.now() - petData.lastTapRegen;
+      const remaining = TAP_REGEN_MS - (elapsed % TAP_REGEN_MS);
+      const mins = Math.ceil(remaining / 60000);
+      timerEl.textContent = `（あと約${mins}分で回復）`;
+    } else {
+      // lastTapRegenがnullの場合（まだ一度もなでていない）
+      timerEl.textContent = '（なでると回復タイマーが始まるよ）';
+    }
+  } else if (timerEl) {
+    timerEl.textContent = '';
+  }
 }
 
 function updateRecords() {

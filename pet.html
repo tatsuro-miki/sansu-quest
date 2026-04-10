@@ -420,196 +420,60 @@ import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/fireb
 const app = initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(app);
 
-// ============================================================
-// セリフ
-// ============================================================
 const SPEECHES = {
   hamster: {
-    idle: [
-      'ちゅー！','おなかすいたよ〜','{name}あそぼ？','むにゅ…','{name}だいすき！',
-      'ほっぺふくれてる！','ねむい…','きょうもがんばってるね！','ちゅちゅ♪',
-      'まるまる…','{name}みてる？','ひまだなぁ','くるくるしたい！',
-    ],
-    feed: [
-      'もぐもぐ！おいしい！','やったー！エサだ！','ちゅちゅ♪','もっとほしいな…',
-      'おいしすぎる！','{name}ありがとう！','もぐもぐもぐ…','さいこうのエサ！',
-    ],
-    tap: [
-      '{name}なでてくれてうれしい！','きゅー！','むにゅむにゅ','{name}すきだよ！',
-      'またなでて♪','きもちいい〜','ずっとなでてて！','ふわふわ…',
-    ],
+    idle: ['ちゅー！','おなかすいたよ〜','{name}あそぼ？','むにゅ…','{name}だいすき！','ほっぺふくれてる！','ねむい…','きょうもがんばってるね！','ちゅちゅ♪','まるまる…','{name}みてる？','ひまだなぁ','くるくるしたい！'],
+    feed: ['もぐもぐ！おいしい！','やったー！エサだ！','ちゅちゅ♪','もっとほしいな…','おいしすぎる！','{name}ありがとう！','もぐもぐもぐ…','さいこうのエサ！'],
+    tap: ['{name}なでてくれてうれしい！','きゅー！','むにゅむにゅ','{name}すきだよ！','またなでて♪','きもちいい〜','ずっとなでてて！','ふわふわ…'],
     happy: ['さいこう！','{name}うれしすぎる！','ぴょんぴょん！','やったやった！','ちゅーちゅー！'],
-    hungry: [
-      'おなかぺこぺこ…','{name}エサちょうだい…','ちゅ…（よわよわ）',
-      'エサ…エサ…','おなかなってる…',
-    ],
+    hungry: ['おなかぺこぺこ…','{name}エサちょうだい…','ちゅ…（よわよわ）','エサ…エサ…','おなかなってる…'],
   },
   cat: {
-    idle: [
-      'にゃー','…','ゴロゴロ…','{name}、なんか用？','みゃう',
-      'ひなたぼっこしたい','…（寝てた）','にゃにゃ','ふにゃぁ…',
-      'まあまあかな','{name}みてるにゃ','ふぁ…（あくび）','きょうもいい天気にゃ',
-    ],
-    feed: [
-      'にゃ！（うれしい）','ゴロゴロゴロ…','まあ、たべてあげる','にゃにゃにゃ！',
-      'おいしいにゃ','…（無言でたべる）','もっとちょうだいにゃ','ごちそうさまにゃ',
-    ],
-    tap: [
-      'ゴロゴロ…','{name}、もっとなでて','みゃ♪','…（しぶしぶ受け入れる）',
-      'にゃー！','ゴロゴロゴロゴロ…','まあ、いいか','きもちいいにゃ…',
-    ],
+    idle: ['にゃー','…','ゴロゴロ…','{name}、なんか用？','みゃう','ひなたぼっこしたい','…（寝てた）','にゃにゃ','ふにゃぁ…','まあまあかな','{name}みてるにゃ','ふぁ…（あくび）','きょうもいい天気にゃ'],
+    feed: ['にゃ！（うれしい）','ゴロゴロゴロ…','まあ、たべてあげる','にゃにゃにゃ！','おいしいにゃ','…（無言でたべる）','もっとちょうだいにゃ','ごちそうさまにゃ'],
+    tap: ['ゴロゴロ…','{name}、もっとなでて','みゃ♪','…（しぶしぶ受け入れる）','にゃー！','ゴロゴロゴロゴロ…','まあ、いいか','きもちいいにゃ…'],
     happy: ['ゴロゴロゴロ！','{name}きもちいい〜','にゃにゃ！','さいこうにゃ！','ぷるぷる…'],
-    hungry: [
-      '{name}、ご飯まだ？','にゃ…（おなかすいた）','みゃーん…',
-      'ごはんごはん…','にゃにゃ…（よわよわ）',
-    ],
+    hungry: ['{name}、ご飯まだ？','にゃ…（おなかすいた）','みゃーん…','ごはんごはん…','にゃにゃ…（よわよわ）'],
   },
 };
 
-// ============================================================
-// SVG描画
-// ============================================================
-function drawHamster(svg, mood) {
-  const happy = mood === 'happy' || mood === 'eating';
-  svg.innerHTML = `
-    <!-- 耳 -->
-    <ellipse cx="68" cy="72" rx="18" ry="16" fill="#e8b89a"/>
-    <ellipse cx="132" cy="72" rx="18" ry="16" fill="#e8b89a"/>
-    <ellipse cx="68" cy="72" rx="11" ry="10" fill="#d4887a"/>
-    <ellipse cx="132" cy="72" rx="11" ry="10" fill="#d4887a"/>
-    <!-- 体 -->
-    <ellipse cx="100" cy="148" rx="52" ry="40" fill="#e8b89a"/>
-    <!-- 顔 -->
-    <circle cx="100" cy="108" r="52" fill="#e8b89a"/>
-    <!-- ほっぺ -->
-    <ellipse cx="70" cy="115" rx="${happy?22:18}" ry="${happy?16:13}" fill="#f5dbc8"/>
-    <ellipse cx="130" cy="115" rx="${happy?22:18}" ry="${happy?16:13}" fill="#f5dbc8"/>
-    <!-- 赤ほっぺ -->
-    <ellipse cx="68" cy="118" rx="10" ry="7" fill="#f0a0a0" opacity=".6"/>
-    <ellipse cx="132" cy="118" rx="10" ry="7" fill="#f0a0a0" opacity=".6"/>
-    <!-- 目 -->
-    <circle cx="82" cy="100" r="8" fill="#3d2010"/>
-    <circle cx="118" cy="100" r="8" fill="#3d2010"/>
-    <circle cx="85" cy="97" r="3" fill="white"/>
-    <circle cx="121" cy="97" r="3" fill="white"/>
-    <!-- 鼻 -->
-    <ellipse cx="100" cy="113" rx="5" ry="4" fill="#c46060"/>
-    <!-- 口 -->
-    ${happy
-      ? `<path d="M88 120 Q100 132 112 120" fill="none" stroke="#c46060" stroke-width="2.5" stroke-linecap="round"/>`
-      : `<path d="M91 121 Q100 127 109 121" fill="none" stroke="#c46060" stroke-width="2" stroke-linecap="round"/>`
-    }
-    <!-- おてて -->
-    <ellipse cx="58" cy="155" rx="12" ry="9" fill="#e8b89a"/>
-    <ellipse cx="142" cy="155" rx="12" ry="9" fill="#e8b89a"/>
-    <!-- おなか -->
-    <ellipse cx="100" cy="155" rx="30" ry="24" fill="#f5dbc8"/>
-    <!-- しっぽ -->
-    <ellipse cx="148" cy="170" rx="10" ry="8" fill="#f5dbc8"/>
-  `;
-}
+const DEFAULT_PET = {
+  type: null, food: 0, happy: 50, fullness: 50,
+  totalFeed: 0, totalTap: 0, days: 0, lastDate: '',
+  questionsForFood: 0, tapCharges: 0, lastTapRegen: null,
+};
 
-function drawCat(svg, mood) {
-  const happy = mood === 'happy' || mood === 'eating';
-  const purring = mood === 'idle';
-  svg.innerHTML = `
-    <!-- 耳 -->
-    <polygon points="55,75 68,42 82,75" fill="#f0c060"/>
-    <polygon points="118,75 132,42 145,75" fill="#f0c060"/>
-    <polygon points="60,73 68,50 78,73" fill="#f08090"/>
-    <polygon points="122,73 132,50 140,73" fill="#f08090"/>
-    <!-- 体 -->
-    <ellipse cx="100" cy="152" rx="50" ry="38" fill="#f0c060"/>
-    <!-- しっぽ -->
-    <path d="M148 170 Q175 155 170 135 Q165 118 155 125" fill="none" stroke="#d89030" stroke-width="14" stroke-linecap="round"/>
-    <path d="M148 170 Q175 155 170 135 Q165 118 155 125" fill="none" stroke="#f0c060" stroke-width="10" stroke-linecap="round"/>
-    <!-- 顔 -->
-    <circle cx="100" cy="105" r="50" fill="#f0c060"/>
-    <!-- 縞模様 -->
-    <path d="M78 68 Q100 60 122 68" fill="none" stroke="#d89030" stroke-width="3" stroke-linecap="round"/>
-    <path d="M72 80 Q100 70 128 80" fill="none" stroke="#d89030" stroke-width="2.5" stroke-linecap="round"/>
-    <!-- ほっぺ -->
-    <ellipse cx="68" cy="112" rx="10" ry="7" fill="#f9c0c0" opacity=".5"/>
-    <ellipse cx="132" cy="112" rx="10" ry="7" fill="#f9c0c0" opacity=".5"/>
-    <!-- 目 -->
-    ${happy
-      ? `<path d="M76 96 Q82 88 88 96" fill="none" stroke="#3d8030" stroke-width="3" stroke-linecap="round"/>
-         <path d="M112 96 Q118 88 124 96" fill="none" stroke="#3d8030" stroke-width="3" stroke-linecap="round"/>`
-      : `<ellipse cx="82" cy="97" rx="8" ry="${purring?6:9}" fill="#3d8030"/>
-         <ellipse cx="118" cy="97" rx="8" ry="${purring?6:9}" fill="#3d8030"/>
-         <ellipse cx="82" cy="97" rx="3" ry="${purring?5:8}" fill="#1a1a1a"/>
-         <ellipse cx="118" cy="97" rx="3" ry="${purring?5:8}" fill="#1a1a1a"/>
-         <circle cx="85" cy="94" r="2.5" fill="white"/>
-         <circle cx="121" cy="94" r="2.5" fill="white"/>`
-    }
-    <!-- 鼻 -->
-    <ellipse cx="100" cy="110" rx="5" ry="4" fill="#e87090"/>
-    <!-- 口 -->
-    ${happy
-      ? `<path d="M88 116 Q100 128 112 116" fill="none" stroke="#c46060" stroke-width="2.5" stroke-linecap="round"/>
-         <path d="M100 110 L100 116" stroke="#c46060" stroke-width="2"/>`
-      : `<path d="M92 116 Q100 122 108 116" fill="none" stroke="#c46060" stroke-width="2" stroke-linecap="round"/>
-         <path d="M100 110 L100 115" stroke="#c46060" stroke-width="2"/>`
-    }
-    <!-- ひげ -->
-    <line x1="50" y1="108" x2="82" y2="112" stroke="#c8a060" stroke-width="1.5"/>
-    <line x1="50" y1="116" x2="82" y2="115" stroke="#c8a060" stroke-width="1.5"/>
-    <line x1="118" y1="112" x2="150" y2="108" stroke="#c8a060" stroke-width="1.5"/>
-    <line x1="118" y1="115" x2="150" y2="116" stroke="#c8a060" stroke-width="1.5"/>
-    <!-- おなか -->
-    <ellipse cx="100" cy="158" rx="28" ry="22" fill="#fff8ee"/>
-    <!-- 前足 -->
-    <ellipse cx="65" cy="168" rx="14" ry="10" fill="#f0c060"/>
-    <ellipse cx="135" cy="168" rx="14" ry="10" fill="#f0c060"/>
-  `;
-}
+const TAP_MAX = 3;
+const TAP_REGEN_MS = 30 * 60 * 1000;
 
-// ============================================================
-// 状態管理
-// ============================================================
 let username = '';
 let save = {};
 let petData = {};
 let speechTimer = null;
 let lottieAnim = null;
+let toastTimer = null;
 
+// ============================================================
+// Lottie
+// ============================================================
 function loadLottie(jsonPath) {
   if (lottieAnim) lottieAnim.destroy();
   const lottieLib = window.lottie || window.bodymovin;
-  if (!lottieLib) {
-    console.error('Lottieライブラリが読み込まれていません');
-    return;
-  }
+  if (!lottieLib) return;
   try {
     lottieAnim = lottieLib.loadAnimation({
       container: document.getElementById('pet-lottie'),
-      renderer: 'svg',
-      loop: true,
-      autoplay: true,
-      path: jsonPath
+      renderer: 'svg', loop: true, autoplay: true, path: jsonPath
     });
-  } catch(e) {
-    console.log('Lottie読み込みエラー:', e);
-  }
+  } catch(e) { console.log('Lottieエラー:', e); }
 }
-const DEFAULT_PET = {
-  type: null,
-  food: 0,
-  happy: 50,
-  fullness: 50,
-  totalFeed: 0,
-  totalTap: 0,
-  days: 0,
-  lastDate: '',
-  questionsForFood: 0,
-  tapCharges: 0,       // ← 3から0に変更
-  lastTapRegen: null,
-};
 
+// ============================================================
+// Firebase
+// ============================================================
 async function init() {
   username = sessionStorage.getItem('sq_user');
   if (!username) { location.href = 'index.html'; return; }
-
   try {
     const snap = await getDoc(doc(db, 'users', username));
     if (snap.exists()) save = snap.data();
@@ -618,53 +482,46 @@ async function init() {
   if (!save.pet) save.pet = { ...DEFAULT_PET };
   petData = save.pet;
 
-  // 日付チェック（連続日数）
   const today = new Date().toLocaleDateString('ja-JP');
   if (petData.lastDate !== today) {
     petData.days = (petData.days || 0) + 1;
     petData.lastDate = today;
-    // 時間経過でhappyとfullnessが自然減少
     petData.happy = Math.max(10, (petData.happy || 50) - 15);
     petData.fullness = Math.max(10, (petData.fullness || 50) - 20);
   }
-  // なで回復処理（30分ごとに1回、最大3回）
-  const TAP_MAX = 3;
-  const TAP_REGEN_MS = 30 * 60 * 1000;
-  const now = Date.now();
+
   const lastRegen = petData.lastTapRegen;
-  
-  // lastTapRegenが未設定なら回復しない
   if (lastRegen) {
-    const elapsed = now - lastRegen;
+    const elapsed = Date.now() - lastRegen;
     const regen = Math.floor(elapsed / TAP_REGEN_MS);
     if (regen > 0) {
       petData.tapCharges = Math.min(TAP_MAX, (petData.tapCharges || 0) + regen);
-      petData.lastTapRegen = now - (elapsed % TAP_REGEN_MS);
+      petData.lastTapRegen = Date.now() - (elapsed % TAP_REGEN_MS);
     }
   }
   if (petData.tapCharges === undefined) petData.tapCharges = 0;
-  
-  async function persist() {
-    save.pet = petData;
-    try { await setDoc(doc(db, 'users', username), save); } catch(e) {}
+
+  updateFoodDisplay();
+  if (petData.type) {
+    showPetMain();
+  } else {
+    document.getElementById('pet-select').style.display = 'block';
   }
+}
+
+async function persist() {
+  save.pet = petData;
+  try { await setDoc(doc(db, 'users', username), save); } catch(e) {}
+}
 
 // ============================================================
 // ペット選択
 // ============================================================
 window.selectPet = function(type) {
   if (petData.type && !confirm('ペットをかえますか？きろくはリセットされます。')) return;
-  
-  const tapCharges = petData.tapCharges ?? 0;  // ← ?? 0 に変更
+  const tapCharges = petData.tapCharges ?? 0;
   const lastTapRegen = petData.lastTapRegen || null;
-  
-  petData = {
-    ...DEFAULT_PET,
-    type,
-    lastDate: new Date().toLocaleDateString('ja-JP'),
-    tapCharges,
-    lastTapRegen,
-  };
+  petData = { ...DEFAULT_PET, type, lastDate: new Date().toLocaleDateString('ja-JP'), tapCharges, lastTapRegen };
   save.pet = petData;
   persist();
   showPetMain();
@@ -682,25 +539,20 @@ window.confirmChangePet = function() {
 };
 
 // ============================================================
-// メイン画面表示
+// メイン画面
 // ============================================================
-  function showPetMain() {
+function showPetMain() {
   document.getElementById('pet-select').style.display = 'none';
-  const main = document.getElementById('pet-main');
-  main.classList.add('show');
-
+  document.getElementById('pet-main').classList.add('show');
   const isHam = petData.type === 'hamster';
   document.getElementById('pet-name-badge').textContent = isHam ? '🐹 ハムスター' : '🐱 ねこ';
-
   loadLottie(isHam ? './hamster.json' : './cat.json');
-
   updateStatus();
   updateRecords();
   startIdleSpeech();
 }
 
-function renderPet(mood) {
-}
+function renderPet(mood) {}
 
 function updateStatus() {
   const h = Math.min(100, Math.max(0, petData.happy || 50));
@@ -709,12 +561,10 @@ function updateStatus() {
   document.getElementById('bar-full').style.width = f + '%';
   document.getElementById('val-happy').textContent = h + '%';
   document.getElementById('val-full').textContent = f + '%';
-
-  const feedBtn = document.getElementById('feed-btn');
   const food = petData.food || 0;
+  const feedBtn = document.getElementById('feed-btn');
   feedBtn.disabled = food <= 0;
   feedBtn.textContent = food > 0 ? `🍖 エサをあげる（${food}こ）` : '🍖 エサがないよ…';
-
   const charges = petData.tapCharges ?? 0;
   const tapEl = document.getElementById('tap-charges');
   if (tapEl) {
@@ -736,33 +586,16 @@ function updateFoodDisplay() {
 // ============================================================
 // エサやり
 // ============================================================
-updateFoodDisplay();
-
-  if (petData.type) {
-    showPetMain();
-  } else {
-    document.getElementById('pet-select').style.display = 'block';
-  }
-}  // ← init()はここで閉じる
-
-async function persist() {
-  save.pet = petData;
-  try { await setDoc(doc(db, 'users', username), save); } catch(e) {}
-}
-
-window.petTap = function() {
-  if ((petData.tapCharges || 0) <= 0) {
-    showToast('なでは30分後に回復するよ！', 'ng');
-    return;
-  }
-  petData.tapCharges = (petData.tapCharges || 1) - 1;
-  if (!petData.lastTapRegen) petData.lastTapRegen = Date.now();
-  petData.happy = Math.min(100, (petData.happy || 50) + 8);
-  petData.totalTap = (petData.totalTap || 0) + 1;
-
-  const speeches = SPEECHES[petData.type].tap;
+window.feedPet = function() {
+  if ((petData.food || 0) <= 0) { showToast('エサがないよ！問題を解こう🎯', 'ng'); return; }
+  petData.food = Math.max(0, (petData.food || 0) - 1);
+  petData.fullness = Math.min(100, (petData.fullness || 50) + 25);
+  petData.happy = Math.min(100, (petData.happy || 50) + 15);
+  petData.totalFeed = (petData.totalFeed || 0) + 1;
+  const speeches = SPEECHES[petData.type].feed;
   setSpeech(speeches[Math.floor(Math.random() * speeches.length)]);
-  spawnHearts(2);
+  spawnHearts();
+  updateFoodDisplay();
   updateStatus();
   updateRecords();
   persist();
@@ -777,26 +610,9 @@ window.petTap = function() {
     return;
   }
   petData.tapCharges = (petData.tapCharges || 1) - 1;
-  if ((petData.tapCharges || 0) <= 0) {
-    showToast('なでは30分後に回復するよ！', 'ng');
-    return;
-  }
-  petData.tapCharges = (petData.tapCharges || 1) - 1;
-  // 初めてなでたときだけlastTapRegenをセット
   if (!petData.lastTapRegen) petData.lastTapRegen = Date.now();
   petData.happy = Math.min(100, (petData.happy || 50) + 8);
   petData.totalTap = (petData.totalTap || 0) + 1;
-
-  const speeches = SPEECHES[petData.type].tap;
-  setSpeech(speeches[Math.floor(Math.random() * speeches.length)]);
-  spawnHearts(2);
-  updateStatus();
-  updateRecords();
-  persist();
-};
-  petData.happy = Math.min(100, (petData.happy || 50) + 8);
-  petData.totalTap = (petData.totalTap || 0) + 1;
-
   const speeches = SPEECHES[petData.type].tap;
   setSpeech(speeches[Math.floor(Math.random() * speeches.length)]);
   spawnHearts(2);
@@ -806,17 +622,17 @@ window.petTap = function() {
 };
 
 // ============================================================
-// 吹き出し・アニメ
+// 吹き出し
 // ============================================================
 function setSpeech(text) {
   const el = document.getElementById('speech-bubble');
-  el.textContent = text.replace('{name}', username);  // ← この1行を変更
+  el.textContent = text.replace('{name}', username);
   el.style.opacity = '1';
   clearTimeout(speechTimer);
   speechTimer = setTimeout(() => {
     const idles = SPEECHES[petData.type].idle;
     const t = idles[Math.floor(Math.random() * idles.length)];
-    el.textContent = t.replace('{name}', username);  // ← ここも
+    el.textContent = t.replace('{name}', username);
   }, 3000);
 }
 
@@ -825,11 +641,7 @@ function startIdleSpeech() {
   const idles = SPEECHES[petData.type].idle;
   const hunger = SPEECHES[petData.type].hungry;
   setInterval(() => {
-    // 30%の確率で何も言わない（無言タイム）
-    if (Math.random() < 0.3) {
-      document.getElementById('speech-bubble').textContent = '…';
-      return;
-    }
+    if (Math.random() < 0.3) { document.getElementById('speech-bubble').textContent = '…'; return; }
     if ((petData.fullness || 50) < 25) {
       setSpeech(hunger[Math.floor(Math.random() * hunger.length)]);
     } else {
@@ -853,10 +665,6 @@ function spawnHearts(count = 4) {
   }
 }
 
-// ============================================================
-// トースト
-// ============================================================
-let toastTimer = null;
 function showToast(msg, type) {
   const el = document.getElementById('toast');
   el.textContent = msg;

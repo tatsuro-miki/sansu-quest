@@ -631,26 +631,23 @@ async function init() {
   const TAP_MAX = 3;
   const TAP_REGEN_MS = 30 * 60 * 1000;
   const now = Date.now();
-  const elapsed = now - (petData.lastTapRegen || now);
-  const regen = Math.floor(elapsed / TAP_REGEN_MS);
-  if (regen > 0) {
-    petData.tapCharges = Math.min(TAP_MAX, (petData.tapCharges || TAP_MAX) + regen);
-    petData.lastTapRegen = now;
+  const lastRegen = petData.lastTapRegen;
+  
+  // lastTapRegenが未設定なら回復しない
+  if (lastRegen) {
+    const elapsed = now - lastRegen;
+    const regen = Math.floor(elapsed / TAP_REGEN_MS);
+    if (regen > 0) {
+      petData.tapCharges = Math.min(TAP_MAX, (petData.tapCharges || 0) + regen);
+      petData.lastTapRegen = now - (elapsed % TAP_REGEN_MS);
+    }
   }
-  if (petData.tapCharges === undefined) petData.tapCharges = TAP_MAX;
-  updateFoodDisplay();
-
-  if (petData.type) {
-    showPetMain();
-  } else {
-    document.getElementById('pet-select').style.display = 'block';
+  if (petData.tapCharges === undefined) petData.tapCharges = 0;
+  
+  async function persist() {
+    save.pet = petData;
+    try { await setDoc(doc(db, 'users', username), save); } catch(e) {}
   }
-}
-
-async function persist() {
-  save.pet = petData;
-  try { await setDoc(doc(db, 'users', username), save); } catch(e) {}
-}
 
 // ============================================================
 // ペット選択
@@ -770,7 +767,23 @@ window.petTap = function() {
     return;
   }
   petData.tapCharges = (petData.tapCharges || 1) - 1;
-  petData.lastTapRegen = petData.lastTapRegen || Date.now();
+  if ((petData.tapCharges || 0) <= 0) {
+    showToast('なでは30分後に回復するよ！', 'ng');
+    return;
+  }
+  petData.tapCharges = (petData.tapCharges || 1) - 1;
+  // 初めてなでたときだけlastTapRegenをセット
+  if (!petData.lastTapRegen) petData.lastTapRegen = Date.now();
+  petData.happy = Math.min(100, (petData.happy || 50) + 8);
+  petData.totalTap = (petData.totalTap || 0) + 1;
+
+  const speeches = SPEECHES[petData.type].tap;
+  setSpeech(speeches[Math.floor(Math.random() * speeches.length)]);
+  spawnHearts(2);
+  updateStatus();
+  updateRecords();
+  persist();
+};
   petData.happy = Math.min(100, (petData.happy || 50) + 8);
   petData.totalTap = (petData.totalTap || 0) + 1;
 

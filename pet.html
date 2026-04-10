@@ -180,27 +180,6 @@ header h1 span { color: var(--gold); }
 .pet-svg-wrap.eating svg { animation: petNom .6s ease; }
 .pet-svg-wrap.idle svg { animation: petIdle 3s ease-in-out infinite; }
 
-.exchange-bar {
-  background: white; border-radius: var(--radius-md);
-  border: 1.5px solid var(--border2);
-  padding: 12px 20px; margin-bottom: 16px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-}
-.exchange-title {
-  font-size: 13px; font-weight: 900; color: var(--text2);
-  margin-bottom: 8px;
-}
-.exchange-btns {
-  display: flex; gap: 8px; flex-wrap: wrap;
-}
-.exchange-btns button {
-  font-family: inherit; font-size: 12px; font-weight: 800;
-  padding: 7px 14px; border-radius: 20px;
-  border: 1.5px solid var(--border2);
-  background: var(--surface2); color: var(--text);
-  cursor: pointer; transition: .15s;
-}
-.exchange-btns button:hover { background: var(--gold); color: white; border-color: var(--gold); }
 @keyframes petBounce {
   0%,100%{transform:translateY(0) scale(1)}
   30%{transform:translateY(-20px) scale(1.08)}
@@ -329,6 +308,29 @@ header h1 span { color: var(--gold); }
 .toast.show { opacity: 1; }
 .toast.ok { background: var(--mint); }
 .toast.ng { background: var(--primary); }
+.exchange-bar {
+  background: white; border-radius: var(--radius-md);
+  border: 1.5px solid var(--border2);
+  padding: 12px 20px; margin-bottom: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.exchange-title {
+  font-size: 13px; font-weight: 900; color: var(--text2);
+  margin-bottom: 8px;
+}
+.exchange-btns {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.exchange-btns button {
+  font-family: inherit; font-size: 12px; font-weight: 800;
+  padding: 7px 14px; border-radius: 20px;
+  border: 1.5px solid var(--border2);
+  background: var(--surface2); color: var(--text);
+  cursor: pointer; transition: .15s;
+}
+.exchange-btns button:hover {
+  background: var(--gold); color: white; border-color: var(--gold);
+}
 </style>
 </head>
 <body>
@@ -593,6 +595,12 @@ function showPetMain() {
   updateRecords();
   startIdleSpeech();
   setInterval(() => updateStatus(), 60000);
+  setInterval(() => {
+    petData.happy   = Math.max(0, (petData.happy   || 50) - 5);
+    petData.fullness = Math.max(0, (petData.fullness || 50) - 8);
+    updateStatus();
+    persist();
+  }, 60 * 60 * 1000);  // 1時間ごと
 }
 
 function renderPet(mood) {}

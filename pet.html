@@ -602,6 +602,7 @@ window.exchangeFood = function(foodCost, coinGain) {
   save.coins = (save.coins || 0) + coinGain;
   persist();
   updateFoodDisplay();
+  updateStatus();
   showToast(`🪙 ${coinGain}コインとこうかんしたよ！`, 'ok');
 };
 // ============================================================

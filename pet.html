@@ -374,7 +374,7 @@ header h1 span { color: var(--gold); }
   <!-- ペットメイン画面 -->
   <div class="pet-main" id="pet-main">
 
-    <!-- 修正3: こうかんショップをpet-mainの中に移動 -->
+    <!-- こうかんショップ（pet-mainの中） -->
     <div class="exchange-bar">
       <div class="exchange-title">🔄 こうかんショップ</div>
       <div class="exchange-btns">
@@ -401,8 +401,8 @@ header h1 span { color: var(--gold); }
       </button>
       <div id="tap-charges" style="position:relative;z-index:2;font-size:13px;font-weight:800;color:var(--text2);margin-top:8px;">
         🖐️ なでる のこり 3回
-        <span id="tap-regen-timer" style="font-size:11px;color:var(--text3);margin-left:6px;"></span>
       </div>
+      <div id="tap-regen-timer" style="position:relative;z-index:2;font-size:13px;font-weight:800;color:var(--blue);margin-top:4px;min-height:20px;"></div>
     </div>
 
     <div class="pet-status">
@@ -486,7 +486,7 @@ let petData = {};
 let speechTimer = null;
 let lottieAnim = null;
 let toastTimer = null;
-let saveLoaded = false; // 修正1: saveが正しく読み込まれたかを追跡するフラグ
+let saveLoaded = false;
 
 // ============================================================
 // Lottie
@@ -512,10 +512,10 @@ async function init() {
   try {
     const snap = await getDoc(doc(db, 'users', username));
     if (snap.exists()) save = snap.data();
-    saveLoaded = true; // 修正1: 読み込み成功フラグ
+    saveLoaded = true;
   } catch(e) {
     console.error('セーブデータ読み込みエラー:', e);
-    saveLoaded = false; // 修正1: 読み込み失敗
+    saveLoaded = false;
   }
 
   if (!save.pet) save.pet = { ...DEFAULT_PET };
@@ -548,20 +548,17 @@ async function init() {
   }
 }
 
-// 修正1: persist()を安全にする - 最新のsaveを再取得してからpetDataをマージし、merge:trueで保存
 async function persist() {
   try {
-    // 最新のセーブデータをFirebaseから再取得して他ページの変更を保護
     const snap = await getDoc(doc(db, 'users', username));
     if (snap.exists()) {
       save = snap.data();
     }
   } catch(e) {
     console.error('persist: セーブデータ再取得エラー:', e);
-    // 再取得に失敗しても、saveLoadedがtrueなら初回読み込みのsaveを使う
     if (!saveLoaded) {
       console.error('persist: セーブデータが未読み込みのため保存をスキップ');
-      return; // saveが一度も正しく読み込まれていなければ保存しない
+      return;
     }
   }
   save.pet = petData;
@@ -641,26 +638,33 @@ function updateStatus() {
   const feedBtn = document.getElementById('feed-btn');
   feedBtn.disabled = food <= 0;
   feedBtn.textContent = food > 0 ? `🍖 エサをあげる（${food}こ）` : '🍖 エサがないよ…';
+
+  // なでる回数とタイマー表示
   const charges = petData.tapCharges ?? 0;
   const tapEl = document.getElementById('tap-charges');
   const timerEl = document.getElementById('tap-regen-timer');
+
   if (tapEl) {
-    tapEl.childNodes[0].textContent = `🖐️ なでる のこり ${charges}回 `;
-    tapEl.style.color = charges === 0 ? 'var(--text3)' : 'var(--text2)';
+    tapEl.textContent = `🖐️ なでる のこり ${charges}回`;
+    tapEl.style.color = charges === 0 ? 'var(--primary)' : 'var(--text2)';
   }
-  // 修正2: charges < TAP_MAX なら常にタイマー情報を表示
-  if (timerEl && charges < TAP_MAX) {
-    if (petData.lastTapRegen) {
-      const elapsed = Date.now() - petData.lastTapRegen;
-      const remaining = TAP_REGEN_MS - (elapsed % TAP_REGEN_MS);
-      const mins = Math.ceil(remaining / 60000);
-      timerEl.textContent = `（あと約${mins}分で回復）`;
+
+  // タイマー表示（独立したdiv要素）
+  if (timerEl) {
+    if (charges < TAP_MAX) {
+      if (petData.lastTapRegen) {
+        const elapsed = Date.now() - petData.lastTapRegen;
+        const remaining = TAP_REGEN_MS - (elapsed % TAP_REGEN_MS);
+        const mins = Math.ceil(remaining / 60000);
+        timerEl.textContent = `⏰ あと約${mins}分で回復`;
+        timerEl.style.color = 'var(--blue)';
+      } else {
+        timerEl.textContent = '⏰ なでると回復タイマーが始まるよ';
+        timerEl.style.color = 'var(--blue)';
+      }
     } else {
-      // lastTapRegenがnullの場合（まだ一度もなでていない）
-      timerEl.textContent = '（なでると回復タイマーが始まるよ）';
+      timerEl.textContent = '';
     }
-  } else if (timerEl) {
-    timerEl.textContent = '';
   }
 }
 

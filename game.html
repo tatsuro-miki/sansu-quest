@@ -551,6 +551,15 @@ body::before {
 .lesson-btn .lesson-name { font-size: .9rem; font-weight: 900; display: block; margin-bottom: 2px; }
 .lesson-btn .lesson-desc { font-size: .72rem; color: var(--text2); font-weight: 700; }
 .lesson-btn .lesson-arrow { font-size: .85rem; color: var(--text3); }
+.avatar-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(233,100,157,0.12);
+  border: 1.5px solid rgba(233,100,157,0.3);
+  text-decoration: none; font-size: 1.2rem;
+  transition: .2s; cursor: pointer;
+}
+.avatar-btn:hover { background: rgba(233,100,157,0.22); transform: scale(1.1); }
 </style>
 </head>
 <body>
@@ -560,6 +569,9 @@ body::before {
     <div class="streak-pill" id="streak-pill">🔥 <span id="ui-streak">0</span>日</div>
     <div class="xp-pill">⭐ <span id="ui-xp">0</span> XP</div>
     <div class="hearts" id="ui-hearts"></div>
+    <a href="avatar.html" class="avatar-btn" id="avatar-btn" title="きがえ">
+    <span id="topbar-avatar">👧</span>
+    </a>
     <button class="logout-btn" onclick="logout()">ログアウト</button>
   </div>
   <div class="level-section">
@@ -697,6 +709,9 @@ async function init() {
   const elapsed = Date.now()-(save.lastHeartRegen||Date.now());
   const regen = Math.floor(elapsed/(30*60*1000));
   if (regen>0) { save.hearts=Math.min(HEARTS_MAX,(save.hearts||0)+regen); save.lastHeartRegen=Date.now(); }
+  if (!save.coins) save.coins = 0;
+  if (!save.ownedParts) save.ownedParts = ['hair_short','clothes_simple','acc_none','face_happy'];
+  if (!save.equipped) save.equipped = { hair:'hair_short', clothes:'clothes_simple', accessory:'acc_none', face:'face_happy' };
   persistSave();
   document.getElementById('app').style.display='block';
   renderUI(); renderBadges();
@@ -746,7 +761,8 @@ function nextQuestion(){ if((save.hearts||0)<=0){renderGameOver();return;} quest
 window.doCheck=function(){ if(answered) return; if(question.type==='fraction'){const n=parseInt(document.getElementById('fn').value),d=parseInt(document.getElementById('fd').value);if(isNaN(n)||isNaN(d)) return;const g=gcd(Math.abs(n),d),rn=n/g,rd=d/g;const cg=gcd(Math.abs(question.na),question.da),cn=question.na/cg,cd=question.da/cg;rn===cn&&rd===cd?onCorrect():onWrong(`せいかいは ${question.na}/${question.da}`);}else{const inp=document.getElementById('main-inp');if(!inp||inp.value==='') return;const ua=(Math.round(parseFloat(inp.value)*10000)/10000).toString();const qa=(Math.round(parseFloat(question.answer)*10000)/10000).toString();if(ua===qa){inp.classList.add('correct');onCorrect();}else{inp.classList.add('wrong');onWrong(`せいかいは ${question.answer}`);}} };
 window.doChoice=function(val,btn){ if(answered) return; document.querySelectorAll('.choice-btn').forEach(b=>b.style.pointerEvents='none'); if(val===question.answer){btn.classList.add('ok');onCorrect();}else{btn.classList.add('ng');document.querySelectorAll('.choice-btn').forEach(b=>{if(b.textContent===question.answer)b.classList.add('ok');});onWrong(`せいかいは ${question.answer}`);} };
 
-function onCorrect(){ answered=true; const baseXp=XP_TBL[question.lv]; const multi=DIFF_MULTI[difficulty]||1; const xpAmt=Math.round(baseXp*multi); save.questionStreak=(save.questionStreak||0)+1; const bonus=save.questionStreak%5===0?10:0; const isCombo=save.questionStreak%3===0; save.totalCorrect=(save.totalCorrect||0)+1; save.catCorrect=save.catCorrect||[0,0,0,0]; save.catCorrect[category]=(save.catCorrect[category]||0)+1; save.dailyDone=(save.dailyDone||0)+1; save.xp=(save.xp||0)+xpAmt+bonus; let leveled=false; while(save.level<MAX_LV&&save.xp>=xpForLv(save.level)){save.xp-=xpForLv(save.level);save.level++;leveled=true;} flashScreen('correct-flash'); if(isCombo){soundCombo();spawnCoins(12);spawnStars(6);}else{soundCorrect();spawnCoins(5);spawnStars(3);} if(leveled){save.hearts=HEARTS_MAX;setTimeout(()=>showLevelUpOverlay(save.level,lvName(save.level)),500);} checkBadges(); persistSave(); renderUI(); renderBadges(); const msgs=['すごい！🎉','かんぺき！✨','よくできました！⭐','その調子！🔥','天才！🧠','完璧！💯']; const diffTag=multi>1?` ${DIFF_LABELS[difficulty]}ボーナス×${multi}！`:''; setFeedback('ok',msgs[R(0,msgs.length-1)]+(bonus?` コンボ+${bonus}XP！`:'')+diffTag); showXpPop(`+${xpAmt+bonus}XP`); if(isCombo) showCombo(`🔥×${save.questionStreak}`); const _dg=dailyGoal(save.level||1); if(save.dailyDone===_dg) setTimeout(()=>showModal('🎊 ノルマ達成！',`今日の${_dg}問クリア！\nまた明日もがんばろう！`,50),600); showNextBtn(); }
+function onCorrect(){ answered=true; const baseXp=XP_TBL[question.lv]; const multi=DIFF_MULTI[difficulty]||1; const xpAmt=Math.round(baseXp*multi); save.questionStreak=(save.questionStreak||0)+1; const bonus=save.questionStreak%5===0?10:0; const isCombo=save.questionStreak%3===0; save.totalCorrect=(save.totalCorrect||0)+1; save.catCorrect=save.catCorrect||[0,0,0,0]; save.catCorrect[category]=(save.catCorrect[category]||0)+1; save.dailyDone=(save.dailyDone||0)+1; save.xp=(save.xp||0)+xpAmt+bonus; const coinAmt = Math.round(1 * (DIFF_MULTI[difficulty] || 1));
+save.coins = (save.coins || 0) + coinAmt; let leveled=false; while(save.level<MAX_LV&&save.xp>=xpForLv(save.level)){save.xp-=xpForLv(save.level);save.level++;leveled=true;} flashScreen('correct-flash'); if(isCombo){soundCombo();spawnCoins(12);spawnStars(6);}else{soundCorrect();spawnCoins(5);spawnStars(3);} if(leveled){save.hearts=HEARTS_MAX;setTimeout(()=>showLevelUpOverlay(save.level,lvName(save.level)),500);} checkBadges(); renderUI(); renderBadges(); const msgs=['すごい！🎉','かんぺき！✨','よくできました！⭐','その調子！🔥','天才！🧠','完璧！💯']; const diffTag=multi>1?` ${DIFF_LABELS[difficulty]}ボーナス×${multi}！`:''; setFeedback('ok',msgs[R(0,msgs.length-1)]+(bonus?` コンボ+${bonus}XP！`:'')+diffTag); showXpPop(`+${xpAmt+bonus}XP`); if(isCombo) showCombo(`🔥×${save.questionStreak}`); const _dg=dailyGoal(save.level||1); if(save.dailyDone===_dg) setTimeout(()=>showModal('🎊 ノルマ達成！',`今日の${_dg}問クリア！\nまた明日もがんばろう！`,50),600); showNextBtn(); }
 function onWrong(msg){ answered=true; save.questionStreak=0; save.hearts=Math.max(0,(save.hearts||HEARTS_MAX)-1); save.lastHeartRegen=Date.now(); persistSave(); renderUI(); flashScreen('wrong-flash'); soundWrong(); soundHeartLost(); setFeedback('ng',`❌ ざんねん… ${msg}`); document.getElementById('streak-pill').classList.add('shake'); setTimeout(()=>document.getElementById('streak-pill').classList.remove('shake'),500); if(save.hearts<=0) setTimeout(renderGameOver,800); else showNextBtn(); }
 
 function checkBadges(){ const ub=save.unlockedBadges||[]; const add=(id,cond)=>{if(cond&&!ub.includes(id)){ub.push(id);showCombo('🏅');}}; add('first',save.totalCorrect>=1);add('streak3',save.questionStreak>=3);add('streak7',save.questionStreak>=7);add('daily1',save.dailyDone>=dailyGoal(save.level||1));add('day3',(save.loginDays||0)>=3);add('day7',(save.loginDays||0)>=7);add('lv3',(save.level||1)>=3);add('lv5',(save.level||1)>=5);add('total50',save.totalCorrect>=50);add('total200',save.totalCorrect>=200);add('fraction1',(save.catCorrect||[])[1]>=5);add('word1',(save.catCorrect||[])[3]>=5); save.unlockedBadges=ub; }

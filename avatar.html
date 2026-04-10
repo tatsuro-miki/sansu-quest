@@ -475,9 +475,7 @@ async function persist() {
 // アバター描画
 // ============================================================
 function renderAvatar() {
-  const cats = ['body', 'clothes', 'face', 'hair', 'accessory'];
-  cats.forEach(cat => {
-    document.getElementById('layer-' + cat).innerHTML = '';
+    document.getElementById('layer-base').src = './base.png';
   });
 
   // ベース体

@@ -325,9 +325,17 @@ header h1 span { color: var(--gold); }
   <div class="food-bar">
     <div class="food-count">
       <span class="food-icon">🍖</span>
-      <span id="food-count">0</span> こ
+      <span id="food-count">0</span> 
     </div>
     <div class="food-hint">5問といたら1こもらえるよ！</div>
+    <div class="exchange-bar">
+  <div class="exchange-title">🔄 こうかんショップ</div>
+  <div class="exchange-btns">
+    <button onclick="exchangeFood(3, 1)">🍖×3 → 🪙×1</button>
+    <button onclick="exchangeFood(10, 5)">🍖×10 → 🪙×5</button>
+    <button onclick="exchangeFood(30, 20)">🍖×30 → 🪙×20</button>
+  </div>
+</div>
   </div>
 
   <!-- ペット選択画面 -->
@@ -538,6 +546,17 @@ window.confirmChangePet = function() {
   }
 };
 
+window.exchangeFood = function(foodCost, coinGain) {
+  if ((petData.food || 0) < foodCost) {
+    showToast(`エサが${foodCost}こ必要だよ！`, 'ng');
+    return;
+  }
+  petData.food -= foodCost;
+  save.coins = (save.coins || 0) + coinGain;
+  persist();
+  updateFoodDisplay();
+  showToast(`🪙 ${coinGain}コインとこうかんしたよ！`, 'ok');
+};
 // ============================================================
 // メイン画面
 // ============================================================

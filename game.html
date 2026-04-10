@@ -771,16 +771,17 @@ if (save.pet.questionsForFood >= 5) {
   save.pet.food = (save.pet.food || 0) + 1;
   save.pet.questionsForFood = 0;
   // エサゲット演出
-  setTimeout(() => {
-    const el = document.createElement('div');
-    el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2rem;font-weight:900;color:#f5a623;z-index:9999;pointer-events:none;background:white;padding:12px 24px;border-radius:20px;';
-    el.textContent = '🍖 エサ+1！';
-    document.body.appendChild(el);
-    setTimeout(() => {
-    el.style.transition = 'opacity .5s';
-    el.style.opacity = '0';
-    setTimeout(() => el.remove(), 500);
-}, 3000);
+   setTimeout(() => {
+     const el = document.createElement('div');
+     el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2rem;font-weight:900;color:#f5a623;z-index:9999;pointer-events:none;background:white;padding:12px 24px;border-radius:20px;';
+     el.textContent = '🍖 エサ+1！';
+     document.body.appendChild(el);
+     setTimeout(() => {
+       el.style.transition = 'opacity .5s';
+       el.style.opacity = '0';
+       setTimeout(() => el.remove(), 500);
+     }, 3000);
+   }, 400);  // ← これを追加
 let leveled=false; while(save.level<MAX_LV&&save.xp>=xpForLv(save.level)){save.xp-=xpForLv(save.level);save.level++;leveled=true;} flashScreen('correct-flash'); if(isCombo){soundCombo();spawnCoins(12);spawnStars(6);}else{soundCorrect();spawnCoins(5);spawnStars(3);} if(leveled){save.hearts=HEARTS_MAX;setTimeout(()=>showLevelUpOverlay(save.level,lvName(save.level)),500);} checkBadges(); persistSave(); renderUI(); renderBadges(); const msgs=['すごい！🎉','かんぺき！✨','よくできました！⭐','その調子！🔥','天才！🧠','完璧！💯']; const diffTag=multi>1?` ${DIFF_LABELS[difficulty]}ボーナス×${multi}！`:''; setFeedback('ok',msgs[R(0,msgs.length-1)]+(bonus?` コンボ+${bonus}XP！`:'')+diffTag); showXpPop(`+${xpAmt+bonus}XP`); if(isCombo) showCombo(`🔥×${save.questionStreak}`); const _dg=dailyGoal(save.level||1); if(save.dailyDone===_dg) setTimeout(()=>showModal('🎊 ノルマ達成！',`今日の${_dg}問クリア！\nまた明日もがんばろう！`,50),600); showNextBtn(); }
 function onWrong(msg){ answered=true; save.questionStreak=0; save.hearts=Math.max(0,(save.hearts||HEARTS_MAX)-1); save.lastHeartRegen=Date.now(); persistSave(); renderUI(); flashScreen('wrong-flash'); soundWrong(); soundHeartLost(); setFeedback('ng',`❌ ざんねん… ${msg}`); document.getElementById('streak-pill').classList.add('shake'); setTimeout(()=>document.getElementById('streak-pill').classList.remove('shake'),500); if(save.hearts<=0) setTimeout(renderGameOver,800); else showNextBtn(); }
 

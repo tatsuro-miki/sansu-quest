@@ -546,13 +546,22 @@ let lottieAnim = null;
 
 function loadLottie(jsonPath) {
   if (lottieAnim) lottieAnim.destroy();
-  lottieAnim = lottie.loadAnimation({
-    container: document.getElementById('pet-lottie'),
-    renderer: 'svg',
-    loop: true,
-    autoplay: true,
-    path: jsonPath
-  });
+  const lottieLib = window.lottie || window.bodymovin;
+  if (!lottieLib) {
+    console.error('Lottieライブラリが読み込まれていません');
+    return;
+  }
+  try {
+    lottieAnim = lottieLib.loadAnimation({
+      container: document.getElementById('pet-lottie'),
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+      path: jsonPath
+    });
+  } catch(e) {
+    console.log('Lottie読み込みエラー:', e);
+  }
 }
 const DEFAULT_PET = {
   type: null,

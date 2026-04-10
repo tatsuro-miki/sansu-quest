@@ -476,26 +476,7 @@ async function persist() {
 // アバター描画
 // ============================================================
 function renderAvatar() {
-    document.getElementById('layer-base').src = './base.png';
-  }
-
-  // ベース体
-  document.getElementById('layer-body').innerHTML = `
-    <ellipse cx="70" cy="145" rx="32" ry="22" fill="#ffd5b0"/>
-    <rect x="52" y="130" width="36" height="30" rx="8" fill="#ffd5b0"/>
-  `;
-
-  // 各パーツ
-  ['face', 'hair', 'clothes', 'accessory'].forEach(cat => {
-    const id = save.equipped[cat];
-    if (!id) return;
-    const allParts = PARTS[cat];
-    if (!allParts) return;
-    const part = allParts.find(p => p.id === id);
-    if (part && part.svg) {
-      document.getElementById('layer-' + cat).innerHTML = part.svg;
-    }
-  });
+  document.getElementById('layer-base').src = './base.png';
 }
 
 // ============================================================

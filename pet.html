@@ -691,7 +691,7 @@ function updateStatus() {
   feedBtn.disabled = food <= 0;
   feedBtn.textContent = food > 0 ? `🍖 エサをあげる（${food}こ）` : '🍖 エサがないよ…';
 
-  const charges = petData.tapCharges ?? 3;
+  const charges = petData.tapCharges ?? 0;
   const tapEl = document.getElementById('tap-charges');
   if (tapEl) {
     tapEl.textContent = `🖐️ なでる のこり ${charges}回`;

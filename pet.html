@@ -635,19 +635,14 @@ window.confirmChangePet = function() {
   const isHam = petData.type === 'hamster';
   document.getElementById('pet-name-badge').textContent = isHam ? '🐹 ハムスター' : '🐱 ねこ';
 
-  renderPet('idle');
+  loadLottie(isHam ? './hamster.json' : './cat.json');
+
   updateStatus();
   updateRecords();
   startIdleSpeech();
 }
 
 function renderPet(mood) {
-  const svg = document.getElementById('pet-svg');
-  const wrap = document.getElementById('pet-svg-wrap');
-  if (petData.type === 'hamster') drawHamster(svg, mood);
-  else drawCat(svg, mood);
-
-  wrap.className = 'pet-svg-wrap ' + mood;
 }
 
 function updateStatus() {

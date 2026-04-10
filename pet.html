@@ -629,7 +629,18 @@ async function persist() {
 // ============================================================
 window.selectPet = function(type) {
   if (petData.type && !confirm('ペットをかえますか？きろくはリセットされます。')) return;
-  petData = { ...DEFAULT_PET, type, lastDate: new Date().toLocaleDateString('ja-JP') };
+  
+  // tapChargesとlastTapRegenは引き継ぐ
+  const tapCharges = petData.tapCharges ?? 3;
+  const lastTapRegen = petData.lastTapRegen || null;
+  
+  petData = {
+    ...DEFAULT_PET,
+    type,
+    lastDate: new Date().toLocaleDateString('ja-JP'),
+    tapCharges,       // ← 引き継ぐ
+    lastTapRegen,     // ← 引き継ぐ
+  };
   save.pet = petData;
   persist();
   showPetMain();

@@ -764,7 +764,27 @@ function nextQuestion(){ if((save.hearts||0)<=0){renderGameOver();return;} quest
 window.doCheck=function(){ if(answered) return; if(question.type==='fraction'){const n=parseInt(document.getElementById('fn').value),d=parseInt(document.getElementById('fd').value);if(isNaN(n)||isNaN(d)) return;const g=gcd(Math.abs(n),d),rn=n/g,rd=d/g;const cg=gcd(Math.abs(question.na),question.da),cn=question.na/cg,cd=question.da/cg;rn===cn&&rd===cd?onCorrect():onWrong(`せいかいは ${question.na}/${question.da}`);}else{const inp=document.getElementById('main-inp');if(!inp||inp.value==='') return;const ua=(Math.round(parseFloat(inp.value)*10000)/10000).toString();const qa=(Math.round(parseFloat(question.answer)*10000)/10000).toString();if(ua===qa){inp.classList.add('correct');onCorrect();}else{inp.classList.add('wrong');onWrong(`せいかいは ${question.answer}`);}} };
 window.doChoice=function(val,btn){ if(answered) return; document.querySelectorAll('.choice-btn').forEach(b=>b.style.pointerEvents='none'); if(val===question.answer){btn.classList.add('ok');onCorrect();}else{btn.classList.add('ng');document.querySelectorAll('.choice-btn').forEach(b=>{if(b.textContent===question.answer)b.classList.add('ok');});onWrong(`せいかいは ${question.answer}`);} };
 
-function onCorrect(){ answered=true; const baseXp=XP_TBL[question.lv]; const multi=DIFF_MULTI[difficulty]||1; const xpAmt=Math.round(baseXp*multi); save.questionStreak=(save.questionStreak||0)+1; const bonus=save.questionStreak%5===0?10:0; const isCombo=save.questionStreak%3===0; save.totalCorrect=(save.totalCorrect||0)+1; save.catCorrect=save.catCorrect||[0,0,0,0]; save.catCorrect[category]=(save.catCorrect[category]||0)+1; save.dailyDone=(save.dailyDone||0)+1; save.xp=(save.xp||0)+xpAmt+bonus; const coinAmt = Math.round(1 * (DIFF_MULTI[difficulty] || 1));
+function onCorrect(){ answered=true; const baseXp=XP_TBL[question.lv]; const multi=DIFF_MULTI[difficulty]||1; const xpAmt=Math.round(baseXp*multi); save.questionStreak=(save.questionStreak||0)+1; const bonus=save.questionStreak%5===0?10:0; const isCombo=save.questionStreak%3===0; save.totalCorrect=(save.totalCorrect||0)+1; save.catCorrect=save.catCorrect||[0,0,0,0]; save.catCorrect[category]=(save.catCorrect[category]||0)+1; save.dailyDone=(save.dailyDone||0)+1; save.xp=(save.xp||0)+xpAmt+bonus;
+const coinAmt = difficulty === 'hard' ? 1 : difficulty === 'mid' ? 2 : 1;
+save.coins = (save.coins || 0) + coinAmt;
+
+// むずかしいの5問ボーナス
+if (difficulty === 'hard') {
+  save.hardStreak = (save.hardStreak || 0) + 1;
+  if (save.hardStreak >= 5) {
+    save.coins += 3;
+    save.hardStreak = 0;
+    // ボーナス演出
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2rem;font-weight:900;color:#f5a623;z-index:9999;pointer-events:none;background:white;padding:12px 24px;border-radius:20px;';
+      el.textContent = '🪙 ボーナス+3！';
+      document.body.appendChild(el);
+      setTimeout(() => { el.style.transition='opacity .5s'; el.style.opacity='0'; setTimeout(()=>el.remove(),500); }, 3000);
+    }, 400);
+  }
+}
+                     
 save.coins = (save.coins || 0) + coinAmt; save.pet = save.pet || {};
 save.pet.questionsForFood = (save.pet.questionsForFood || 0) + 1;
 if (save.pet.questionsForFood >= 5) {

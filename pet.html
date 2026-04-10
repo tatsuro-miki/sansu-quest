@@ -474,7 +474,7 @@ const SPEECHES = {
 const DEFAULT_PET = {
   type: null, food: 0, happy: 50, fullness: 50,
   totalFeed: 0, totalTap: 0, days: 0, lastDate: '',
-  questionsForFood: 0, tapCharges: 0, lastTapRegen: null,
+  questionsForFood: 0, tapCharges: 3, lastTapRegen: null,
 };
 
 const TAP_MAX = 3;
@@ -540,6 +540,12 @@ async function init() {
   }
   if (petData.tapCharges === undefined) petData.tapCharges = 0;
 
+  // デッドロック防止: tapChargesが0でlastTapRegenがnullなら自動でタイマー開始
+  if ((petData.tapCharges || 0) === 0 && !petData.lastTapRegen) {
+    petData.lastTapRegen = Date.now();
+    persist();
+  }
+
   updateFoodDisplay();
   if (petData.type) {
     showPetMain();
@@ -574,9 +580,7 @@ async function persist() {
 // ============================================================
 window.selectPet = function(type) {
   if (petData.type && !confirm('ペットをかえますか？きろくはリセットされます。')) return;
-  const tapCharges = petData.tapCharges ?? 0;
-  const lastTapRegen = petData.lastTapRegen || null;
-  petData = { ...DEFAULT_PET, type, lastDate: new Date().toLocaleDateString('ja-JP'), tapCharges, lastTapRegen };
+  petData = { ...DEFAULT_PET, type, lastDate: new Date().toLocaleDateString('ja-JP') };
   save.pet = petData;
   persist();
   showPetMain();

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>マイペット｜さんすうクエスト</title>
@@ -358,10 +359,8 @@ header h1 span { color: var(--gold); }
 
       <div class="speech-bubble" id="speech-bubble">よんでくれてうれしいな！</div>
 
-      <div class="pet-svg-wrap idle" id="pet-svg-wrap" onclick="petTap()">
-        <svg id="pet-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-          <!-- ペットSVGはJSで描画 -->
-        </svg>
+      <div class="pet-svg-wrap" id="pet-svg-wrap" onclick="petTap()">
+        <div id="pet-lottie" style="width:200px;height:200px;"></div>
       </div>
 
       <button class="feed-btn" id="feed-btn" onclick="feedPet()">
@@ -543,7 +542,18 @@ let username = '';
 let save = {};
 let petData = {};
 let speechTimer = null;
+let lottieAnim = null;
 
+function loadLottie(jsonPath) {
+  if (lottieAnim) lottieAnim.destroy();
+  lottieAnim = lottie.loadAnimation({
+    container: document.getElementById('pet-lottie'),
+    renderer: 'svg',
+    loop: true,
+    autoplay: true,
+    path: jsonPath
+  });
+}
 const DEFAULT_PET = {
   type: null,
   food: 0,
@@ -617,7 +627,7 @@ window.confirmChangePet = function() {
 // ============================================================
 // メイン画面表示
 // ============================================================
-function showPetMain() {
+  function showPetMain() {
   document.getElementById('pet-select').style.display = 'none';
   const main = document.getElementById('pet-main');
   main.classList.add('show');

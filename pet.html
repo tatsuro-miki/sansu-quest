@@ -422,18 +422,18 @@ const db = getFirestore(app);
 // ============================================================
 const SPEECHES = {
   hamster: {
-    idle:    ['ちゅー！','おなかすいたよ〜','あそぼ？','むにゅ…','ほっぺふくれてる！'],
-    feed:    ['もぐもぐ！おいしい！','やったー！エサだ！','ちゅちゅ♪','もっとほしいな…','おいしすぎる！'],
-    tap:     ['きゅー！','なでてくれてうれしい！','むにゅむにゅ','すきだよ！','またなでて♪'],
-    happy:   ['さいこう！','うれしすぎる！','ぴょんぴょん！'],
-    hungry:  ['おなかぺこぺこ…','エサちょうだい…','ちゅ…（よわよわ）'],
+    idle: ['ちゅー！','おなかすいたよ〜','{name}あそぼ？','むにゅ…','{name}だいすき！'],
+    feed: ['もぐもぐ！おいしい！','やったー！エサだ！','ちゅちゅ♪','もっとほしいな…','おいしすぎる！'],
+    tap: ['{name}なでてくれてうれしい！','きゅー！','むにゅむにゅ','{name}すきだよ！','またなでて♪'],
+    happy: ['さいこう！','{name}うれしすぎる！','ぴょんぴょん！'],
+    hungry: ['おなかぺこぺこ…','{name}エサちょうだい…','ちゅ…（よわよわ）'],
   },
   cat: {
-    idle:    ['にゃー','…（無視）','ゴロゴロ…','みゃう','なんか用？'],
-    feed:    ['にゃ！（うれしい）','ゴロゴロゴロ…','まあ、たべてあげる','にゃにゃにゃ！','おいしいにゃ'],
-    tap:     ['ゴロゴロ…','みゃ♪','もっとなでて','…（しぶしぶ受け入れる）','にゃー！'],
-    happy:   ['ゴロゴロゴロ！','にゃにゃ！','きもちいい〜'],
-    hungry:  ['にゃ…（おなかすいた）','みゃーん…','ご飯まだ？'],
+    idle: ['にゃー','…（無視）','ゴロゴロ…','{name}、なんか用？','みゃう'],
+    feed: ['にゃ！（うれしい）','ゴロゴロゴロ…','まあ、たべてあげる','にゃにゃにゃ！','おいしいにゃ'],
+    tap: ['ゴロゴロ…','{name}、もっとなでて','みゃ♪','…（しぶしぶ受け入れる）','にゃー！'],
+    happy: ['ゴロゴロゴロ！','{name}きもちいい〜','にゃにゃ！'],
+    hungry: ['{name}、ご飯まだ？','にゃ…（おなかすいた）','みゃーん…'],
   },
 };
 
@@ -739,12 +739,13 @@ window.petTap = function() {
 // ============================================================
 function setSpeech(text) {
   const el = document.getElementById('speech-bubble');
-  el.textContent = text;
+  el.textContent = text.replace('{name}', username);  // ← この1行を変更
   el.style.opacity = '1';
   clearTimeout(speechTimer);
   speechTimer = setTimeout(() => {
     const idles = SPEECHES[petData.type].idle;
-    el.textContent = idles[Math.floor(Math.random() * idles.length)];
+    const t = idles[Math.floor(Math.random() * idles.length)];
+    el.textContent = t.replace('{name}', username);  // ← ここも
   }, 3000);
 }
 

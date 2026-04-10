@@ -572,6 +572,9 @@ body::before {
     <a href="avatar.html" class="avatar-btn" id="avatar-btn" title="きがえ">
     <span id="topbar-avatar">👧</span>
     </a>
+    <a href="pet.html" class="avatar-btn" title="ペット" style="background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.3);">
+    <span id="topbar-pet">🐾</span>
+    </a>
     <button class="logout-btn" onclick="logout()">ログアウト</button>
   </div>
   <div class="level-section">
@@ -762,7 +765,21 @@ window.doCheck=function(){ if(answered) return; if(question.type==='fraction'){c
 window.doChoice=function(val,btn){ if(answered) return; document.querySelectorAll('.choice-btn').forEach(b=>b.style.pointerEvents='none'); if(val===question.answer){btn.classList.add('ok');onCorrect();}else{btn.classList.add('ng');document.querySelectorAll('.choice-btn').forEach(b=>{if(b.textContent===question.answer)b.classList.add('ok');});onWrong(`せいかいは ${question.answer}`);} };
 
 function onCorrect(){ answered=true; const baseXp=XP_TBL[question.lv]; const multi=DIFF_MULTI[difficulty]||1; const xpAmt=Math.round(baseXp*multi); save.questionStreak=(save.questionStreak||0)+1; const bonus=save.questionStreak%5===0?10:0; const isCombo=save.questionStreak%3===0; save.totalCorrect=(save.totalCorrect||0)+1; save.catCorrect=save.catCorrect||[0,0,0,0]; save.catCorrect[category]=(save.catCorrect[category]||0)+1; save.dailyDone=(save.dailyDone||0)+1; save.xp=(save.xp||0)+xpAmt+bonus; const coinAmt = Math.round(1 * (DIFF_MULTI[difficulty] || 1));
-save.coins = (save.coins || 0) + coinAmt; let leveled=false; while(save.level<MAX_LV&&save.xp>=xpForLv(save.level)){save.xp-=xpForLv(save.level);save.level++;leveled=true;} flashScreen('correct-flash'); if(isCombo){soundCombo();spawnCoins(12);spawnStars(6);}else{soundCorrect();spawnCoins(5);spawnStars(3);} if(leveled){save.hearts=HEARTS_MAX;setTimeout(()=>showLevelUpOverlay(save.level,lvName(save.level)),500);} checkBadges(); persistSave(); renderUI(); renderBadges(); const msgs=['すごい！🎉','かんぺき！✨','よくできました！⭐','その調子！🔥','天才！🧠','完璧！💯']; const diffTag=multi>1?` ${DIFF_LABELS[difficulty]}ボーナス×${multi}！`:''; setFeedback('ok',msgs[R(0,msgs.length-1)]+(bonus?` コンボ+${bonus}XP！`:'')+diffTag); showXpPop(`+${xpAmt+bonus}XP`); if(isCombo) showCombo(`🔥×${save.questionStreak}`); const _dg=dailyGoal(save.level||1); if(save.dailyDone===_dg) setTimeout(()=>showModal('🎊 ノルマ達成！',`今日の${_dg}問クリア！\nまた明日もがんばろう！`,50),600); showNextBtn(); }
+save.coins = (save.coins || 0) + coinAmt; save.pet = save.pet || {};
+save.pet.questionsForFood = (save.pet.questionsForFood || 0) + 1;
+if (save.pet.questionsForFood >= 5) {
+  save.pet.food = (save.pet.food || 0) + 1;
+  save.pet.questionsForFood = 0;
+  // エサゲット演出
+  setTimeout(() => {
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2rem;font-weight:900;color:#f5a623;z-index:9999;pointer-events:none;animation:xpFloat .9s ease forwards;';
+    el.textContent = '🍖 エサ+1！';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 950);
+  }, 400);
+}
+let leveled=false; while(save.level<MAX_LV&&save.xp>=xpForLv(save.level)){save.xp-=xpForLv(save.level);save.level++;leveled=true;} flashScreen('correct-flash'); if(isCombo){soundCombo();spawnCoins(12);spawnStars(6);}else{soundCorrect();spawnCoins(5);spawnStars(3);} if(leveled){save.hearts=HEARTS_MAX;setTimeout(()=>showLevelUpOverlay(save.level,lvName(save.level)),500);} checkBadges(); persistSave(); renderUI(); renderBadges(); const msgs=['すごい！🎉','かんぺき！✨','よくできました！⭐','その調子！🔥','天才！🧠','完璧！💯']; const diffTag=multi>1?` ${DIFF_LABELS[difficulty]}ボーナス×${multi}！`:''; setFeedback('ok',msgs[R(0,msgs.length-1)]+(bonus?` コンボ+${bonus}XP！`:'')+diffTag); showXpPop(`+${xpAmt+bonus}XP`); if(isCombo) showCombo(`🔥×${save.questionStreak}`); const _dg=dailyGoal(save.level||1); if(save.dailyDone===_dg) setTimeout(()=>showModal('🎊 ノルマ達成！',`今日の${_dg}問クリア！\nまた明日もがんばろう！`,50),600); showNextBtn(); }
 function onWrong(msg){ answered=true; save.questionStreak=0; save.hearts=Math.max(0,(save.hearts||HEARTS_MAX)-1); save.lastHeartRegen=Date.now(); persistSave(); renderUI(); flashScreen('wrong-flash'); soundWrong(); soundHeartLost(); setFeedback('ng',`❌ ざんねん… ${msg}`); document.getElementById('streak-pill').classList.add('shake'); setTimeout(()=>document.getElementById('streak-pill').classList.remove('shake'),500); if(save.hearts<=0) setTimeout(renderGameOver,800); else showNextBtn(); }
 
 function checkBadges(){ const ub=save.unlockedBadges||[]; const add=(id,cond)=>{if(cond&&!ub.includes(id)){ub.push(id);showCombo('🏅');}}; add('first',save.totalCorrect>=1);add('streak3',save.questionStreak>=3);add('streak7',save.questionStreak>=7);add('daily1',save.dailyDone>=dailyGoal(save.level||1));add('day3',(save.loginDays||0)>=3);add('day7',(save.loginDays||0)>=7);add('lv3',(save.level||1)>=3);add('lv5',(save.level||1)>=5);add('total50',save.totalCorrect>=50);add('total200',save.totalCorrect>=200);add('fraction1',(save.catCorrect||[])[1]>=5);add('word1',(save.catCorrect||[])[3]>=5); save.unlockedBadges=ub; }

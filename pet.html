@@ -376,6 +376,7 @@ header h1 span { color: var(--gold); }
       </button>
       <div id="tap-charges" style="position:relative;z-index:2;font-size:13px;font-weight:800;color:var(--text2);margin-top:8px;">
         🖐️ なでる のこり 3回
+        <span id="tap-regen-timer" style="font-size:11px;color:var(--text3);margin-left:6px;"></span>
       </div>
     </div>
 
@@ -569,6 +570,7 @@ function showPetMain() {
   updateStatus();
   updateRecords();
   startIdleSpeech();
+  setInterval(() => updateStatus(), 60000);
 }
 
 function renderPet(mood) {}
@@ -585,11 +587,20 @@ function updateStatus() {
   feedBtn.disabled = food <= 0;
   feedBtn.textContent = food > 0 ? `🍖 エサをあげる（${food}こ）` : '🍖 エサがないよ…';
   const charges = petData.tapCharges ?? 0;
-  const tapEl = document.getElementById('tap-charges');
-  if (tapEl) {
-    tapEl.textContent = `🖐️ なでる のこり ${charges}回`;
-    tapEl.style.color = charges === 0 ? 'var(--text3)' : 'var(--text2)';
-  }
+const tapEl = document.getElementById('tap-charges');
+const timerEl = document.getElementById('tap-regen-timer');
+if (tapEl) {
+  tapEl.firstChild.textContent = `🖐️ なでる のこり ${charges}回 `;
+  tapEl.style.color = charges === 0 ? 'var(--text3)' : 'var(--text2)';
+}
+if (timerEl && charges < TAP_MAX && petData.lastTapRegen) {
+  const elapsed = Date.now() - petData.lastTapRegen;
+  const remaining = TAP_REGEN_MS - (elapsed % TAP_REGEN_MS);
+  const mins = Math.ceil(remaining / 60000);
+  timerEl.textContent = `（あと約${mins}分で回復）`;
+} else if (timerEl) {
+  timerEl.textContent = '';
+}
 }
 
 function updateRecords() {

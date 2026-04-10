@@ -356,8 +356,8 @@ async function init() {
   } catch(e) {}
 
   if (!save.coins) save.coins = 0;
-  if (!save.ownedParts) save.ownedParts = ['hair_short','clothes_simple','acc_none','face_happy'];
-  if (!save.equipped) save.equipped = { ...DEFAULT_EQUIPPED };
+  if (!save.ownedParts) save.ownedParts = ['tops_none', 'under_none', 'shoes_none', 'acc_none'];
+  if (!save.equipped) save.equipped = { tops: 'tops_none', under: 'under_none', shoes: 'shoes_none', accessory: 'acc_none' };
 
   document.getElementById('avatar-username').textContent = username + ' ちゃん';
   document.getElementById('coin-count').textContent = save.coins;

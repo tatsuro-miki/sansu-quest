@@ -736,23 +736,33 @@ function updateFoodDisplay() {
 // ============================================================
 // エサやり
 // ============================================================
-window.feedPet = function() {
-  if ((petData.food || 0) <= 0) { showToast('エサがないよ！問題を解こう🎯', 'ng'); return; }
+updateFoodDisplay();
 
-  petData.food = Math.max(0, (petData.food || 0) - 1);
-  petData.fullness = Math.min(100, (petData.fullness || 50) + 25);
-  petData.happy = Math.min(100, (petData.happy || 50) + 15);
-  petData.totalFeed = (petData.totalFeed || 0) + 1;
+  if (petData.type) {
+    showPetMain();
+  } else {
+    document.getElementById('pet-select').style.display = 'block';
+  }
+}  // ← init()はここで閉じる
 
-  const speeches = SPEECHES[petData.type].feed;
+async function persist() {
+  save.pet = petData;
+  try { await setDoc(doc(db, 'users', username), save); } catch(e) {}
+}
+
+window.petTap = function() {
+  if ((petData.tapCharges || 0) <= 0) {
+    showToast('なでは30分後に回復するよ！', 'ng');
+    return;
+  }
+  petData.tapCharges = (petData.tapCharges || 1) - 1;
+  if (!petData.lastTapRegen) petData.lastTapRegen = Date.now();
+  petData.happy = Math.min(100, (petData.happy || 50) + 8);
+  petData.totalTap = (petData.totalTap || 0) + 1;
+
+  const speeches = SPEECHES[petData.type].tap;
   setSpeech(speeches[Math.floor(Math.random() * speeches.length)]);
-  renderPet('eating');
-  spawnHearts();
-
-  setTimeout(() => renderPet('happy'), 700);
-  setTimeout(() => renderPet('idle'), 2000);
-
-  updateFoodDisplay();
+  spawnHearts(2);
   updateStatus();
   updateRecords();
   persist();

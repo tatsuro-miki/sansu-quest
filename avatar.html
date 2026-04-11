@@ -144,11 +144,22 @@ body::before {
   background: var(--pink); color: white; border-color: var(--pink);
 }
 .cat-tab:hover:not(.active) { background: var(--surface3); }
+/* ガチャ衣装タブ特別スタイル */
+.cat-tab.gacha-tab {
+  border-color: rgba(176,122,232,0.4);
+  background: rgba(176,122,232,0.12);
+  color: var(--purple);
+}
+.cat-tab.gacha-tab.active {
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  color: white;
+  border-color: var(--purple);
+}
 
 /* パーツグリッド */
 .parts-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 8px; max-height: 280px; overflow-y: auto;
+  gap: 8px; max-height: 340px; overflow-y: auto;
   padding-right: 4px;
 }
 .parts-grid::-webkit-scrollbar { width: 4px; }
@@ -187,6 +198,58 @@ body::before {
   position: absolute; top: 4px; right: 4px;
   font-size: 10px; color: var(--pink);
 }
+
+/* ガチャ衣装カード */
+.gacha-card {
+  background: var(--surface2);
+  border: 2px solid rgba(176,122,232,0.25);
+  border-radius: var(--radius-sm);
+  padding: 6px;
+  cursor: pointer; transition: .2s;
+  text-align: center; position: relative;
+  aspect-ratio: 3/4;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.gacha-card:hover { transform: translateY(-2px); border-color: var(--purple); }
+.gacha-card.equipped {
+  border-color: var(--pink); background: rgba(233,100,157,0.08);
+  box-shadow: 0 0 12px rgba(233,100,157,0.2);
+}
+.gacha-card img {
+  width: 100%; height: 80%;
+  object-fit: contain;
+}
+.gacha-card .outfit-label {
+  font-size: 9px; font-weight: 800; color: var(--text2);
+  margin-top: 2px;
+}
+.gacha-card .rarity-dot {
+  position: absolute; top: 4px; right: 4px;
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.rarity-dot.c { background: #8bc34a; }
+.rarity-dot.uc { background: #4facfe; }
+.rarity-dot.r { background: #c850c0; }
+.rarity-dot.sr { background: #f5af19; box-shadow: 0 0 6px rgba(245,175,25,0.6); }
+
+/* ガチャ衣装なし案内 */
+.gacha-empty {
+  text-align: center; padding: 30px 16px;
+  color: var(--text3);
+}
+.gacha-empty .empty-icon { font-size: 48px; display: block; margin-bottom: 10px; }
+.gacha-empty p { font-size: 13px; font-weight: 700; line-height: 1.6; }
+.gacha-link-btn {
+  display: inline-block; margin-top: 12px;
+  font-family: inherit; font-size: 13px; font-weight: 900;
+  padding: 8px 20px; border-radius: 20px; border: none;
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  color: white; cursor: pointer; text-decoration: none;
+  transition: .15s;
+}
+.gacha-link-btn:hover { opacity: .85; transform: translateY(-1px); }
 
 /* トースト */
 .toast {
@@ -256,12 +319,15 @@ body::before {
     <div class="avatar-panel">
       <h2>👗 わたしのキャラ</h2>
       <div class="avatar-stage">
+        <!-- パーツ重ね着レイヤー -->
         <div id="avatar-layers" style="position:relative;width:240px;height:420px;overflow:hidden;">
           <img id="layer-base"  src="./base.png" style="position:absolute;top:0;left:0;width:240px;height:auto;transform:scale(0.5);transform-origin:top center;margin-top:10px;">
           <img id="layer-under" src=""           style="position:absolute;top:0;left:0;width:240px;height:auto;transform:scale(0.5);transform-origin:top center;margin-top:10px;display:none;">
           <img id="layer-tops"  src=""           style="position:absolute;top:0;left:0;width:240px;height:auto;transform:scale(0.5);transform-origin:top center;margin-top:10px;display:none;">
           <img id="layer-shoes" src=""           style="position:absolute;top:0;left:0;width:240px;height:auto;transform:scale(0.5);transform-origin:top center;margin-top:10px;display:none;">
         </div>
+        <!-- ガチャ衣装（全身画像）レイヤー -->
+        <img id="layer-gacha-outfit" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;padding:20px;display:none;">
       </div>
       <div class="avatar-name-display" id="avatar-username">よみこみちゅう...</div>
     </div>
@@ -274,6 +340,7 @@ body::before {
           <button class="cat-tab" onclick="switchCat('under', this)">👖 ボトムス</button>
           <button class="cat-tab" onclick="switchCat('shoes', this)">👟 くつ</button>
           <button class="cat-tab" onclick="switchCat('accessory', this)">🎀 アクセ</button>
+          <button class="cat-tab gacha-tab" onclick="switchCat('gacha', this)">✨ ガチャ衣装</button>
         </div>
       <div class="parts-grid" id="parts-grid"></div>
     </div>
@@ -328,18 +395,31 @@ const PARTS = {
     { id: 'acc_cat_ears',  name: 'ねこみみ',    cost: 60, emoji: '🐱' },
   ],
 };
+
+// ガチャ衣装のレア度定義（gacha.html と同じ）
+const RARITIES = [
+  { key: 'C',  ids: [4,5,6,10,11,16,17,19,20,21], label: 'コモン',       dot: 'c'  },
+  { key: 'UC', ids: [7,8,9,13,15],                 label: 'アンコモン',   dot: 'uc' },
+  { key: 'R',  ids: [12,14,18,23,24],              label: 'レア',         dot: 'r'  },
+  { key: 'SR', ids: [22,1,2,3],                    label: 'スーパーレア', dot: 'sr' },
+];
+
+function getRarityForOutfit(num) {
+  return RARITIES.find(r => r.ids.includes(num));
+}
+
 // ============================================================
 // 状態管理
 // ============================================================
 let username = '';
 let save = {};
 let pendingBuy = null;
-let currentCat = 'hair';
+let currentCat = 'tops';
 
 const DEFAULT_EQUIPPED = {
-  tops: '',
-  under: '',
-  shoes: '',
+  tops: 'tops_none',
+  under: 'under_none',
+  shoes: 'shoes_none',
   accessory: 'acc_none',
 };
 
@@ -357,7 +437,10 @@ async function init() {
 
   if (!save.coins) save.coins = 0;
   if (!save.ownedParts) save.ownedParts = ['tops_none', 'under_none', 'shoes_none', 'acc_none'];
-  if (!save.equipped) save.equipped = { tops: 'tops_none', under: 'under_none', shoes: 'shoes_none', accessory: 'acc_none' };
+  if (!save.equipped) save.equipped = { ...DEFAULT_EQUIPPED };
+  if (!save.gachaOwned) save.gachaOwned = [];
+  // ガチャ衣装の装備状態（outfit_XX形式、空文字なら未装備）
+  if (!save.equippedGacha) save.equippedGacha = '';
 
   document.getElementById('avatar-username').textContent = username + ' ちゃん';
   document.getElementById('coin-count').textContent = save.coins;
@@ -367,13 +450,28 @@ async function init() {
 }
 
 async function persist() {
-  try { await setDoc(doc(db, 'users', username), save); } catch(e) {}
+  try { await setDoc(doc(db, 'users', username), save, { merge: true }); } catch(e) {}
 }
 
 // ============================================================
 // アバター描画
 // ============================================================
 function renderAvatar() {
+  const layersDiv = document.getElementById('avatar-layers');
+  const gachaLayer = document.getElementById('layer-gacha-outfit');
+
+  // ガチャ衣装が装備されている場合
+  if (save.equippedGacha) {
+    layersDiv.style.display = 'none';
+    gachaLayer.src = `./parts/${save.equippedGacha}.png`;
+    gachaLayer.style.display = 'block';
+    return;
+  }
+
+  // パーツ重ね着モード
+  layersDiv.style.display = 'block';
+  gachaLayer.style.display = 'none';
+
   document.getElementById('layer-base').src = './base.png';
 
   const layers = {
@@ -400,12 +498,20 @@ function renderAvatar() {
 function renderShop(cat) {
   currentCat = cat;
   const grid = document.getElementById('parts-grid');
+
+  // ガチャ衣装タブ
+  if (cat === 'gacha') {
+    renderGachaTab(grid);
+    return;
+  }
+
+  // 通常パーツタブ
   const parts = PARTS[cat];
   grid.innerHTML = '';
 
   parts.forEach(part => {
     const owned = (save.ownedParts || []).includes(part.id);
-    const equipped = save.equipped[cat] === part.id;
+    const equipped = save.equipped[cat] === part.id && !save.equippedGacha;
 
     const card = document.createElement('div');
     card.className = 'part-card' + (equipped ? ' equipped' : '') + (!owned && part.cost > 0 ? ' locked' : '');
@@ -434,11 +540,106 @@ function renderShop(cat) {
 }
 
 // ============================================================
+// ガチャ衣装タブ描画
+// ============================================================
+function renderGachaTab(grid) {
+  grid.innerHTML = '';
+
+  const owned = save.gachaOwned || [];
+
+  // 衣装を持っていない場合
+  if (owned.length === 0) {
+    grid.innerHTML = `
+      <div class="gacha-empty" style="grid-column: 1 / -1;">
+        <span class="empty-icon">🎰</span>
+        <p>まだガチャ衣装をもっていないよ！<br>ガチャをひいて衣装をゲットしよう！</p>
+        <a class="gacha-link-btn" href="gacha.html">ガチャへいく →</a>
+      </div>
+    `;
+    return;
+  }
+
+  // 「はずす」ボタン（ガチャ衣装を外してパーツモードに戻す）
+  const resetCard = document.createElement('div');
+  resetCard.className = 'part-card' + (!save.equippedGacha ? ' equipped' : '');
+  resetCard.innerHTML = `
+    <span class="part-preview">✖️</span>
+    <span class="part-name">はずす</span>
+    <div class="part-cost owned">パーツモード</div>
+  `;
+  resetCard.onclick = () => {
+    save.equippedGacha = '';
+    persist();
+    renderAvatar();
+    renderGachaTab(grid);
+    showToast('パーツモードにもどしたよ！', 'ok');
+  };
+  grid.appendChild(resetCard);
+
+  // ガチャで持っている衣装を表示
+  for (const id of owned) {
+    const num = parseInt(id.split('_')[1]);
+    const rarity = getRarityForOutfit(num);
+    const isEquipped = save.equippedGacha === id;
+
+    const card = document.createElement('div');
+    card.className = 'gacha-card' + (isEquipped ? ' equipped' : '');
+
+    // レア度ドット
+    if (rarity) {
+      const dot = document.createElement('div');
+      dot.className = `rarity-dot ${rarity.dot}`;
+      card.appendChild(dot);
+    }
+
+    const img = document.createElement('img');
+    img.src = `parts/${id}.png`;
+    img.alt = id;
+    card.appendChild(img);
+
+    const label = document.createElement('span');
+    label.className = 'outfit-label';
+    label.textContent = rarity ? rarity.label : '';
+    card.appendChild(label);
+
+    if (isEquipped) {
+      const badge = document.createElement('span');
+      badge.className = 'equipped-badge';
+      badge.textContent = '✓';
+      badge.style.cssText = 'position:absolute;top:4px;left:4px;font-size:14px;color:var(--pink);font-weight:900;';
+      card.appendChild(badge);
+    }
+
+    card.onclick = () => {
+      save.equippedGacha = id;
+      persist();
+      renderAvatar();
+      renderGachaTab(grid);
+      showToast('ガチャ衣装にきがえたよ！✨', 'ok');
+    };
+
+    grid.appendChild(card);
+  }
+
+  // ガチャへのリンク
+  const linkCard = document.createElement('div');
+  linkCard.className = 'part-card';
+  linkCard.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;aspect-ratio:3/4;border-style:dashed;opacity:0.7;';
+  linkCard.innerHTML = `
+    <span class="part-preview">🎰</span>
+    <span class="part-name">もっとほしい！</span>
+  `;
+  linkCard.onclick = () => { location.href = 'gacha.html'; };
+  grid.appendChild(linkCard);
+}
+
+// ============================================================
 // パーツクリック
 // ============================================================
 function onPartClick(part, cat, owned) {
   if (owned || part.cost === 0) {
-    // 装備する
+    // 装備する（ガチャ衣装を外す）
+    save.equippedGacha = '';
     save.equipped[cat] = part.id;
     if (!save.ownedParts.includes(part.id)) save.ownedParts.push(part.id);
     persist();
@@ -465,6 +666,7 @@ window.confirmBuy = function() {
   save.coins = (save.coins || 0) - part.cost;
   if (!save.ownedParts) save.ownedParts = [];
   save.ownedParts.push(part.id);
+  save.equippedGacha = '';  // パーツを買ったらガチャ衣装を外す
   save.equipped[cat] = part.id;
   persist();
   document.getElementById('coin-count').textContent = save.coins;

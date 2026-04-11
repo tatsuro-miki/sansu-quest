@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ガチャ｜さんすうクエスト</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #e8d5f5;
+  --surface: rgba(255,255,255,0.92);
+  --border: rgba(180,120,220,0.25);
+  --border2: rgba(180,120,220,0.4);
+  --pink: #e9649d;
+  --purple: #9f7aea;
+  --purple2: #b794f6;
+  --gold: #f5a623;
+  --gold2: #ffd700;
+  --blue: #4f8ef7;
+  --mint: #2db87a;
+  --text: #2d1a3e;
+  --text2: #6a4a7a;
+  --text3: #a080b8;
+  --radius: 20px;
+  --radius-md: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', 'M PLUS Rounded 1c', sans-serif;
+  min-height: 100vh;
+  color: var(--text);
+  overflow-x: hidden;
+  background: var(--bg);
+  position: relative;
+}
+
+/* キラキラ背景 */
+.bg-layer {
+  position: fixed; inset: 0;
+  background: url('parts/gacha_bg.png') center center / cover no-repeat;
+  z-index: 0;
+}
+.bg-overlay {
+  position: fixed; inset: 0;
+  background: rgba(200,160,240,0.3);
+  z-index: 0;
+}
+
+/* ナビバー */
+.nav-bar {
+  position: relative; z-index: 10;
+  max-width: 680px; margin: 0 auto;
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: inherit; font-size: 14px; font-weight: 800;
+  padding: 8px 16px; border-radius: 20px;
+  border: 2px solid var(--border2);
+  background: var(--surface); color: var(--text2);
+  cursor: pointer; text-decoration: none; transition: .15s;
+}
+.back-btn:hover { background: white; }
+
+.coin-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 2px solid rgba(245,166,35,0.35);
+  border-radius: 25px; padding: 8px 18px;
+  font-weight: 900; font-size: 16px; color: var(--gold);
+  box-shadow: 0 2px 12px rgba(245,166,35,0.15);
+}
+
+/* メインコンテンツ */
+.app {
+  max-width: 680px; margin: 0 auto;
+  padding: 0 16px 40px;
+  position: relative; z-index: 1;
+}
+
+/* タイトル */
+.page-title {
+  text-align: center; padding: 8px 0 16px;
+}
+.page-title h1 {
+  font-size: clamp(26px, 6vw, 36px); font-weight: 900;
+  color: white;
+  text-shadow: 0 2px 8px rgba(140,60,200,0.5), 0 0 20px rgba(255,200,255,0.3);
+}
+
+/* ガチャマシンエリア */
+.gacha-stage {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 2px solid var(--border2);
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(140,60,200,0.15);
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.machine-wrap {
+  position: relative;
+  width: 260px; height: 260px;
+  margin: 0 auto 16px;
+}
+.machine-wrap img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 16px rgba(200,100,255,0.3));
+  transition: transform .3s;
+}
+.machine-wrap:hover img { transform: scale(1.03); }
+.machine-wrap.spinning img {
+  animation: machineShake 0.5s ease-in-out infinite;
+}
+
+@keyframes machineShake {
+  0%,100% { transform: rotate(0deg); }
+  25% { transform: rotate(-2deg) scale(1.02); }
+  75% { transform: rotate(2deg) scale(1.02); }
+}
+
+/* ガチャボタン */
+.gacha-btn {
+  font-family: inherit; font-size: 20px; font-weight: 900;
+  padding: 16px 40px; border-radius: 50px; border: none;
+  background: linear-gradient(135deg, #ff69b4, #ff1493, #c850c0);
+  color: white; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255,20,147,0.4), 0 0 40px rgba(200,80,192,0.2);
+  transition: all .25s;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+}
+.gacha-btn::before {
+  content: '';
+  position: absolute; inset: -2px;
+  background: linear-gradient(45deg, #ff69b4, #ffd700, #ff69b4, #87ceeb, #ff69b4);
+  background-size: 300% 300%;
+  border-radius: 50px;
+  z-index: -1;
+  animation: shimmer 3s ease infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.gacha-btn:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 8px 28px rgba(255,20,147,0.5);
+}
+.gacha-btn:active:not(:disabled) { transform: scale(0.97); }
+.gacha-btn:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(0.4); }
+
+.gacha-cost {
+  font-size: 14px; font-weight: 800; color: var(--text3);
+  margin-top: 10px;
+}
+
+/* 統計 */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; margin-top: 16px;
+}
+.stat-box {
+  background: rgba(159,122,234,0.08);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 8px; text-align: center;
+}
+.stat-num { font-size: 22px; font-weight: 900; color: var(--purple); }
+.stat-lbl { font-size: 11px; font-weight: 700; color: var(--text3); }
+
+/* ===== ガチャ演出オーバーレイ ===== */
+.gacha-overlay {
+  position: fixed; inset: 0;
+  background: rgba(20,0,40,0.85);
+  z-index: 100;
+  display: none; align-items: center; justify-content: center;
+  flex-direction: column;
+}
+.gacha-overlay.show { display: flex; }
+
+/* ローディング演出 */
+.gacha-loading {
+  text-align: center; color: white;
+  display: none;
+}
+.gacha-loading.show { display: block; }
+.gacha-loading p {
+  font-size: 20px; font-weight: 900;
+  animation: loadPulse 1s ease-in-out infinite;
+  margin-top: 16px;
+}
+@keyframes loadPulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* キラキラパーティクル */
+.sparkle-burst {
+  position: absolute;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: sparkleFly 1s ease-out forwards;
+}
+@keyframes sparkleFly {
+  0% { opacity: 1; transform: translate(0,0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+}
+
+/* 結果カード */
+.result-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  text-align: center;
+  max-width: 340px; width: 90%;
+  box-shadow: 0 8px 40px rgba(200,100,255,0.4);
+  display: none;
+  animation: resultPop 0.5s cubic-bezier(.34,1.56,.64,1);
+  position: relative;
+}
+.result-card.show { display: block; }
+
+@keyframes resultPop {
+  0% { opacity: 0; transform: scale(0.3) rotate(-10deg); }
+  60% { transform: scale(1.05) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+.result-outfit-img {
+  width: 180px; height: 240px;
+  object-fit: contain;
+  margin: 12px auto;
+  display: block;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+}
+
+/* レア度バッジ */
+.rarity-tag {
+  display: inline-block;
+  padding: 6px 18px;
+  border-radius: 20px;
+  font-weight: 900; font-size: 15px;
+  margin: 8px 4px;
+}
+.rarity-n {
+  background: #bbb; color: white;
+}
+.rarity-r {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  color: white;
+  box-shadow: 0 0 12px rgba(79,172,254,0.4);
+}
+.rarity-sr {
+  background: linear-gradient(135deg, #f5af19, #f12711);
+  color: white;
+  box-shadow: 0 0 20px rgba(245,175,25,0.5);
+  animation: srGlow 1.5s ease-in-out infinite;
+}
+@keyframes srGlow {
+  0%,100% { box-shadow: 0 0 20px rgba(245,175,25,0.5); }
+  50% { box-shadow: 0 0 30px rgba(245,175,25,0.8), 0 0 60px rgba(241,39,17,0.3); }
+}
+
+.new-tag {
+  display: inline-block;
+  background: #ff4757;
+  color: white;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-weight: 900; font-size: 13px;
+  animation: newPulse 0.8s ease-in-out infinite;
+}
+@keyframes newPulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.result-msg {
+  font-size: 15px; font-weight: 800; color: var(--text2);
+  margin: 12px 0;
+}
+
+.result-close-btn {
+  font-family: inherit; font-size: 16px; font-weight: 900;
+  padding: 12px 36px; border-radius: 50px; border: none;
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  color: white; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(159,122,234,0.3);
+  transition: .2s;
+}
+.result-close-btn:hover { opacity: .88; transform: translateY(-2px); }
+
+/* コレクション */
+.collection-panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 2px solid var(--border2);
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(140,60,200,0.1);
+}
+.collection-title {
+  font-size: 16px; font-weight: 900; color: var(--text);
+  margin-bottom: 4px;
+}
+.collection-sub {
+  font-size: 12px; font-weight: 700; color: var(--text3);
+  margin-bottom: 14px;
+}
+
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+}
+.coll-slot {
+  aspect-ratio: 3/4;
+  background: rgba(159,122,234,0.06);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  position: relative; cursor: default;
+  transition: .2s;
+}
+.coll-slot.owned {
+  border-color: var(--purple2);
+  background: white;
+}
+.coll-slot.owned:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(159,122,234,0.2);
+}
+.coll-slot img {
+  width: 100%; height: 100%;
+  object-fit: contain; padding: 4px;
+}
+.coll-slot .lock-icon {
+  font-size: 24px; color: var(--text3); opacity: 0.5;
+}
+.coll-slot .rarity-dot {
+  position: absolute; top: 4px; right: 4px;
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.rarity-dot.n { background: #bbb; }
+.rarity-dot.r { background: #4facfe; }
+.rarity-dot.sr { background: #f5af19; box-shadow: 0 0 6px rgba(245,175,25,0.6); }
+
+/* トースト */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  padding: 10px 24px; border-radius: 20px;
+  font-weight: 800; font-size: 14px;
+  opacity: 0; pointer-events: none; z-index: 200;
+  transition: opacity .3s; white-space: nowrap;
+  color: white;
+}
+.toast.show { opacity: 1; }
+.toast.ok { background: var(--mint); }
+.toast.ng { background: var(--pink); }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="bg-overlay"></div>
+
+<div class="nav-bar">
+  <a class="back-btn" href="game.html">← もどる</a>
+  <div class="coin-badge">
+    <span>🪙</span>
+    <span id="coin-count">0</span>
+  </div>
+</div>
+
+<div class="app">
+  <div class="page-title">
+    <h1>✨ ガチャガチャ ✨</h1>
+  </div>
+
+  <!-- ガチャマシン -->
+  <div class="gacha-stage">
+    <div class="machine-wrap" id="machine-wrap">
+      <img src="parts/gacha_machine.png" alt="ガチャマシン">
+    </div>
+
+    <button class="gacha-btn" id="gacha-btn" onclick="pullGacha()">
+      🎰 ガチャをひく！
+    </button>
+    <div class="gacha-cost">💰 100コイン</div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num" id="stat-owned">0</div>
+        <div class="stat-lbl">ゲットずみ</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">28</div>
+        <div class="stat-lbl">ぜんぶ</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="stat-percent">0%</div>
+        <div class="stat-lbl">コンプりつ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- コレクション -->
+  <div class="collection-panel">
+    <div class="collection-title">👗 いしょうコレクション</div>
+    <div class="collection-sub">ガチャでゲットした衣装がならぶよ！</div>
+    <div class="collection-grid" id="collection-grid"></div>
+  </div>
+</div>
+
+<!-- ガチャ演出オーバーレイ -->
+<div class="gacha-overlay" id="gacha-overlay">
+  <div class="gacha-loading" id="gacha-loading">
+    <div style="font-size:60px;animation:machineShake 0.4s ease-in-out infinite;">🎰</div>
+    <p>ガチャガチャ…</p>
+  </div>
+  <div class="result-card" id="result-card">
+    <img class="result-outfit-img" id="result-img" src="" alt="">
+    <div>
+      <span class="rarity-tag" id="result-rarity"></span>
+      <span class="new-tag" id="result-new" style="display:none;">NEW!</span>
+    </div>
+    <div class="result-msg" id="result-msg"></div>
+    <button class="result-close-btn" onclick="closeResult()">OK！</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { FIREBASE_CONFIG } from './firebase.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const app = initializeApp(FIREBASE_CONFIG);
+const db = getFirestore(app);
+
+// ============================================================
+// 定数
+// ============================================================
+const GACHA_COST = 100;
+const TOTAL_OUTFITS = 28;
+
+// レア度定義: { id範囲, 排出率, ラベル, CSSクラス }
+const RARITIES = [
+  { key: 'N',  min: 1,  max: 16, rate: 0.70, label: 'ノーマル',       css: 'rarity-n', dot: 'n'  },
+  { key: 'R',  min: 17, max: 24, rate: 0.25, label: '⭐ レア',        css: 'rarity-r', dot: 'r'  },
+  { key: 'SR', min: 25, max: 28, rate: 0.05, label: '🌟 スーパーレア', css: 'rarity-sr', dot: 'sr' },
+];
+
+// ============================================================
+// 状態
+// ============================================================
+let username = '';
+let save = {};
+let toastTimer = null;
+
+// ============================================================
+// Firebase
+// ============================================================
+async function init() {
+  username = sessionStorage.getItem('sq_user');
+  if (!username) { location.href = 'index.html'; return; }
+
+  try {
+    const snap = await getDoc(doc(db, 'users', username));
+    if (snap.exists()) save = snap.data();
+  } catch(e) {
+    console.error('読み込みエラー:', e);
+  }
+
+  if (!save.coins) save.coins = 0;
+  if (!save.gachaOwned) save.gachaOwned = [];
+
+  updateUI();
+  renderCollection();
+}
+
+async function persist() {
+  try {
+    await setDoc(doc(db, 'users', username), save, { merge: true });
+  } catch(e) {
+    console.error('保存エラー:', e);
+  }
+}
+
+// ============================================================
+// UI更新
+// ============================================================
+function updateUI() {
+  document.getElementById('coin-count').textContent = save.coins || 0;
+
+  const owned = new Set(save.gachaOwned || []).size;
+  document.getElementById('stat-owned').textContent = owned;
+  document.getElementById('stat-percent').textContent = Math.round((owned / TOTAL_OUTFITS) * 100) + '%';
+
+  const btn = document.getElementById('gacha-btn');
+  btn.disabled = (save.coins || 0) < GACHA_COST;
+}
+
+// ============================================================
+// レア度判定
+// ============================================================
+function getRarityForOutfit(num) {
+  return RARITIES.find(r => num >= r.min && num <= r.max);
+}
+
+// ============================================================
+// ガチャ抽選
+// ============================================================
+function drawGacha() {
+  const rand = Math.random();
+  let cumulative = 0;
+  let rarity = RARITIES[0];
+
+  for (const r of RARITIES) {
+    cumulative += r.rate;
+    if (rand < cumulative) { rarity = r; break; }
+  }
+
+  const num = Math.floor(Math.random() * (rarity.max - rarity.min + 1)) + rarity.min;
+  const id = `outfit_${String(num).padStart(2, '0')}`;
+  return { id, num, rarity };
+}
+
+// ============================================================
+// ガチャ実行
+// ============================================================
+window.pullGacha = async function() {
+  if ((save.coins || 0) < GACHA_COST) {
+    showToast('コインがたりないよ！', 'ng');
+    return;
+  }
+
+  // コイン消費
+  save.coins -= GACHA_COST;
+  updateUI();
+
+  // マシン演出
+  const machineWrap = document.getElementById('machine-wrap');
+  machineWrap.classList.add('spinning');
+
+  // オーバーレイ表示
+  const overlay = document.getElementById('gacha-overlay');
+  const loading = document.getElementById('gacha-loading');
+  const card = document.getElementById('result-card');
+  overlay.classList.add('show');
+  loading.classList.add('show');
+  card.classList.remove('show');
+
+  // 抽選
+  const result = drawGacha();
+  const isNew = !save.gachaOwned.includes(result.id);
+
+  // 所持リストに追加（被りでも追加しない＝ユニーク管理）
+  if (isNew) {
+    save.gachaOwned.push(result.id);
+  }
+  await persist();
+
+  // 演出待ち
+  await new Promise(r => setTimeout(r, 1800));
+
+  // ローディング非表示
+  machineWrap.classList.remove('spinning');
+  loading.classList.remove('show');
+
+  // 結果表示
+  document.getElementById('result-img').src = `parts/${result.id}.png`;
+  document.getElementById('result-rarity').textContent = result.rarity.label;
+  document.getElementById('result-rarity').className = `rarity-tag ${result.rarity.css}`;
+
+  if (isNew) {
+    document.getElementById('result-new').style.display = 'inline-block';
+    document.getElementById('result-msg').textContent = 'あたらしい衣装をゲットしたよ！🎉';
+  } else {
+    document.getElementById('result-new').style.display = 'none';
+    document.getElementById('result-msg').textContent = 'もう持ってる衣装だった…！';
+  }
+
+  card.classList.add('show');
+
+  // キラキラエフェクト
+  spawnSparkles(overlay);
+
+  updateUI();
+  renderCollection();
+};
+
+window.closeResult = function() {
+  document.getElementById('gacha-overlay').classList.remove('show');
+  document.getElementById('result-card').classList.remove('show');
+  document.getElementById('gacha-loading').classList.remove('show');
+};
+
+// ============================================================
+// キラキラエフェクト
+// ============================================================
+function spawnSparkles(container) {
+  const colors = ['#ffd700','#ff69b4','#87ceeb','#fff','#c850c0','#ff6b6b'];
+  for (let i = 0; i < 30; i++) {
+    setTimeout(() => {
+      const spark = document.createElement('div');
+      spark.className = 'sparkle-burst';
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 80 + Math.random() * 180;
+      spark.style.cssText = `
+        left: 50%; top: 45%;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        --dx: ${Math.cos(angle) * dist}px;
+        --dy: ${Math.sin(angle) * dist}px;
+        width: ${4 + Math.random() * 6}px;
+        height: ${4 + Math.random() * 6}px;
+      `;
+      container.appendChild(spark);
+      setTimeout(() => spark.remove(), 1000);
+    }, i * 40);
+  }
+}
+
+// ============================================================
+// コレクション描画
+// ============================================================
+function renderCollection() {
+  const grid = document.getElementById('collection-grid');
+  grid.innerHTML = '';
+
+  for (let i = 1; i <= TOTAL_OUTFITS; i++) {
+    const id = `outfit_${String(i).padStart(2, '0')}`;
+    const owned = (save.gachaOwned || []).includes(id);
+    const rarity = getRarityForOutfit(i);
+
+    const slot = document.createElement('div');
+    slot.className = 'coll-slot' + (owned ? ' owned' : '');
+
+    // レア度ドット
+    const dot = document.createElement('div');
+    dot.className = `rarity-dot ${rarity.dot}`;
+    slot.appendChild(dot);
+
+    if (owned) {
+      const img = document.createElement('img');
+      img.src = `parts/${id}.png`;
+      img.alt = id;
+      slot.appendChild(img);
+    } else {
+      const lock = document.createElement('span');
+      lock.className = 'lock-icon';
+      lock.textContent = '🔒';
+      slot.appendChild(lock);
+    }
+
+    grid.appendChild(slot);
+  }
+}
+
+// ============================================================
+// トースト
+// ============================================================
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (type || '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, 2500);
+}
+
+// 初期化
+init();
+</script>
+</body>
+</html>

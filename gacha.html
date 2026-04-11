@@ -252,13 +252,21 @@ body {
   font-weight: 900; font-size: 15px;
   margin: 8px 4px;
 }
-.rarity-n {
-  background: #bbb; color: white;
+.rarity-miss {
+  background: #999; color: white;
 }
-.rarity-r {
+.rarity-c {
+  background: #8bc34a; color: white;
+}
+.rarity-uc {
   background: linear-gradient(135deg, #4facfe, #00f2fe);
   color: white;
   box-shadow: 0 0 12px rgba(79,172,254,0.4);
+}
+.rarity-r {
+  background: linear-gradient(135deg, #c850c0, #f12711);
+  color: white;
+  box-shadow: 0 0 15px rgba(200,80,192,0.4);
 }
 .rarity-sr {
   background: linear-gradient(135deg, #f5af19, #f12711);
@@ -351,8 +359,9 @@ body {
   position: absolute; top: 4px; right: 4px;
   width: 10px; height: 10px; border-radius: 50%;
 }
-.rarity-dot.n { background: #bbb; }
-.rarity-dot.r { background: #4facfe; }
+.rarity-dot.c { background: #8bc34a; }
+.rarity-dot.uc { background: #4facfe; }
+.rarity-dot.r { background: #c850c0; }
 .rarity-dot.sr { background: #f5af19; box-shadow: 0 0 6px rgba(245,175,25,0.6); }
 
 /* トースト */
@@ -404,7 +413,7 @@ body {
         <div class="stat-lbl">ゲットずみ</div>
       </div>
       <div class="stat-box">
-        <div class="stat-num">28</div>
+        <div class="stat-num">24</div>
         <div class="stat-lbl">ぜんぶ</div>
       </div>
       <div class="stat-box">
@@ -453,14 +462,17 @@ const db = getFirestore(app);
 // 定数
 // ============================================================
 const GACHA_COST = 100;
-const TOTAL_OUTFITS = 28;
+const MISS_REFUND = 30;
+const TOTAL_OUTFITS = 24;
 
-// レア度定義: { id範囲, 排出率, ラベル, CSSクラス }
+// レア度定義（衣装番号リスト方式）
 const RARITIES = [
-  { key: 'N',  min: 1,  max: 16, rate: 0.70, label: 'ノーマル',       css: 'rarity-n', dot: 'n'  },
-  { key: 'R',  min: 17, max: 24, rate: 0.25, label: '⭐ レア',        css: 'rarity-r', dot: 'r'  },
-  { key: 'SR', min: 25, max: 28, rate: 0.05, label: '🌟 スーパーレア', css: 'rarity-sr', dot: 'sr' },
+  { key: 'C',  ids: [4,5,6,10,11,16,17,19,20,21], rate: 0.40, label: 'コモン',          css: 'rarity-c',  dot: 'c'  },
+  { key: 'UC', ids: [7,8,9,13,15],                 rate: 0.30, label: '⭐ アンコモン',    css: 'rarity-uc', dot: 'uc' },
+  { key: 'R',  ids: [12,14,18,23,24],              rate: 0.08, label: '💎 レア',          css: 'rarity-r',  dot: 'r'  },
+  { key: 'SR', ids: [22,1,2,3],                    rate: 0.02, label: '🌟 スーパーレア',  css: 'rarity-sr', dot: 'sr' },
 ];
+const MISS_RATE = 0.20; // ハズレ確率
 
 // ============================================================
 // 状態
@@ -504,9 +516,14 @@ async function persist() {
 function updateUI() {
   document.getElementById('coin-count').textContent = save.coins || 0;
 
-  const owned = new Set(save.gachaOwned || []).size;
-  document.getElementById('stat-owned').textContent = owned;
-  document.getElementById('stat-percent').textContent = Math.round((owned / TOTAL_OUTFITS) * 100) + '%';
+  const allNums = getAllOutfitNums();
+  const ownedCount = (save.gachaOwned || []).filter(id => {
+    const num = parseInt(id.split('_')[1]);
+    return allNums.includes(num);
+  }).length;
+
+  document.getElementById('stat-owned').textContent = ownedCount;
+  document.getElementById('stat-percent').textContent = Math.round((ownedCount / TOTAL_OUTFITS) * 100) + '%';
 
   const btn = document.getElementById('gacha-btn');
   btn.disabled = (save.coins || 0) < GACHA_COST;
@@ -516,7 +533,14 @@ function updateUI() {
 // レア度判定
 // ============================================================
 function getRarityForOutfit(num) {
-  return RARITIES.find(r => num >= r.min && num <= r.max);
+  return RARITIES.find(r => r.ids.includes(num));
+}
+
+// 全衣装番号リスト
+function getAllOutfitNums() {
+  const all = [];
+  for (const r of RARITIES) all.push(...r.ids);
+  return all.sort((a,b) => a - b);
 }
 
 // ============================================================
@@ -524,17 +548,26 @@ function getRarityForOutfit(num) {
 // ============================================================
 function drawGacha() {
   const rand = Math.random();
+
+  // ハズレ判定
+  if (rand < MISS_RATE) {
+    return { id: null, num: null, rarity: null, isMiss: true };
+  }
+
+  // 衣装抽選（ハズレ以外の確率で比率配分）
+  const remaining = rand - MISS_RATE;
+  const outfitTotal = 1 - MISS_RATE; // 0.80
   let cumulative = 0;
   let rarity = RARITIES[0];
 
   for (const r of RARITIES) {
     cumulative += r.rate;
-    if (rand < cumulative) { rarity = r; break; }
+    if (remaining < cumulative) { rarity = r; break; }
   }
 
-  const num = Math.floor(Math.random() * (rarity.max - rarity.min + 1)) + rarity.min;
-  const id = `outfit_${String(num).padStart(2, '0')}`;
-  return { id, num, rarity };
+  const pick = rarity.ids[Math.floor(Math.random() * rarity.ids.length)];
+  const id = `outfit_${String(pick).padStart(2, '0')}`;
+  return { id, num: pick, rarity, isMiss: false };
 }
 
 // ============================================================
@@ -564,16 +597,39 @@ window.pullGacha = async function() {
 
   // 抽選
   const result = drawGacha();
+
+  if (result.isMiss) {
+    // ハズレ：コイン一部返却
+    save.coins += MISS_REFUND;
+    await persist();
+
+    await new Promise(r => setTimeout(r, 1200));
+    machineWrap.classList.remove('spinning');
+    loading.classList.remove('show');
+
+    document.getElementById('result-img').src = 'parts/gacha_machine.png';
+    document.getElementById('result-img').style.opacity = '0.4';
+    document.getElementById('result-rarity').textContent = '💨 ハズレ…';
+    document.getElementById('result-rarity').className = 'rarity-tag rarity-miss';
+    document.getElementById('result-new').style.display = 'none';
+    document.getElementById('result-msg').textContent = `ざんねん！🪙${MISS_REFUND}コインもどってきたよ`;
+
+    card.classList.add('show');
+    updateUI();
+    return;
+  }
+
   const isNew = !save.gachaOwned.includes(result.id);
 
-  // 所持リストに追加（被りでも追加しない＝ユニーク管理）
+  // 所持リストに追加（ユニーク管理）
   if (isNew) {
     save.gachaOwned.push(result.id);
   }
   await persist();
 
-  // 演出待ち
-  await new Promise(r => setTimeout(r, 1800));
+  // 演出待ち（SRは長め）
+  const waitMs = result.rarity.key === 'SR' ? 2500 : 1800;
+  await new Promise(r => setTimeout(r, waitMs));
 
   // ローディング非表示
   machineWrap.classList.remove('spinning');
@@ -581,6 +637,7 @@ window.pullGacha = async function() {
 
   // 結果表示
   document.getElementById('result-img').src = `parts/${result.id}.png`;
+  document.getElementById('result-img').style.opacity = '1';
   document.getElementById('result-rarity').textContent = result.rarity.label;
   document.getElementById('result-rarity').className = `rarity-tag ${result.rarity.css}`;
 
@@ -639,18 +696,22 @@ function renderCollection() {
   const grid = document.getElementById('collection-grid');
   grid.innerHTML = '';
 
-  for (let i = 1; i <= TOTAL_OUTFITS; i++) {
-    const id = `outfit_${String(i).padStart(2, '0')}`;
+  const allNums = getAllOutfitNums();
+
+  for (const num of allNums) {
+    const id = `outfit_${String(num).padStart(2, '0')}`;
     const owned = (save.gachaOwned || []).includes(id);
-    const rarity = getRarityForOutfit(i);
+    const rarity = getRarityForOutfit(num);
 
     const slot = document.createElement('div');
     slot.className = 'coll-slot' + (owned ? ' owned' : '');
 
     // レア度ドット
-    const dot = document.createElement('div');
-    dot.className = `rarity-dot ${rarity.dot}`;
-    slot.appendChild(dot);
+    if (rarity) {
+      const dot = document.createElement('div');
+      dot.className = `rarity-dot ${rarity.dot}`;
+      slot.appendChild(dot);
+    }
 
     if (owned) {
       const img = document.createElement('img');

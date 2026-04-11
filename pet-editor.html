@@ -46,23 +46,18 @@ header .spacer { flex: 1; }
 .hbtn.primary { background: var(--pink); color: white; border-color: var(--pink); }
 .hbtn.primary:hover { opacity: .85; }
 .hbtn.export { background: var(--mint); color: white; border-color: var(--mint); }
-
 .main {
   display: grid;
   grid-template-columns: 260px 1fr 280px;
   height: calc(100vh - 52px);
 }
-
 .panel-left {
   background: white;
   border-right: 2px solid var(--border2);
   overflow-y: auto;
   padding: 12px;
 }
-.panel-left h3 {
-  font-size: 13px; font-weight: 900; color: var(--text2);
-  margin-bottom: 8px;
-}
+.panel-left h3 { font-size: 13px; font-weight: 900; color: var(--text2); margin-bottom: 8px; }
 .cat-section { margin-bottom: 16px; }
 .cat-label {
   font-size: 11px; font-weight: 900; color: var(--purple);
@@ -73,14 +68,10 @@ header .spacer { flex: 1; }
 .part-list { display: flex; flex-wrap: wrap; gap: 6px; }
 .part-thumb {
   width: 70px; height: 70px;
-  border: 2px solid var(--border2);
-  border-radius: 10px;
-  background: #fef8fc;
-  cursor: grab;
-  overflow: hidden;
+  border: 2px solid var(--border2); border-radius: 10px;
+  background: #fef8fc; cursor: grab; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
-  transition: .15s;
-  position: relative;
+  transition: .15s; position: relative;
 }
 .part-thumb:hover { border-color: var(--pink); transform: scale(1.05); }
 .part-thumb.on-stage { border-color: var(--mint); background: rgba(45,184,122,0.08); }
@@ -88,127 +79,93 @@ header .spacer { flex: 1; }
 .part-thumb .pname {
   position: absolute; bottom: 1px; left: 0; right: 0;
   font-size: 8px; font-weight: 800; color: var(--text2);
-  text-align: center; background: rgba(255,255,255,0.85);
-  padding: 1px 0;
+  text-align: center; background: rgba(255,255,255,0.85); padding: 1px 0;
 }
-
 .panel-center {
   display: flex; align-items: center; justify-content: center;
   background: repeating-conic-gradient(#e8e8e8 0% 25%, #f5f5f5 0% 50%) 50%/20px 20px;
-  overflow: hidden;
-  position: relative;
+  overflow: auto; position: relative;
 }
 .stage-wrap {
   position: relative;
-  border: 2px dashed var(--border2);
-  border-radius: 8px;
+  border: 2px dashed var(--border2); border-radius: 8px;
   background: rgba(255,255,255,0.7);
 }
-.stage-wrap img.base-img {
-  display: block;
-  user-select: none; -webkit-user-drag: none;
-}
+.stage-wrap img.base-img { display: block; user-select: none; -webkit-user-drag: none; }
 .draggable-part {
-  position: absolute;
-  cursor: move;
-  outline: 2px solid transparent;
-  transition: outline-color .15s;
+  position: absolute; cursor: move;
+  outline: 2px solid transparent; transition: outline-color .15s;
 }
-.draggable-part.selected {
-  outline: 2px solid var(--pink);
-  outline-offset: 2px;
-}
+.draggable-part.selected { outline: 2px solid var(--pink); outline-offset: 2px; }
 .draggable-part img {
-  width: 100%; height: 100%;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none; -webkit-user-drag: none;
+  width: 100%; height: 100%; object-fit: contain;
+  pointer-events: none; user-select: none; -webkit-user-drag: none;
 }
-
 .panel-right {
   background: white;
   border-left: 2px solid var(--border2);
-  overflow-y: auto;
-  padding: 16px;
+  overflow-y: auto; padding: 16px;
 }
-.panel-right h3 {
-  font-size: 13px; font-weight: 900; color: var(--text2);
-  margin-bottom: 12px;
-}
+.panel-right h3 { font-size: 13px; font-weight: 900; color: var(--text2); margin-bottom: 12px; }
 .prop-group { margin-bottom: 16px; }
-.prop-label {
-  font-size: 11px; font-weight: 800; color: var(--purple);
-  margin-bottom: 4px;
-}
-.prop-row {
-  display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
-}
+.prop-label { font-size: 11px; font-weight: 800; color: var(--purple); margin-bottom: 4px; }
+.prop-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .prop-row label { font-size: 12px; font-weight: 700; color: var(--text2); min-width: 20px; }
 .prop-row input[type=range] { flex: 1; }
 .prop-row .val { font-size: 12px; font-weight: 800; color: var(--text); min-width: 40px; text-align: right; }
 .prop-row input[type=number] {
   width: 70px; font-family: inherit; font-size: 12px; font-weight: 700;
-  border: 1.5px solid var(--border2); border-radius: 8px; padding: 4px 8px;
-  text-align: center;
+  border: 1.5px solid var(--border2); border-radius: 8px; padding: 4px 8px; text-align: center;
 }
 .layer-list { list-style: none; }
 .layer-item {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 10px; border-radius: 8px;
-  font-size: 12px; font-weight: 700; color: var(--text2);
-  cursor: pointer; transition: .12s;
+  font-size: 12px; font-weight: 700; color: var(--text2); cursor: pointer; transition: .12s;
 }
 .layer-item:hover { background: #fef4f9; }
 .layer-item.selected { background: rgba(233,100,157,0.1); color: var(--pink); font-weight: 900; }
 .layer-btns { display: flex; gap: 4px; margin-left: auto; }
-.layer-btns button {
-  font-size: 14px; background: none; border: none; cursor: pointer;
-  padding: 2px 4px; border-radius: 4px;
-}
+.layer-btns button { font-size: 14px; background: none; border: none; cursor: pointer; padding: 2px 4px; border-radius: 4px; }
 .layer-btns button:hover { background: #fce4f0; }
-
 .no-select { font-size: 13px; color: var(--text3); text-align: center; padding: 20px; }
-
 .json-box {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.4);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 200; display: none;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center; z-index: 200; display: none;
 }
 .json-box.show { display: flex; }
 .json-inner {
   background: white; border-radius: var(--radius);
-  padding: 24px; width: 90%; max-width: 600px; max-height: 80vh;
-  overflow: auto;
+  padding: 24px; width: 90%; max-width: 600px; max-height: 80vh; overflow: auto;
 }
 .json-inner h3 { margin-bottom: 12px; }
 .json-inner textarea {
   width: 100%; height: 300px; font-family: monospace; font-size: 12px;
-  border: 1.5px solid var(--border2); border-radius: 8px; padding: 12px;
-  resize: vertical;
+  border: 1.5px solid var(--border2); border-radius: 8px; padding: 12px; resize: vertical;
 }
 .json-inner .btns { display: flex; gap: 8px; margin-top: 12px; }
-
 .hint {
-  position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+  position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
   background: rgba(45,26,62,0.85); color: white;
   font-size: 12px; font-weight: 700; padding: 6px 16px;
-  border-radius: 20px; pointer-events: none;
-  white-space: nowrap;
+  border-radius: 20px; pointer-events: none; white-space: nowrap; z-index: 50;
 }
 </style>
 </head>
 <body>
-
 <header>
   <h1>🎨 アバター位置エディター</h1>
   <span class="spacer"></span>
   <label style="font-size:12px;font-weight:700;color:var(--text2);">
     ステージ倍率:
     <select id="stage-zoom" style="font-family:inherit;font-size:12px;border-radius:8px;padding:2px 6px;">
+      <option value="0.1">0.1x</option>
+      <option value="0.15">0.15x</option>
+      <option value="0.2">0.2x</option>
+      <option value="0.25" selected>0.25x</option>
+      <option value="0.3">0.3x</option>
       <option value="0.4">0.4x</option>
-      <option value="0.5" selected>0.5x</option>
-      <option value="0.6">0.6x</option>
+      <option value="0.5">0.5x</option>
       <option value="0.8">0.8x</option>
       <option value="1.0">1.0x</option>
     </select>
@@ -216,31 +173,25 @@ header .spacer { flex: 1; }
   <button class="hbtn" onclick="resetAll()">🗑 リセット</button>
   <button class="hbtn export" onclick="exportJSON()">📋 JSON出力</button>
 </header>
-
 <div class="main">
   <div class="panel-left">
     <h3>📦 パーツ一覧</h3>
     <div id="parts-panel"></div>
   </div>
-
   <div class="panel-center" id="stage-area">
     <div class="stage-wrap" id="stage-wrap">
       <img class="base-img" id="base-img" src="./base.png" draggable="false">
     </div>
-    <div class="hint">クリックで選択 → ドラッグ or 矢印キーで移動 / Delete で削除</div>
   </div>
-
   <div class="panel-right">
     <h3>⚙️ プロパティ</h3>
-    <div id="props-content">
-      <div class="no-select">パーツを選択してね</div>
-    </div>
+    <div id="props-content"><div class="no-select">パーツを選択してね</div></div>
     <hr style="border:none;border-top:1px solid rgba(176,122,232,0.2);margin:16px 0;">
     <h3>📚 レイヤー順</h3>
     <ul class="layer-list" id="layer-list"></ul>
   </div>
 </div>
-
+<div class="hint">クリックで選択 → ドラッグ or 矢印キーで移動 / Shift+矢印で10px / Delete で削除</div>
 <div class="json-box" id="json-modal">
   <div class="json-inner">
     <h3>📋 パーツ位置データ (JSON)</h3>
@@ -251,7 +202,6 @@ header .spacer { flex: 1; }
     </div>
   </div>
 </div>
-
 <script>
 const PART_DEFS = {
   headband: {
@@ -316,28 +266,16 @@ const PART_DEFS = {
     ]
   },
 };
-
 let placedParts = [];
 let selectedPart = null;
 let nextZ = 10;
-let stageZoom = 0.5;
+let stageZoom = 0.25;
 let baseNatW = 0, baseNatH = 0;
 let isDragging = false, dragOffX = 0, dragOffY = 0;
-
 const stageWrap = document.getElementById('stage-wrap');
 const baseImg = document.getElementById('base-img');
-
-baseImg.onload = function() {
-  baseNatW = baseImg.naturalWidth;
-  baseNatH = baseImg.naturalHeight;
-  applyZoom();
-};
-if (baseImg.complete && baseImg.naturalWidth) {
-  baseNatW = baseImg.naturalWidth;
-  baseNatH = baseImg.naturalHeight;
-  applyZoom();
-}
-
+baseImg.onload = function() { baseNatW = baseImg.naturalWidth; baseNatH = baseImg.naturalHeight; applyZoom(); };
+if (baseImg.complete && baseImg.naturalWidth) { baseNatW = baseImg.naturalWidth; baseNatH = baseImg.naturalHeight; applyZoom(); }
 function applyZoom() {
   const w = Math.round(baseNatW * stageZoom);
   const h = Math.round(baseNatH * stageZoom);
@@ -347,12 +285,7 @@ function applyZoom() {
   baseImg.style.height = h + 'px';
   placedParts.forEach(p => applyPartTransform(p));
 }
-
-document.getElementById('stage-zoom').onchange = function() {
-  stageZoom = parseFloat(this.value);
-  applyZoom();
-};
-
+document.getElementById('stage-zoom').onchange = function() { stageZoom = parseFloat(this.value); applyZoom(); };
 function renderPartsList() {
   const panel = document.getElementById('parts-panel');
   panel.innerHTML = '';
@@ -375,7 +308,6 @@ function renderPartsList() {
     panel.appendChild(section);
   }
 }
-
 function addPartToStage(itemDef) {
   const existing = placedParts.find(p => p.defId === itemDef.id);
   if (existing) { selectPart(existing); return; }
@@ -387,15 +319,9 @@ function addPartToStage(itemDef) {
   el.appendChild(img);
   stageWrap.appendChild(el);
   const part = {
-    id: 'p_' + Date.now(),
-    defId: itemDef.id,
-    name: itemDef.name,
-    file: itemDef.file,
-    x: Math.round(baseNatW * 0.3),
-    y: Math.round(baseNatH * 0.2),
-    scale: 1.0,
-    zIndex: nextZ++,
-    el: el,
+    id: 'p_' + Date.now(), defId: itemDef.id, name: itemDef.name, file: itemDef.file,
+    x: Math.round(baseNatW * 0.3), y: Math.round(baseNatH * 0.2),
+    scale: 1.0, zIndex: nextZ++, el: el,
   };
   placedParts.push(part);
   applyPartTransform(part);
@@ -406,13 +332,10 @@ function addPartToStage(itemDef) {
   el.ontouchstart = (e) => startDrag(e, part);
   el.onclick = (e) => { e.stopPropagation(); selectPart(part); };
 }
-
 function applyPartTransform(p) {
   const el = p.el;
-  const sx = p.x * stageZoom;
-  const sy = p.y * stageZoom;
-  el.style.left = sx + 'px';
-  el.style.top = sy + 'px';
+  el.style.left = (p.x * stageZoom) + 'px';
+  el.style.top = (p.y * stageZoom) + 'px';
   el.style.zIndex = p.zIndex;
   const img = el.querySelector('img');
   if (img.naturalWidth) {
@@ -425,7 +348,6 @@ function applyPartTransform(p) {
     };
   }
 }
-
 function selectPart(p) {
   placedParts.forEach(pp => pp.el.classList.remove('selected'));
   selectedPart = p;
@@ -433,13 +355,9 @@ function selectPart(p) {
   renderProps();
   updateLayerList();
 }
-
 document.getElementById('stage-area').addEventListener('click', (e) => {
-  if (e.target.id === 'stage-area' || e.target.id === 'stage-wrap' || e.target.id === 'base-img') {
-    selectPart(null);
-  }
+  if (e.target.id === 'stage-area' || e.target.id === 'stage-wrap' || e.target.id === 'base-img') selectPart(null);
 });
-
 function startDrag(e, part) {
   e.preventDefault();
   selectPart(part);
@@ -454,10 +372,8 @@ function startDrag(e, part) {
     const cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
     const cy = ev.touches ? ev.touches[0].clientY : ev.clientY;
     const stageRect = stageWrap.getBoundingClientRect();
-    const newLeft = cx - stageRect.left - dragOffX;
-    const newTop = cy - stageRect.top - dragOffY;
-    part.x = Math.round(newLeft / stageZoom);
-    part.y = Math.round(newTop / stageZoom);
+    part.x = Math.round((cx - stageRect.left - dragOffX) / stageZoom);
+    part.y = Math.round((cy - stageRect.top - dragOffY) / stageZoom);
     applyPartTransform(part);
     renderProps();
   };
@@ -473,7 +389,6 @@ function startDrag(e, part) {
   document.addEventListener('touchmove', onMove, { passive: false });
   document.addEventListener('touchend', onUp);
 }
-
 document.addEventListener('keydown', (e) => {
   if (!selectedPart) return;
   const step = e.shiftKey ? 10 : 1;
@@ -482,33 +397,24 @@ document.addEventListener('keydown', (e) => {
     case 'ArrowRight': selectedPart.x += step; break;
     case 'ArrowUp':    selectedPart.y -= step; break;
     case 'ArrowDown':  selectedPart.y += step; break;
-    case 'Delete':
-    case 'Backspace':
+    case 'Delete': case 'Backspace':
       if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
-      removePart(selectedPart);
-      return;
+      removePart(selectedPart); return;
     default: return;
   }
   e.preventDefault();
   applyPartTransform(selectedPart);
   renderProps();
 });
-
 function removePart(p) {
   p.el.remove();
   placedParts = placedParts.filter(pp => pp !== p);
   if (selectedPart === p) selectedPart = null;
-  renderProps();
-  updateLayerList();
-  markThumbs();
+  renderProps(); updateLayerList(); markThumbs();
 }
-
 function renderProps() {
   const container = document.getElementById('props-content');
-  if (!selectedPart) {
-    container.innerHTML = '<div class="no-select">パーツを選択してね</div>';
-    return;
-  }
+  if (!selectedPart) { container.innerHTML = '<div class="no-select">パーツを選択してね</div>'; return; }
   const p = selectedPart;
   container.innerHTML = `
     <div class="prop-group">
@@ -521,18 +427,22 @@ function renderProps() {
       </div>
     </div>
     <div class="prop-group">
-      <div class="prop-label">🔍 スケール</div>
+      <div class="prop-label">🔍 スケール（パーツの大きさ）</div>
       <div class="prop-row">
-        <input type="range" min="0.1" max="3" step="0.05" value="${p.scale}"
-          oninput="setProp('scale', this.value); this.nextElementSibling.textContent=parseFloat(this.value).toFixed(2)">
-        <span class="val">${p.scale.toFixed(2)}</span>
+        <button class="hbtn" onclick="setProp('scale', Math.max(0.05, selectedPart.scale - 0.05))">➖</button>
+        <input type="range" min="0.05" max="5" step="0.05" value="${p.scale}"
+          oninput="setProp('scale', this.value); document.getElementById('scale-val').textContent=parseFloat(this.value).toFixed(2)">
+        <button class="hbtn" onclick="setProp('scale', Math.min(5, selectedPart.scale + 0.05))">➕</button>
+        <span class="val" id="scale-val">${p.scale.toFixed(2)}</span>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px;">
+        ➖➕ or スライダーでサイズ変更（0.05刻み）
       </div>
     </div>
     <div class="prop-group">
-      <div class="prop-label">📚 Zオーダー</div>
+      <div class="prop-label">📚 Zオーダー（重なり順）</div>
       <div class="prop-row">
-        <input type="number" id="prop-z" value="${p.zIndex}" min="0" max="100"
-          onchange="setProp('zIndex', this.value)">
+        <input type="number" id="prop-z" value="${p.zIndex}" min="0" max="100" onchange="setProp('zIndex', this.value)">
         <button class="hbtn" onclick="setProp('zIndex', ${p.zIndex + 1})" title="前面へ">⬆️</button>
         <button class="hbtn" onclick="setProp('zIndex', Math.max(0, ${p.zIndex - 1}))" title="背面へ">⬇️</button>
       </div>
@@ -542,18 +452,12 @@ function renderProps() {
     </div>
   `;
 }
-
 window.setProp = function(key, val) {
   if (!selectedPart) return;
-  if (key === 'scale') {
-    selectedPart[key] = parseFloat(val);
-  } else {
-    selectedPart[key] = parseInt(val) || 0;
-  }
+  selectedPart[key] = key === 'scale' ? parseFloat(val) : (parseInt(val) || 0);
   applyPartTransform(selectedPart);
   if (key !== 'x' && key !== 'y') renderProps();
 };
-
 function updateLayerList() {
   const list = document.getElementById('layer-list');
   const sorted = [...placedParts].sort((a, b) => b.zIndex - a.zIndex);
@@ -561,66 +465,34 @@ function updateLayerList() {
   sorted.forEach(p => {
     const li = document.createElement('li');
     li.className = 'layer-item' + (selectedPart === p ? ' selected' : '');
-    li.innerHTML = `
-      <span>${p.name}</span>
-      <span style="font-size:10px;color:var(--text3)">z:${p.zIndex}</span>
+    li.innerHTML = `<span>${p.name}</span><span style="font-size:10px;color:var(--text3)">z:${p.zIndex}</span>
       <div class="layer-btns">
         <button onclick="event.stopPropagation(); moveZ(${placedParts.indexOf(p)}, 1)" title="前面へ">⬆</button>
         <button onclick="event.stopPropagation(); moveZ(${placedParts.indexOf(p)}, -1)" title="背面へ">⬇</button>
-      </div>
-    `;
+      </div>`;
     li.onclick = () => selectPart(p);
     list.appendChild(li);
   });
 }
-
 window.moveZ = function(idx, dir) {
-  const p = placedParts[idx];
-  if (!p) return;
+  const p = placedParts[idx]; if (!p) return;
   p.zIndex = Math.max(0, p.zIndex + dir);
-  applyPartTransform(p);
-  selectPart(p);
+  applyPartTransform(p); selectPart(p);
 };
-
 function markThumbs() {
   document.querySelectorAll('.part-thumb').forEach(t => t.classList.remove('on-stage'));
-  placedParts.forEach(p => {
-    const t = document.getElementById('thumb-' + p.defId);
-    if (t) t.classList.add('on-stage');
-  });
+  placedParts.forEach(p => { const t = document.getElementById('thumb-' + p.defId); if (t) t.classList.add('on-stage'); });
 }
-
 window.resetAll = function() {
   if (!confirm('すべてのパーツをステージからクリアしますか？')) return;
   placedParts.forEach(p => p.el.remove());
-  placedParts = [];
-  selectedPart = null;
-  nextZ = 10;
-  renderProps();
-  updateLayerList();
-  markThumbs();
+  placedParts = []; selectedPart = null; nextZ = 10;
+  renderProps(); updateLayerList(); markThumbs();
 };
-
 window.exportJSON = function() {
-  const data = placedParts.map(p => ({
-    id: p.defId,
-    name: p.name,
-    file: p.file,
-    x: p.x,
-    y: p.y,
-    scale: p.scale,
-    zIndex: p.zIndex,
-  }));
+  const data = placedParts.map(p => ({ id: p.defId, name: p.name, file: p.file, x: p.x, y: p.y, scale: p.scale, zIndex: p.zIndex }));
   const partsConfig = {};
-  data.forEach(d => {
-    partsConfig[d.id] = {
-      file: d.file,
-      x: d.x,
-      y: d.y,
-      scale: d.scale,
-      zIndex: d.zIndex,
-    };
-  });
+  data.forEach(d => { partsConfig[d.id] = { file: d.file, x: d.x, y: d.y, scale: d.scale, zIndex: d.zIndex }; });
   const output = {
     _comment: 'pet-editor.html で生成した位置データ',
     baseImage: 'base.png',
@@ -632,14 +504,9 @@ window.exportJSON = function() {
   document.getElementById('json-output').value = JSON.stringify(output, null, 2);
   document.getElementById('json-modal').classList.add('show');
 };
-
 window.copyJSON = function() {
-  const ta = document.getElementById('json-output');
-  ta.select();
-  document.execCommand('copy');
-  alert('コピーしました！');
+  const ta = document.getElementById('json-output'); ta.select(); document.execCommand('copy'); alert('コピーしました！');
 };
-
 renderPartsList();
 </script>
 </body>

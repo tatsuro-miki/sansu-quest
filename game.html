@@ -486,6 +486,7 @@ body::before {
 .xp-pop { position: fixed; top: 38%; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 9998; font-size: 1.1rem; font-weight: 900; color: var(--xp); animation: xpFloat .9s ease forwards; }
 .coin-pop { position: fixed; top: 32%; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 9998; font-size: 1.3rem; font-weight: 900; color: var(--gold); animation: coinFloat 1.2s ease forwards; text-shadow: 0 2px 8px rgba(245,166,35,0.4); }
 @keyframes coinFloat { 0% { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.5); } 15% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.2); } 30% { transform: translateX(-50%) translateY(-5px) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(-40px) scale(0.8); } }
+@keyframes toastIn { 0% { opacity:0; transform:translateX(-50%) translateY(-20px) scale(0.8); } 100% { opacity:1; transform:translateX(-50%) translateY(0) scale(1); } }
 .save-dot { position: fixed; bottom: 16px; right: 16px; width: 8px; height: 8px; border-radius: 50%; background: var(--xp); opacity: 0; transition: opacity .3s; z-index: 999; }
 .save-dot.saving { opacity: 1; animation: pulse 1s infinite; }
 .correct-flash { position: fixed; inset: 0; background: rgba(45,184,122,0.16); pointer-events: none; z-index: 9990; animation: flashIn .35s ease forwards; }
@@ -836,7 +837,7 @@ function trackCategoryProgress() {
         category = 1;
         document.querySelectorAll('.cat-btn').forEach((b, i) => b.classList.toggle('active', i === 1));
         renderLessonCorner(1);
-        showToast('ほかのカテゴリも解いてみよう！🧠', 'ng');
+        showLockAlert();
       }
     } else {
       arithmeticStreak = 0; // 他カテゴリを解いたらリセット
@@ -898,6 +899,28 @@ window.toggleHint=function(){ hintVisible=!hintVisible; const box=document.getEl
 window.toggleMemo=function(){ memoVisible=!memoVisible; const area=document.getElementById('memo-area'); if(area){area.style.display=memoVisible?'block':'none';if(memoVisible)setTimeout(()=>area.querySelector('textarea')?.focus(),80);} };
 
 function showModal(title,body,xp){ const ov=document.createElement('div');ov.className='modal-overlay';ov.innerHTML=`<div class="modal-box"><span style="font-size:3.5rem;display:block;margin-bottom:10px">🏆</span><h2>${title}</h2><p>${body}</p>${xp?`<div class="modal-xp">+${xp} XP</div>`:''}<button class="modal-close" onclick="this.closest('.modal-overlay').remove()">やった！</button></div>`;document.body.appendChild(ov);if(xp){save.xp=(save.xp||0)+xp;persistSave();renderUI();} }
+function showToast(text, type) {
+  const el = document.createElement('div');
+  const bg = type === 'ok' ? 'linear-gradient(135deg,#2db87a,#27a06c)' : 'linear-gradient(135deg,#e94560,#d63050)';
+  el.style.cssText = `position:fixed;top:18%;left:50%;transform:translateX(-50%);z-index:10000;padding:14px 28px;border-radius:16px;font-size:1.1rem;font-weight:800;color:white;background:${bg};box-shadow:0 4px 24px rgba(0,0,0,.25);pointer-events:none;animation:toastIn .4s ease;white-space:nowrap;`;
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.transition = 'opacity .5s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 500); }, 2500);
+}
+
+function showLockAlert() {
+  const ov = document.createElement('div');
+  ov.className = 'modal-overlay';
+  ov.innerHTML = `<div class="modal-box">
+    <span style="font-size:3.5rem;display:block;margin-bottom:10px">🔒</span>
+    <h2>四則演算がロックされたよ！</h2>
+    <p style="margin:12px 0;line-height:1.7;font-size:.95rem">四則演算を5問れんぞくで解いたから、<br>ほかのカテゴリにもチャレンジしよう！<br><br>
+    <strong style="color:var(--primary)">🍕 分数・🔸 小数・📖 文章題</strong><br>をそれぞれ <strong>2問ずつ</strong> 解くと<br>四則演算がまた使えるようになるよ！</p>
+    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">わかった！</button>
+  </div>`;
+  document.body.appendChild(ov);
+}
+
 function showCombo(text){ const el=document.createElement('div');el.className='combo-pop';el.textContent=text;document.body.appendChild(el);setTimeout(()=>el.remove(),950); }
 function showXpPop(text){ const el=document.createElement('div');el.className='xp-pop';el.textContent=text;document.body.appendChild(el);setTimeout(()=>el.remove(),950); }
 function showCoinPop(amount){ const el=document.createElement('div');el.className='coin-pop';el.textContent=`🪙 +${amount}コイン`;document.body.appendChild(el);setTimeout(()=>el.remove(),1250); }

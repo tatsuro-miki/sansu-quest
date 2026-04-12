@@ -301,60 +301,73 @@ body::before {
 .frac-wrap input:focus { border-color: var(--blue); }
 .frac-line { width: 76px; height: 2px; background: var(--text); border-radius: 1px; }
 
-/* テンキー */
+/* テンキー — 画面下部固定 電卓スタイル */
+.numpad-wrap {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 800;
+  background: linear-gradient(180deg, #f5e6c8 0%, #e8d4a8 100%);
+  border-top: 3px solid #c9a96e;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 20px rgba(0,0,0,.15);
+}
 .numpad {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 5px;
-  max-width: 210px;
-  margin: 8px auto 0;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  max-width: 400px;
+  margin: 0 auto;
 }
 .numpad-btn {
   font-family: inherit;
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   font-weight: 900;
-  padding: 9px 0;
-  background: var(--surface2);
+  padding: 16px 0;
+  background: linear-gradient(180deg, #fff8e1 0%, #f5e6c0 100%);
   color: var(--text);
-  border: 1.5px solid var(--border2);
-  border-radius: var(--radius-sm);
+  border: 2px solid #c9a96e;
+  border-radius: 10px;
   cursor: pointer;
-  transition: .15s;
+  transition: .12s;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 3px 0 #b8965a, 0 4px 8px rgba(0,0,0,.12);
 }
 .numpad-btn:active {
-  background: var(--primary2);
-  transform: scale(0.94);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #b8965a;
 }
-.numpad-btn.np-del {
-  background: var(--surface3);
-  font-size: .9rem;
+.numpad-btn.np-func {
+  background: linear-gradient(180deg, #ffe0b2 0%, #ffcc80 100%);
+  border-color: #e09940;
+  box-shadow: 0 3px 0 #c68530, 0 4px 8px rgba(0,0,0,.12);
+  font-size: 1.2rem;
 }
-.numpad-btn.np-minus {
-  background: var(--surface3);
-}
-.numpad-btn.np-dot {
-  background: var(--surface3);
+.numpad-btn.np-func:active {
+  box-shadow: 0 1px 0 #c68530;
 }
 .numpad-btn.np-ok {
-  background: var(--primary);
+  background: linear-gradient(180deg, #ff8a80 0%, var(--primary) 100%);
   color: white;
-  font-size: .95rem;
-  box-shadow: var(--glow-primary);
+  font-size: 1.15rem;
+  border-color: #c62828;
+  box-shadow: 0 3px 0 #b71c1c, 0 4px 8px rgba(0,0,0,.15);
 }
 .numpad-btn.np-ok:active {
-  background: #d63050;
+  box-shadow: 0 1px 0 #b71c1c;
 }
 .numpad-btn.np-next {
-  background: var(--xp);
+  background: linear-gradient(180deg, #81c784 0%, #43a047 100%);
   color: white;
-  font-size: .95rem;
-  box-shadow: 0 4px 20px rgba(45,184,122,.25);
+  font-size: 1.15rem;
+  border-color: #2e7d32;
+  box-shadow: 0 3px 0 #1b5e20, 0 4px 8px rgba(0,0,0,.15);
 }
 .numpad-btn.np-next:active {
-  background: #27a06c;
+  box-shadow: 0 1px 0 #1b5e20;
 }
+/* テンキー表示時のコンテンツ余白 */
+.has-numpad { padding-bottom: 260px !important; }
 
 /* 選択肢 */
 .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; width: 100%; margin-top: 6px; }
@@ -880,7 +893,7 @@ function updateCatButtons() {
 }
 window.setDifficulty=function(d){ difficulty=d; ['easy','mid','hard'].forEach(k=>{const el=document.getElementById('diff-'+k);if(el){el.classList.toggle('active',k===d);el.className='diff-btn'+(k===d?' active '+k:'');}}); nextQuestion(); };
 
-function nextQuestion(){ if((save.hearts||0)<=0){renderGameOver();return;} if(arithmeticLocked && category===0){category=1;document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===1));} question=gen(); answered=false; hintVisible=false; memoVisible=false; const lvLabel=question.lv==='lv1'?'かんたん':question.lv==='lv2'?'ふつう':'むずかしい'; const dispXp=Math.round((XP_TBL[question.lv]||10)*(DIFF_MULTI[difficulty]||1)); let ansHtml=''; if(question.type==='fraction'){ansHtml=`<div class="frac-wrap"><input type="text" id="fn" placeholder="分子" readonly autocomplete="off"><div class="frac-line"></div><input type="text" id="fd" placeholder="分母" readonly autocomplete="off"></div>${buildNumpad()}`;}else if(question.type==='choice'){ansHtml=`<div class="choices">${question.choices.map(c=>`<button class="choice-btn" onclick="doChoice('${c}',this)">${c}</button>`).join('')}</div>`;}else{ansHtml=`<input type="text" class="answer-input" id="main-inp" placeholder="?" readonly autocomplete="off">${buildNumpad()}`;} document.getElementById('main-area').innerHTML=`<div class="question-card"><div class="q-meta"><span class="q-cat">${question.label}</span><span class="q-lv ${question.lv}">${lvLabel}</span><span class="q-xp">+${dispXp}XP</span></div><div class="q-text">${question.text}</div>${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}<div class="answer-area" id="ans-area">${ansHtml}</div><div class="memo-wrap"><button class="memo-toggle" onclick="toggleMemo()">✏️ 計算メモを使う</button><div class="memo-area" id="memo-area" style="display:none"><div class="memo-label">📝 ここにメモしてOK！</div><textarea class="memo-textarea" placeholder="ここに計算を書こう"></textarea></div></div></div><div class="feedback" id="fb"></div><div id="btn-area"></div>`; if(question.type==='number'){ activeNumpadInput=document.getElementById('main-inp'); setTimeout(()=>document.getElementById('main-inp')?.focus(),80); document.getElementById('main-inp').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();}); } if(question.type==='fraction'){ const fn=document.getElementById('fn'),fd=document.getElementById('fd'); activeNumpadInput=fn; fn.addEventListener('focus',()=>{activeNumpadInput=fn;}); fd.addEventListener('focus',()=>{activeNumpadInput=fd;}); fn.addEventListener('keydown',e=>{if(e.key==='Enter')fd.focus();}); fd.addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();}); setTimeout(()=>fn.focus(),80); } }
+function nextQuestion(){ if((save.hearts||0)<=0){renderGameOver();return;} if(arithmeticLocked && category===0){category=1;document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===1));} question=gen(); answered=false; hintVisible=false; memoVisible=false; const lvLabel=question.lv==='lv1'?'かんたん':question.lv==='lv2'?'ふつう':'むずかしい'; const dispXp=Math.round((XP_TBL[question.lv]||10)*(DIFF_MULTI[difficulty]||1)); let ansHtml=''; let needsNumpad=false; if(question.type==='fraction'){ansHtml=`<div class="frac-wrap"><input type="text" id="fn" placeholder="分子" readonly autocomplete="off"><div class="frac-line"></div><input type="text" id="fd" placeholder="分母" readonly autocomplete="off"></div>`;needsNumpad=true;}else if(question.type==='choice'){ansHtml=`<div class="choices">${question.choices.map(c=>`<button class="choice-btn" onclick="doChoice('${c}',this)">${c}</button>`).join('')}</div>`;}else{ansHtml=`<input type="text" class="answer-input" id="main-inp" placeholder="?" readonly autocomplete="off">`;needsNumpad=true;} document.getElementById('main-area').innerHTML=`<div class="question-card"><div class="q-meta"><span class="q-cat">${question.label}</span><span class="q-lv ${question.lv}">${lvLabel}</span><span class="q-xp">+${dispXp}XP</span></div><div class="q-text">${question.text}</div>${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}<div class="answer-area" id="ans-area">${ansHtml}</div><div class="memo-wrap"><button class="memo-toggle" onclick="toggleMemo()">✏️ 計算メモを使う</button><div class="memo-area" id="memo-area" style="display:none"><div class="memo-label">📝 ここにメモしてOK！</div><textarea class="memo-textarea" placeholder="ここに計算を書こう"></textarea></div></div></div><div class="feedback" id="fb"></div><div id="btn-area"></div>`; if(needsNumpad){ showNumpad(); } else { hideNumpad(); } if(question.type==='number'){ activeNumpadInput=document.getElementById('main-inp'); setTimeout(()=>document.getElementById('main-inp')?.focus(),80); document.getElementById('main-inp').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();}); } if(question.type==='fraction'){ const fn=document.getElementById('fn'),fd=document.getElementById('fd'); activeNumpadInput=fn; fn.addEventListener('focus',()=>{activeNumpadInput=fn;}); fd.addEventListener('focus',()=>{activeNumpadInput=fd;}); fn.addEventListener('keydown',e=>{if(e.key==='Enter')fd.focus();}); fd.addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();}); setTimeout(()=>fn.focus(),80); } }
 
 window.doCheck=function(){ if(answered) return; if(question.type==='fraction'){const n=parseInt(document.getElementById('fn').value),d=parseInt(document.getElementById('fd').value);if(isNaN(n)||isNaN(d)||d===0) return;const g=gcd(Math.abs(n),Math.abs(d)),rn=Math.round(n/g),rd=Math.round(d/g);const cg=gcd(Math.abs(question.na),Math.abs(question.da)),cn=Math.round(question.na/cg),cd=Math.round(question.da/cg);rn===cn&&rd===cd?onCorrect():onWrong(`せいかいは ${question.na}/${question.da}`);}else{const inp=document.getElementById('main-inp');if(!inp||inp.value==='') return;const ua=(Math.round(parseFloat(inp.value)*10000)/10000).toString();const qa=(Math.round(parseFloat(question.answer)*10000)/10000).toString();if(ua===qa){inp.classList.add('correct');onCorrect();}else{inp.classList.add('wrong');onWrong(`せいかいは ${question.answer}`);}} };
 window.doChoice=function(val,btn){ if(answered) return; document.querySelectorAll('.choice-btn').forEach(b=>b.style.pointerEvents='none'); if(val===question.answer){btn.classList.add('ok');onCorrect();}else{btn.classList.add('ng');document.querySelectorAll('.choice-btn').forEach(b=>{if(b.textContent===question.answer)b.classList.add('ok');});onWrong(`せいかいは ${question.answer}`);} };
@@ -984,7 +997,7 @@ function showNextBtn(){
   }
 }
 
-function renderGameOver(){ document.getElementById('main-area').innerHTML=`<div class="gameover-card"><h2>💔 ハートがなくなった！</h2><p>30分ごとにハートが回復するよ。<br>また後でチャレンジしよう！</p><p style="margin-bottom:20px;font-size:.85rem;color:var(--text2)">今日の正解: <strong style="color:var(--xp)">${save.dailyDone||0}</strong> 問 / 累計: <strong style="color:var(--gold)">${save.totalCorrect||0}</strong> 問</p><button class="revive-btn" onclick="checkRevive()">❤️ ハートを確認する</button><button class="revive-btn ghost" onclick="logout()">ログアウト</button></div>`; }
+function renderGameOver(){ hideNumpad(); document.getElementById('main-area').innerHTML=`<div class="gameover-card"><h2>💔 ハートがなくなった！</h2><p>30分ごとにハートが回復するよ。<br>また後でチャレンジしよう！</p><p style="margin-bottom:20px;font-size:.85rem;color:var(--text2)">今日の正解: <strong style="color:var(--xp)">${save.dailyDone||0}</strong> 問 / 累計: <strong style="color:var(--gold)">${save.totalCorrect||0}</strong> 問</p><button class="revive-btn" onclick="checkRevive()">❤️ ハートを確認する</button><button class="revive-btn ghost" onclick="logout()">ログアウト</button></div>`; }
 window.checkRevive=function(){ const elapsed=Date.now()-(save.lastHeartRegen||Date.now()); const regen=Math.floor(elapsed/(30*60*1000)); if(regen>0||save.hearts>0){save.hearts=Math.min(HEARTS_MAX,(save.hearts||0)+regen);save.lastHeartRegen=Date.now();persistSave();renderUI();nextQuestion();}else{const mins=Math.ceil((30*60*1000-(Date.now()-(save.lastHeartRegen||Date.now())))/60000);alert(`あと約${mins}分でハートが回復します！`);} };
 
 window.toggleHint=function(){ hintVisible=!hintVisible; const box=document.getElementById('hint-box'),btn=document.getElementById('hint-btn'); if(box) box.style.display=hintVisible?'block':'none'; if(btn) btn.textContent=hintVisible?'💡 ヒントを隠す':'💡 ヒントを見る'; };
@@ -994,22 +1007,38 @@ window.toggleMemo=function(){ memoVisible=!memoVisible; const area=document.getE
 let activeNumpadInput = null; // 現在フォーカスしている入力欄
 
 function buildNumpad() {
-  return `<div class="numpad" id="numpad">
+  return `<div class="numpad">
     <button class="numpad-btn" onclick="npKey('7')">7</button>
     <button class="numpad-btn" onclick="npKey('8')">8</button>
     <button class="numpad-btn" onclick="npKey('9')">9</button>
+    <button class="numpad-btn np-func" onclick="npDel()">C</button>
     <button class="numpad-btn" onclick="npKey('4')">4</button>
     <button class="numpad-btn" onclick="npKey('5')">5</button>
     <button class="numpad-btn" onclick="npKey('6')">6</button>
+    <button class="numpad-btn np-func" onclick="npAllClear()">AC</button>
     <button class="numpad-btn" onclick="npKey('1')">1</button>
     <button class="numpad-btn" onclick="npKey('2')">2</button>
     <button class="numpad-btn" onclick="npKey('3')">3</button>
-    <button class="numpad-btn np-dot" onclick="npKey('.')">.</button>
+    <button class="numpad-btn np-func" onclick="npKey('.')">.</button>
+    <button class="numpad-btn np-func" onclick="npMinus()">−</button>
     <button class="numpad-btn" onclick="npKey('0')">0</button>
-    <button class="numpad-btn np-del" onclick="npDel()">←</button>
-    <button class="numpad-btn np-minus" onclick="npMinus()">−</button>
     <button class="numpad-btn np-ok" style="grid-column:span 2" onclick="doCheck()">こたえる</button>
   </div>`;
+}
+
+function showNumpad() {
+  hideNumpad();
+  const wrap = document.createElement('div');
+  wrap.className = 'numpad-wrap';
+  wrap.id = 'numpad-wrap';
+  wrap.innerHTML = buildNumpad();
+  document.body.appendChild(wrap);
+  document.body.classList.add('has-numpad');
+}
+function hideNumpad() {
+  const el = document.getElementById('numpad-wrap');
+  if (el) el.remove();
+  document.body.classList.remove('has-numpad');
 }
 
 window.npKey = function(k) {
@@ -1022,6 +1051,12 @@ window.npDel = function() {
   const inp = activeNumpadInput || document.getElementById('main-inp');
   if (!inp || answered) return;
   inp.value = inp.value.slice(0, -1);
+  inp.focus();
+};
+window.npAllClear = function() {
+  const inp = activeNumpadInput || document.getElementById('main-inp');
+  if (!inp || answered) return;
+  inp.value = '';
   inp.focus();
 };
 window.npMinus = function() {

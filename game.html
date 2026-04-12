@@ -690,6 +690,13 @@ const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${d.getMonth()
 
 let username='', save={}, category=0, difficulty='easy', question=null, answered=false;
 let hintVisible=false, memoVisible=false;
+
+// 四則演算ロック制御：5問連続で他カテゴリ各2問必須
+let arithmeticStreak = 0;       // 四則演算の連続正解+不正解数
+let arithmeticLocked = false;   // 四則演算がロック中か
+let unlockProgress = {1:0, 2:0, 3:0}; // 他カテゴリの解答数（ロック中のみ）
+const ARITH_LOCK_THRESHOLD = 5; // 何問で発動
+const UNLOCK_REQUIRED = 2;      // 各カテゴリ何問必要
 let saveTimer=null;
 let testMode=false, testTimer=null, testTimeLeft=0;
 let testCorrect=0, testTotal=0, testCurrentQ=null, testAnswered=false;
@@ -756,19 +763,88 @@ function genWord(tier){ if(tier==='easy') return genArithmetic('easy'); const ro
 function gen(){ let tier=difficulty; if((category===1||category===2||category===3)&&tier==='easy') tier='mid'; switch(category){case 0:return genArithmetic(tier);case 1:return genFraction(tier);case 2:return genDecimal(tier);case 3:return genWord(tier);} }
 
 window.setCategory = function(idx) {
+  // 四則演算がロック中なら選べない
+  if (idx === 0 && arithmeticLocked) {
+    showToast('ほかのカテゴリも解こう！', 'ng');
+    return;
+  }
   category = idx;
   document.querySelectorAll('.cat-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
-  renderLessonCorner(idx);  // ← この1行を追加
+  renderLessonCorner(idx);
+  updateCatButtons();
   nextQuestion();
 };
+
+function updateCatButtons() {
+  const btns = document.querySelectorAll('.cat-btn');
+  btns.forEach((btn, i) => {
+    // 既存のバッジを削除
+    const old = btn.querySelector('.lock-badge');
+    if (old) old.remove();
+    btn.style.opacity = '';
+    btn.style.position = 'relative';
+
+    if (i === 0 && arithmeticLocked) {
+      // 四則演算ロック表示
+      btn.style.opacity = '0.45';
+      const badge = document.createElement('span');
+      badge.className = 'lock-badge';
+      badge.textContent = '🔒';
+      badge.style.cssText = 'position:absolute;top:-4px;right:-4px;font-size:12px;';
+      btn.appendChild(badge);
+    } else if (arithmeticLocked && i > 0) {
+      // 他カテゴリの残り問題数表示
+      const remain = UNLOCK_REQUIRED - (unlockProgress[i] || 0);
+      if (remain > 0) {
+        const badge = document.createElement('span');
+        badge.className = 'lock-badge';
+        badge.textContent = `${remain}`;
+        badge.style.cssText = 'position:absolute;top:-6px;right:-6px;font-size:10px;font-weight:900;background:var(--primary);color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;';
+        btn.appendChild(badge);
+      }
+    }
+  });
+}
 window.setDifficulty=function(d){ difficulty=d; ['easy','mid','hard'].forEach(k=>{const el=document.getElementById('diff-'+k);if(el){el.classList.toggle('active',k===d);el.className='diff-btn'+(k===d?' active '+k:'');}}); nextQuestion(); };
 
-function nextQuestion(){ if((save.hearts||0)<=0){renderGameOver();return;} question=gen(); answered=false; hintVisible=false; memoVisible=false; const lvLabel=question.lv==='lv1'?'かんたん':question.lv==='lv2'?'ふつう':'むずかしい'; const dispXp=Math.round((XP_TBL[question.lv]||10)*(DIFF_MULTI[difficulty]||1)); let ansHtml=''; if(question.type==='fraction'){ansHtml=`<div class="frac-wrap"><input type="number" id="fn" placeholder="分子" min="0" max="9999"><div class="frac-line"></div><input type="number" id="fd" placeholder="分母" min="1" max="9999"></div><button class="submit-btn" onclick="doCheck()">こたえる</button>`;}else if(question.type==='choice'){ansHtml=`<div class="choices">${question.choices.map(c=>`<button class="choice-btn" onclick="doChoice('${c}',this)">${c}</button>`).join('')}</div>`;}else{ansHtml=`<input type="number" class="answer-input" id="main-inp" placeholder="?" autocomplete="off"><button class="submit-btn" onclick="doCheck()">こたえる</button>`;} document.getElementById('main-area').innerHTML=`<div class="question-card"><div class="q-meta"><span class="q-cat">${question.label}</span><span class="q-lv ${question.lv}">${lvLabel}</span><span class="q-xp">+${dispXp}XP</span></div><div class="q-text">${question.text}</div>${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}<div class="answer-area" id="ans-area">${ansHtml}</div><div class="memo-wrap"><button class="memo-toggle" onclick="toggleMemo()">✏️ 計算メモを使う</button><div class="memo-area" id="memo-area" style="display:none"><div class="memo-label">📝 ここにメモしてOK！</div><textarea class="memo-textarea" placeholder="ここに計算を書こう"></textarea></div></div></div><div class="feedback" id="fb"></div><div id="btn-area"></div>`; if(question.type==='number') setTimeout(()=>document.getElementById('main-inp')?.focus(),80); if(question.type==='fraction'){document.getElementById('fn').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('fd').focus();});document.getElementById('fd').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();});setTimeout(()=>document.getElementById('fn').focus(),80);} if(question.type==='number') document.getElementById('main-inp').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();}); }
+function nextQuestion(){ if((save.hearts||0)<=0){renderGameOver();return;} if(arithmeticLocked && category===0){category=1;document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===1));} question=gen(); answered=false; hintVisible=false; memoVisible=false; const lvLabel=question.lv==='lv1'?'かんたん':question.lv==='lv2'?'ふつう':'むずかしい'; const dispXp=Math.round((XP_TBL[question.lv]||10)*(DIFF_MULTI[difficulty]||1)); let ansHtml=''; if(question.type==='fraction'){ansHtml=`<div class="frac-wrap"><input type="number" id="fn" placeholder="分子" min="0" max="9999"><div class="frac-line"></div><input type="number" id="fd" placeholder="分母" min="1" max="9999"></div><button class="submit-btn" onclick="doCheck()">こたえる</button>`;}else if(question.type==='choice'){ansHtml=`<div class="choices">${question.choices.map(c=>`<button class="choice-btn" onclick="doChoice('${c}',this)">${c}</button>`).join('')}</div>`;}else{ansHtml=`<input type="number" class="answer-input" id="main-inp" placeholder="?" autocomplete="off"><button class="submit-btn" onclick="doCheck()">こたえる</button>`;} document.getElementById('main-area').innerHTML=`<div class="question-card"><div class="q-meta"><span class="q-cat">${question.label}</span><span class="q-lv ${question.lv}">${lvLabel}</span><span class="q-xp">+${dispXp}XP</span></div><div class="q-text">${question.text}</div>${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}<div class="answer-area" id="ans-area">${ansHtml}</div><div class="memo-wrap"><button class="memo-toggle" onclick="toggleMemo()">✏️ 計算メモを使う</button><div class="memo-area" id="memo-area" style="display:none"><div class="memo-label">📝 ここにメモしてOK！</div><textarea class="memo-textarea" placeholder="ここに計算を書こう"></textarea></div></div></div><div class="feedback" id="fb"></div><div id="btn-area"></div>`; if(question.type==='number') setTimeout(()=>document.getElementById('main-inp')?.focus(),80); if(question.type==='fraction'){document.getElementById('fn').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('fd').focus();});document.getElementById('fd').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();});setTimeout(()=>document.getElementById('fn').focus(),80);} if(question.type==='number') document.getElementById('main-inp').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();}); }
 
 window.doCheck=function(){ if(answered) return; if(question.type==='fraction'){const n=parseInt(document.getElementById('fn').value),d=parseInt(document.getElementById('fd').value);if(isNaN(n)||isNaN(d)) return;const g=gcd(Math.abs(n),d),rn=n/g,rd=d/g;const cg=gcd(Math.abs(question.na),question.da),cn=question.na/cg,cd=question.da/cg;rn===cn&&rd===cd?onCorrect():onWrong(`せいかいは ${question.na}/${question.da}`);}else{const inp=document.getElementById('main-inp');if(!inp||inp.value==='') return;const ua=(Math.round(parseFloat(inp.value)*10000)/10000).toString();const qa=(Math.round(parseFloat(question.answer)*10000)/10000).toString();if(ua===qa){inp.classList.add('correct');onCorrect();}else{inp.classList.add('wrong');onWrong(`せいかいは ${question.answer}`);}} };
 window.doChoice=function(val,btn){ if(answered) return; document.querySelectorAll('.choice-btn').forEach(b=>b.style.pointerEvents='none'); if(val===question.answer){btn.classList.add('ok');onCorrect();}else{btn.classList.add('ng');document.querySelectorAll('.choice-btn').forEach(b=>{if(b.textContent===question.answer)b.classList.add('ok');});onWrong(`せいかいは ${question.answer}`);} };
 
-function onCorrect(){ answered=true; const baseXp=XP_TBL[question.lv]; const multi=DIFF_MULTI[difficulty]||1; const xpAmt=Math.round(baseXp*multi); save.questionStreak=(save.questionStreak||0)+1; const bonus=save.questionStreak%5===0?10:0; const isCombo=save.questionStreak%3===0; save.totalCorrect=(save.totalCorrect||0)+1; save.catCorrect=save.catCorrect||[0,0,0,0]; save.catCorrect[category]=(save.catCorrect[category]||0)+1; save.dailyDone=(save.dailyDone||0)+1; save.xp=(save.xp||0)+xpAmt+bonus;
+function trackCategoryProgress() {
+  if (arithmeticLocked) {
+    // ロック中：他カテゴリの進捗を記録
+    if (category > 0) {
+      unlockProgress[category] = (unlockProgress[category] || 0) + 1;
+    }
+    // 全カテゴリ達成チェック
+    const done = [1,2,3].every(c => (unlockProgress[c] || 0) >= UNLOCK_REQUIRED);
+    if (done) {
+      arithmeticLocked = false;
+      arithmeticStreak = 0;
+      unlockProgress = {1:0, 2:0, 3:0};
+      showToast('四則演算がつかえるようになったよ！', 'ok');
+    }
+  } else {
+    // 通常：四則演算の連続カウント
+    if (category === 0) {
+      arithmeticStreak++;
+      if (arithmeticStreak >= ARITH_LOCK_THRESHOLD) {
+        arithmeticLocked = true;
+        // 四則以外のカテゴリに自動切替
+        category = 1;
+        document.querySelectorAll('.cat-btn').forEach((b, i) => b.classList.toggle('active', i === 1));
+        renderLessonCorner(1);
+        showToast('ほかのカテゴリも解いてみよう！🧠', 'ng');
+      }
+    } else {
+      arithmeticStreak = 0; // 他カテゴリを解いたらリセット
+    }
+  }
+  updateCatButtons();
+}
+function onCorrect(){ answered=true; trackCategoryProgress(); const baseXp=XP_TBL[question.lv]; const multi=DIFF_MULTI[difficulty]||1; const xpAmt=Math.round(baseXp*multi); save.questionStreak=(save.questionStreak||0)+1; const bonus=save.questionStreak%5===0?10:0; const isCombo=save.questionStreak%3===0; save.totalCorrect=(save.totalCorrect||0)+1; save.catCorrect=save.catCorrect||[0,0,0,0]; save.catCorrect[category]=(save.catCorrect[category]||0)+1; save.dailyDone=(save.dailyDone||0)+1; save.xp=(save.xp||0)+xpAmt+bonus;
 const coinAmt = difficulty === 'hard' ? 20 : difficulty === 'mid' ? 10 : 5;
 save.coins = (save.coins || 0) + coinAmt;
 
@@ -808,7 +884,7 @@ if (save.pet.questionsForFood >= 5) {
    }, 400);
 }
 let leveled=false; if(!save.level)save.level=1; while(save.level<MAX_LV&&save.xp>=xpForLv(save.level)){save.xp-=xpForLv(save.level);save.level++;leveled=true;} flashScreen('correct-flash'); if(isCombo){soundCombo();spawnCoins(12);spawnStars(6);}else{soundCorrect();spawnCoins(5);spawnStars(3);} if(leveled){save.hearts=HEARTS_MAX;setTimeout(()=>showLevelUpOverlay(save.level,lvName(save.level)),500);} checkBadges(); persistSave(); renderUI(); renderBadges(); const msgs=['すごい！🎉','かんぺき！✨','よくできました！⭐','その調子！🔥','天才！🧠','完璧！💯']; const diffTag=multi>1?` ${DIFF_LABELS[difficulty]}ボーナス×${multi}！`:''; setFeedback('ok',msgs[R(0,msgs.length-1)]+(bonus?` コンボ+${bonus}XP！`:'')+diffTag); showXpPop(`+${xpAmt+bonus}XP`); showCoinPop(coinAmt); if(isCombo) showCombo(`🔥×${save.questionStreak}`); const _dg=dailyGoal(save.level||1); if(save.dailyDone===_dg) setTimeout(()=>showModal('🎊 ノルマ達成！',`今日の${_dg}問クリア！\nまた明日もがんばろう！`,50),600); showNextBtn(); }
-function onWrong(msg){ answered=true; save.questionStreak=0; save.hearts=Math.max(0,(save.hearts||HEARTS_MAX)-1); save.lastHeartRegen=Date.now(); persistSave(); renderUI(); flashScreen('wrong-flash'); soundWrong(); soundHeartLost(); setFeedback('ng',`❌ ざんねん… ${msg}`); document.getElementById('streak-pill').classList.add('shake'); setTimeout(()=>document.getElementById('streak-pill').classList.remove('shake'),500); if(save.hearts<=0) setTimeout(renderGameOver,800); else showNextBtn(); }
+function onWrong(msg){ answered=true; trackCategoryProgress(); save.questionStreak=0; save.hearts=Math.max(0,(save.hearts||HEARTS_MAX)-1); save.lastHeartRegen=Date.now(); persistSave(); renderUI(); flashScreen('wrong-flash'); soundWrong(); soundHeartLost(); setFeedback('ng',`❌ ざんねん… ${msg}`); document.getElementById('streak-pill').classList.add('shake'); setTimeout(()=>document.getElementById('streak-pill').classList.remove('shake'),500); if(save.hearts<=0) setTimeout(renderGameOver,800); else showNextBtn(); }
 
 function checkBadges(){ const ub=save.unlockedBadges||[]; const add=(id,cond)=>{if(cond&&!ub.includes(id)){ub.push(id);showCombo('🏅');}}; add('first',save.totalCorrect>=1);add('streak3',save.questionStreak>=3);add('streak7',save.questionStreak>=7);add('daily1',save.dailyDone>=dailyGoal(save.level||1));add('day3',(save.loginDays||0)>=3);add('day7',(save.loginDays||0)>=7);add('lv3',(save.level||1)>=3);add('lv5',(save.level||1)>=5);add('total50',save.totalCorrect>=50);add('total200',save.totalCorrect>=200);add('fraction1',(save.catCorrect||[])[1]>=5);add('word1',(save.catCorrect||[])[3]>=5); save.unlockedBadges=ub; }
 

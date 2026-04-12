@@ -765,7 +765,7 @@ window.doCheck=function(){ if(answered) return; if(question.type==='fraction'){c
 window.doChoice=function(val,btn){ if(answered) return; document.querySelectorAll('.choice-btn').forEach(b=>b.style.pointerEvents='none'); if(val===question.answer){btn.classList.add('ok');onCorrect();}else{btn.classList.add('ng');document.querySelectorAll('.choice-btn').forEach(b=>{if(b.textContent===question.answer)b.classList.add('ok');});onWrong(`せいかいは ${question.answer}`);} };
 
 function onCorrect(){ answered=true; const baseXp=XP_TBL[question.lv]; const multi=DIFF_MULTI[difficulty]||1; const xpAmt=Math.round(baseXp*multi); save.questionStreak=(save.questionStreak||0)+1; const bonus=save.questionStreak%5===0?10:0; const isCombo=save.questionStreak%3===0; save.totalCorrect=(save.totalCorrect||0)+1; save.catCorrect=save.catCorrect||[0,0,0,0]; save.catCorrect[category]=(save.catCorrect[category]||0)+1; save.dailyDone=(save.dailyDone||0)+1; save.xp=(save.xp||0)+xpAmt+bonus;
-const coinAmt = difficulty === 'hard' ? 1 : difficulty === 'mid' ? 2 : 1;
+const coinAmt = difficulty === 'hard' ? 20 : difficulty === 'mid' ? 10 : 5;
 save.coins = (save.coins || 0) + coinAmt;
 
 // むずかしいの5問ボーナス
@@ -785,7 +785,7 @@ if (difficulty === 'hard') {
   }
 }
                      
-save.coins = (save.coins || 0) + coinAmt; save.pet = save.pet || {};
+save.pet = save.pet || {};
 save.pet.questionsForFood = (save.pet.questionsForFood || 0) + 1;
 if (save.pet.questionsForFood >= 5) {
   save.pet.food = (save.pet.food || 0) + 1;

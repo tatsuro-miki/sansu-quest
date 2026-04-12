@@ -69,10 +69,12 @@ body::before {
 ============================================================ */
 .topbar {
   display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap;
   margin-bottom: 14px; padding: 10px 14px;
   background: var(--surface);
   border-radius: var(--radius-md);
   border: 1.5px solid var(--border2);
+  overflow: hidden;
 }
 .user-name { font-size: .88rem; font-weight: 900; color: var(--gold); }
 .streak-pill {
@@ -555,11 +557,11 @@ body::before {
 .lesson-btn .lesson-arrow { font-size: .85rem; color: var(--text3); }
 .avatar-btn {
   display: flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border-radius: 50%;
+  width: 34px; height: 34px; min-width: 34px; border-radius: 50%;
   background: rgba(233,100,157,0.12);
   border: 1.5px solid rgba(233,100,157,0.3);
   text-decoration: none; font-size: 1.2rem;
-  transition: .2s; cursor: pointer;
+  transition: .2s; cursor: pointer; flex-shrink: 0;
 }
 .avatar-btn:hover { background: rgba(233,100,157,0.22); transform: scale(1.1); }
 </style>

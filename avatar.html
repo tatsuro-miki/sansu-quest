@@ -327,7 +327,7 @@ body::before {
           <img id="layer-shoes" src=""           style="position:absolute;top:0;left:0;width:240px;height:auto;transform:scale(0.5);transform-origin:top center;margin-top:10px;display:none;">
         </div>
         <!-- ガチャ衣装（全身画像）レイヤー -->
-        <img id="layer-gacha-outfit" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;padding:20px;display:none;">
+        <img id="layer-gacha-outfit" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;padding:8px;display:none;">
       </div>
       <div class="avatar-name-display" id="avatar-username">よみこみちゅう...</div>
     </div>
@@ -403,7 +403,7 @@ const RARITIES = [
   { key: 'R',  ids: [1,2,3,12,14,23,24,26,27,28],               label: 'レア',         dot: 'r'  },
   { key: 'SR', ids: [22,15,20,21,25],                     label: 'スーパーレア', dot: 'sr' },
 ];
- 
+
 function getRarityForOutfit(num) {
   return RARITIES.find(r => r.ids.includes(num));
 }
@@ -501,11 +501,15 @@ function renderShop(cat) {
 
   // ガチャ衣装タブ
   if (cat === 'gacha') {
+    grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    grid.style.maxHeight = '440px';
     renderGachaTab(grid);
     return;
   }
 
-  // 通常パーツタブ
+  // 通常パーツタブ（3列に戻す）
+  grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+  grid.style.maxHeight = '340px';
   const parts = PARTS[cat];
   grid.innerHTML = '';
 

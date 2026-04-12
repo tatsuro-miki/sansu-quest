@@ -301,6 +301,53 @@ body::before {
 .frac-wrap input:focus { border-color: var(--blue); }
 .frac-line { width: 76px; height: 2px; background: var(--text); border-radius: 1px; }
 
+/* テンキー */
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 280px;
+  margin: 12px auto 0;
+}
+.numpad-btn {
+  font-family: inherit;
+  font-size: 1.4rem;
+  font-weight: 900;
+  padding: 14px 0;
+  background: var(--surface2);
+  color: var(--text);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: .15s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.numpad-btn:active {
+  background: var(--primary2);
+  transform: scale(0.94);
+}
+.numpad-btn.np-del {
+  background: var(--surface3);
+  font-size: 1.1rem;
+}
+.numpad-btn.np-minus {
+  background: var(--surface3);
+  font-size: 1.3rem;
+}
+.numpad-btn.np-dot {
+  background: var(--surface3);
+}
+.numpad-btn.np-ok {
+  background: var(--primary);
+  color: white;
+  font-size: 1.1rem;
+  box-shadow: var(--glow-primary);
+}
+.numpad-btn.np-ok:active {
+  background: #d63050;
+}
+
 /* 選択肢 */
 .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; width: 100%; margin-top: 6px; }
 .choice-btn {
@@ -808,7 +855,7 @@ function updateCatButtons() {
 }
 window.setDifficulty=function(d){ difficulty=d; ['easy','mid','hard'].forEach(k=>{const el=document.getElementById('diff-'+k);if(el){el.classList.toggle('active',k===d);el.className='diff-btn'+(k===d?' active '+k:'');}}); nextQuestion(); };
 
-function nextQuestion(){ if((save.hearts||0)<=0){renderGameOver();return;} if(arithmeticLocked && category===0){category=1;document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===1));} question=gen(); answered=false; hintVisible=false; memoVisible=false; const lvLabel=question.lv==='lv1'?'かんたん':question.lv==='lv2'?'ふつう':'むずかしい'; const dispXp=Math.round((XP_TBL[question.lv]||10)*(DIFF_MULTI[difficulty]||1)); let ansHtml=''; if(question.type==='fraction'){ansHtml=`<div class="frac-wrap"><input type="number" id="fn" placeholder="分子" min="0" max="9999"><div class="frac-line"></div><input type="number" id="fd" placeholder="分母" min="1" max="9999"></div><button class="submit-btn" onclick="doCheck()">こたえる</button>`;}else if(question.type==='choice'){ansHtml=`<div class="choices">${question.choices.map(c=>`<button class="choice-btn" onclick="doChoice('${c}',this)">${c}</button>`).join('')}</div>`;}else{ansHtml=`<input type="number" class="answer-input" id="main-inp" placeholder="?" autocomplete="off"><button class="submit-btn" onclick="doCheck()">こたえる</button>`;} document.getElementById('main-area').innerHTML=`<div class="question-card"><div class="q-meta"><span class="q-cat">${question.label}</span><span class="q-lv ${question.lv}">${lvLabel}</span><span class="q-xp">+${dispXp}XP</span></div><div class="q-text">${question.text}</div>${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}<div class="answer-area" id="ans-area">${ansHtml}</div><div class="memo-wrap"><button class="memo-toggle" onclick="toggleMemo()">✏️ 計算メモを使う</button><div class="memo-area" id="memo-area" style="display:none"><div class="memo-label">📝 ここにメモしてOK！</div><textarea class="memo-textarea" placeholder="ここに計算を書こう"></textarea></div></div></div><div class="feedback" id="fb"></div><div id="btn-area"></div>`; if(question.type==='number') setTimeout(()=>document.getElementById('main-inp')?.focus(),80); if(question.type==='fraction'){document.getElementById('fn').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('fd').focus();});document.getElementById('fd').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();});setTimeout(()=>document.getElementById('fn').focus(),80);} if(question.type==='number') document.getElementById('main-inp').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();}); }
+function nextQuestion(){ if((save.hearts||0)<=0){renderGameOver();return;} if(arithmeticLocked && category===0){category=1;document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===1));} question=gen(); answered=false; hintVisible=false; memoVisible=false; const lvLabel=question.lv==='lv1'?'かんたん':question.lv==='lv2'?'ふつう':'むずかしい'; const dispXp=Math.round((XP_TBL[question.lv]||10)*(DIFF_MULTI[difficulty]||1)); let ansHtml=''; if(question.type==='fraction'){ansHtml=`<div class="frac-wrap"><input type="text" inputmode="numeric" id="fn" placeholder="分子" autocomplete="off"><div class="frac-line"></div><input type="text" inputmode="numeric" id="fd" placeholder="分母" autocomplete="off"></div>${buildNumpad()}`;}else if(question.type==='choice'){ansHtml=`<div class="choices">${question.choices.map(c=>`<button class="choice-btn" onclick="doChoice('${c}',this)">${c}</button>`).join('')}</div>`;}else{ansHtml=`<input type="text" inputmode="numeric" class="answer-input" id="main-inp" placeholder="?" autocomplete="off">${buildNumpad()}`;} document.getElementById('main-area').innerHTML=`<div class="question-card"><div class="q-meta"><span class="q-cat">${question.label}</span><span class="q-lv ${question.lv}">${lvLabel}</span><span class="q-xp">+${dispXp}XP</span></div><div class="q-text">${question.text}</div>${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}<div class="answer-area" id="ans-area">${ansHtml}</div><div class="memo-wrap"><button class="memo-toggle" onclick="toggleMemo()">✏️ 計算メモを使う</button><div class="memo-area" id="memo-area" style="display:none"><div class="memo-label">📝 ここにメモしてOK！</div><textarea class="memo-textarea" placeholder="ここに計算を書こう"></textarea></div></div></div><div class="feedback" id="fb"></div><div id="btn-area"></div>`; if(question.type==='number'){ activeNumpadInput=document.getElementById('main-inp'); setTimeout(()=>document.getElementById('main-inp')?.focus(),80); document.getElementById('main-inp').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();}); } if(question.type==='fraction'){ const fn=document.getElementById('fn'),fd=document.getElementById('fd'); activeNumpadInput=fn; fn.addEventListener('focus',()=>{activeNumpadInput=fn;}); fd.addEventListener('focus',()=>{activeNumpadInput=fd;}); fn.addEventListener('keydown',e=>{if(e.key==='Enter')fd.focus();}); fd.addEventListener('keydown',e=>{if(e.key==='Enter')doCheck();}); setTimeout(()=>fn.focus(),80); } }
 
 window.doCheck=function(){ if(answered) return; if(question.type==='fraction'){const n=parseInt(document.getElementById('fn').value),d=parseInt(document.getElementById('fd').value);if(isNaN(n)||isNaN(d)) return;const g=gcd(Math.abs(n),d),rn=n/g,rd=d/g;const cg=gcd(Math.abs(question.na),question.da),cn=question.na/cg,cd=question.da/cg;rn===cn&&rd===cd?onCorrect():onWrong(`せいかいは ${question.na}/${question.da}`);}else{const inp=document.getElementById('main-inp');if(!inp||inp.value==='') return;const ua=(Math.round(parseFloat(inp.value)*10000)/10000).toString();const qa=(Math.round(parseFloat(question.answer)*10000)/10000).toString();if(ua===qa){inp.classList.add('correct');onCorrect();}else{inp.classList.add('wrong');onWrong(`せいかいは ${question.answer}`);}} };
 window.doChoice=function(val,btn){ if(answered) return; document.querySelectorAll('.choice-btn').forEach(b=>b.style.pointerEvents='none'); if(val===question.answer){btn.classList.add('ok');onCorrect();}else{btn.classList.add('ng');document.querySelectorAll('.choice-btn').forEach(b=>{if(b.textContent===question.answer)b.classList.add('ok');});onWrong(`せいかいは ${question.answer}`);} };
@@ -897,6 +944,51 @@ window.checkRevive=function(){ const elapsed=Date.now()-(save.lastHeartRegen||Da
 
 window.toggleHint=function(){ hintVisible=!hintVisible; const box=document.getElementById('hint-box'),btn=document.getElementById('hint-btn'); if(box) box.style.display=hintVisible?'block':'none'; if(btn) btn.textContent=hintVisible?'💡 ヒントを隠す':'💡 ヒントを見る'; };
 window.toggleMemo=function(){ memoVisible=!memoVisible; const area=document.getElementById('memo-area'); if(area){area.style.display=memoVisible?'block':'none';if(memoVisible)setTimeout(()=>area.querySelector('textarea')?.focus(),80);} };
+
+/* === テンキー === */
+let activeNumpadInput = null; // 現在フォーカスしている入力欄
+
+function buildNumpad() {
+  return `<div class="numpad" id="numpad">
+    <button class="numpad-btn" onclick="npKey('7')">7</button>
+    <button class="numpad-btn" onclick="npKey('8')">8</button>
+    <button class="numpad-btn" onclick="npKey('9')">9</button>
+    <button class="numpad-btn" onclick="npKey('4')">4</button>
+    <button class="numpad-btn" onclick="npKey('5')">5</button>
+    <button class="numpad-btn" onclick="npKey('6')">6</button>
+    <button class="numpad-btn" onclick="npKey('1')">1</button>
+    <button class="numpad-btn" onclick="npKey('2')">2</button>
+    <button class="numpad-btn" onclick="npKey('3')">3</button>
+    <button class="numpad-btn np-dot" onclick="npKey('.')">.</button>
+    <button class="numpad-btn" onclick="npKey('0')">0</button>
+    <button class="numpad-btn np-del" onclick="npDel()">←</button>
+    <button class="numpad-btn np-minus" onclick="npMinus()">−</button>
+    <button class="numpad-btn np-ok" style="grid-column:span 2" onclick="doCheck()">こたえる</button>
+  </div>`;
+}
+
+window.npKey = function(k) {
+  const inp = activeNumpadInput || document.getElementById('main-inp');
+  if (!inp || answered) return;
+  inp.value += k;
+  inp.focus();
+};
+window.npDel = function() {
+  const inp = activeNumpadInput || document.getElementById('main-inp');
+  if (!inp || answered) return;
+  inp.value = inp.value.slice(0, -1);
+  inp.focus();
+};
+window.npMinus = function() {
+  const inp = activeNumpadInput || document.getElementById('main-inp');
+  if (!inp || answered) return;
+  if (inp.value.startsWith('-')) {
+    inp.value = inp.value.slice(1);
+  } else {
+    inp.value = '-' + inp.value;
+  }
+  inp.focus();
+};
 
 function showModal(title,body,xp){ const ov=document.createElement('div');ov.className='modal-overlay';ov.innerHTML=`<div class="modal-box"><span style="font-size:3.5rem;display:block;margin-bottom:10px">🏆</span><h2>${title}</h2><p>${body}</p>${xp?`<div class="modal-xp">+${xp} XP</div>`:''}<button class="modal-close" onclick="this.closest('.modal-overlay').remove()">やった！</button></div>`;document.body.appendChild(ov);if(xp){save.xp=(save.xp||0)+xp;persistSave();renderUI();} }
 function showToast(text, type) {

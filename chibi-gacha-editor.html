@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>パーツ調整ツール</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI','Hiragino Sans',sans-serif;background:#1a1a2e;color:#e0e0e0;padding:16px;min-height:100vh}
+h1{text-align:center;font-size:1.3em;color:#a78bfa;margin-bottom:16px}
+
+.layout{display:flex;gap:16px;max-width:1100px;margin:0 auto;flex-wrap:wrap;align-items:flex-start}
+
+/* ── 左：パーツリスト ── */
+.left{flex:0 0 180px}
+.load-btn{display:block;width:100%;padding:10px;background:#553c9a;color:#e9d8fd;border:none;border-radius:8px;font-size:0.9em;cursor:pointer;margin-bottom:10px;text-align:center}
+.load-btn:hover{background:#6b46c1}
+.load-btn input{display:none}
+#count{font-size:0.75em;color:#68d391;margin-bottom:8px}
+#parts-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:520px;overflow-y:auto}
+#parts-list::-webkit-scrollbar{width:4px}
+#parts-list::-webkit-scrollbar-thumb{background:#553c9a;border-radius:4px}
+.thumb{background:#f5f0e8;border-radius:6px;border:2px solid transparent;cursor:pointer;overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;transition:border-color .15s}
+.thumb:hover{border-color:#a78bfa}
+.thumb.active{border-color:#fbd38d;box-shadow:0 0 8px #fbd38d55}
+.thumb img{width:100%;height:100%;object-fit:contain}
+.tname{font-size:0.62em;color:#a0aec0;text-align:center;word-break:break-all;line-height:1.2;margin-top:3px}
+
+/* ── 中央：コントロール ── */
+.mid{flex:0 0 280px;display:flex;flex-direction:column;gap:12px}
+.card{background:#16213e;border:1px solid #2d2f4a;border-radius:10px;padding:14px}
+.card h2{font-size:0.78em;color:#7c83b0;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+
+.sel-row{display:flex;align-items:center;gap:10px}
+.sel-icon{width:44px;height:44px;background:#f5f0e8;border-radius:6px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.sel-icon img{width:100%;height:100%;object-fit:contain}
+#sel-name{font-size:0.82em;color:#fbd38d;word-break:break-all}
+
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.mf{display:flex;flex-direction:column;gap:3px}
+.mf label{font-size:0.7em;color:#7c83b0}
+.mf input,.mf select{background:#0f3460;border:1px solid #2d2f4a;border-radius:5px;color:#e0e0e0;padding:5px 7px;font-size:0.8em;width:100%}
+.mf input:focus,.mf select:focus{outline:none;border-color:#a78bfa}
+.mf.full{grid-column:1/-1}
+
+.sl-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sl-row label{width:52px;font-size:0.8em;color:#a0aec0;flex-shrink:0}
+.sl-row input[type=range]{flex:1;height:4px;accent-color:#a78bfa;cursor:pointer}
+.sl-row .n{width:52px;font-size:0.8em;font-family:monospace;color:#fbd38d;background:#0f3460;border:1px solid #2d2f4a;border-radius:5px;padding:3px 5px;text-align:right}
+.sl-row .n:focus{outline:none;border-color:#a78bfa}
+.hint{font-size:0.7em;color:#718096;margin-top:2px}
+
+.json-block{background:#0a0a1a;border-radius:6px;padding:8px 10px;font-family:monospace;font-size:0.73em;color:#90cdf4;white-space:pre-wrap;word-break:break-all;min-height:36px;margin-bottom:7px;line-height:1.6;border:1px solid #1a3a5a}
+.copy-btn{background:#553c9a;color:#e9d8fd;border:none;border-radius:6px;padding:6px 12px;font-size:0.78em;cursor:pointer;transition:background .2s}
+.copy-btn:hover{background:#6b46c1}
+.copy-btn.ok{background:#276749}
+
+/* ── 右：プレビュー ── */
+.right{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:10px}
+.right h2{font-size:0.78em;color:#7c83b0;text-transform:uppercase;letter-spacing:.1em}
+.stage-wrap{background:#f5f0e8;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.5);overflow:hidden}
+#stage{width:268px;height:345px;position:relative;overflow:hidden}
+#stage img{position:absolute;height:auto}
+#base-img{width:100%;height:100%;object-fit:contain;left:0;top:0;z-index:1}
+#part-img{z-index:10;display:none}
+.guides{position:absolute;inset:0;pointer-events:none;z-index:5}
+.gh,.gv{position:absolute;background:rgba(167,139,250,.35)}
+.gh{width:100%;height:1px;top:50%}
+.gv{height:100%;width:1px;left:50%}
+.tog{display:flex;align-items:center;gap:7px;font-size:0.78em;color:#a0aec0;cursor:pointer}
+.tog input{accent-color:#a78bfa;cursor:pointer}
+#cur{font-size:0.77em;color:#68d391;font-family:monospace;background:#0f3460;border-radius:5px;padding:5px 12px}
+</style>
+</head>
+<body>
+<h1>🎨 パーツ調整ツール</h1>
+
+<div class="layout">
+
+  <!-- 左：パーツ一覧 -->
+  <div class="left">
+    <label class="load-btn">
+      📂 画像を選択
+      <input type="file" id="file-in" multiple accept=".png,.webp,.gif,.jpg,.jpeg">
+    </label>
+    <div id="count"></div>
+    <div id="parts-list"></div>
+    <p style="font-size:0.68em;color:#718096;margin-top:8px;line-height:1.5">
+      フォルダを開いてCtrl+Aで全選択→「開く」でOKです
+    </p>
+  </div>
+
+  <!-- 中央：コントロール -->
+  <div class="mid">
+
+    <div class="card">
+      <h2>✅ 選択中</h2>
+      <div class="sel-row">
+        <div class="sel-icon"><img id="sel-img" src="" alt=""></div>
+        <div id="sel-name">← 左のパーツをクリック</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📝 パーツ情報</h2>
+      <div class="meta-grid">
+        <div class="mf full">
+          <label>パーツID</label>
+          <input type="text" id="m-id" placeholder="hair_金色ロング" oninput="upJson()">
+        </div>
+        <div class="mf full">
+          <label>表示名</label>
+          <input type="text" id="m-name" placeholder="金色ロング" oninput="upJson()">
+        </div>
+        <div class="mf full">
+          <label>ファイルパス（GitHub用）</label>
+          <input type="text" id="m-file" placeholder="chibi-parts/gacha/file.png" oninput="upJson()">
+        </div>
+        <div class="mf">
+          <label>コスト</label>
+          <input type="number" id="m-cost" value="1000" min="0" step="100" oninput="upJson()">
+        </div>
+        <div class="mf">
+          <label>レアリティ</label>
+          <select id="m-stars" onchange="upJson()">
+            <option value="1">★1 C</option>
+            <option value="2">★2 UC</option>
+            <option value="3">★3 R</option>
+            <option value="4" selected>★4 SR</option>
+            <option value="5">★5 SSR</option>
+          </select>
+        </div>
+        <div class="mf">
+          <label>z-index</label>
+          <input type="number" id="m-z" value="10" min="1" max="99" oninput="upJson()">
+        </div>
+        <div class="mf">
+          <label>カテゴリ</label>
+          <select id="m-cat" onchange="upJson()">
+            <option value="hair">hair 髪</option>
+            <option value="eyes">eyes 目</option>
+            <option value="face">face 顔</option>
+            <option value="outfit">outfit 服</option>
+            <option value="accessory">accessory</option>
+            <option value="bg">bg 背景</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🎯 位置・サイズ</h2>
+      <div class="sl-row">
+        <label>X</label>
+        <input type="range" id="sl-x" min="-50" max="50" step="0.5" value="0" oninput="sv('x',this.value)">
+        <input type="number" class="n" id="n-x" min="-50" max="50" step="0.5" value="0" oninput="ss('x',this.value)">
+      </div>
+      <div class="sl-row">
+        <label>Y</label>
+        <input type="range" id="sl-y" min="-50" max="50" step="0.5" value="0" oninput="sv('y',this.value)">
+        <input type="number" class="n" id="n-y" min="-50" max="50" step="0.5" value="0" oninput="ss('y',this.value)">
+      </div>
+      <div class="sl-row">
+        <label>スケール</label>
+        <input type="range" id="sl-scale" min="1" max="120" step="0.5" value="50" oninput="sv('scale',this.value)">
+        <input type="number" class="n" id="n-scale" min="1" max="120" step="0.5" value="50" oninput="ss('scale',this.value)">
+      </div>
+      <p class="hint">X/Y: 中心オフセット(%) ／ スケール: ステージ幅比(%)</p>
+      <button class="copy-btn" style="margin-top:10px;width:100%;background:#276749;font-size:0.9em;padding:9px" onclick="register()">
+        📌 このパーツを登録
+      </button>
+    </div>
+
+    <!-- 登録済みリスト -->
+    <div class="card">
+      <h2>💾 登録済み <span id="reg-count" style="color:#68d391">0件</span></h2>
+      <div id="reg-list" style="max-height:120px;overflow-y:auto;font-size:0.74em;font-family:monospace;color:#a0aec0;line-height:1.8"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <button class="copy-btn" id="ba" onclick="exportAll('transforms')">📋 transforms一括コピー</button>
+        <button class="copy-btn" id="bb" onclick="exportAll('manifest')">📋 manifest一括コピー</button>
+        <button class="copy-btn" style="background:#1a5276" onclick="downloadManifest()">💾 manifest.json ダウンロード</button>
+        <button class="copy-btn" style="background:#742a2a" onclick="clearReg()">🗑️ クリア</button>
+      </div>
+      <p style="font-size:0.7em;color:#e9c46a;margin-top:6px">⚠️ コピー→メモ帳で保存する場合は「UTF-8」で保存してください</p>
+    </div>
+
+    <div class="card">
+      <h2>📋 chibi-transforms.json（現在のパーツ）</h2>
+      <div class="json-block" id="jt">パーツを選択してください</div>
+      <button class="copy-btn" id="bt" onclick="cp('jt','bt')">📋 コピー</button>
+    </div>
+
+    <div class="card">
+      <h2>📋 manifest.json（現在のパーツ）</h2>
+      <div class="json-block" id="jm">パーツを選択してください</div>
+      <button class="copy-btn" id="bm" onclick="cp('jm','bm')">📋 コピー</button>
+    </div>
+
+  </div>
+
+  <!-- 右：プレビュー -->
+  <div class="right">
+    <h2>👁️ プレビュー（実寸268×345）</h2>
+    <div class="stage-wrap">
+      <div id="stage">
+        <img id="base-img" src="https://raw.githubusercontent.com/tatsuro-miki/sansu-quest/main/chibi-parts/base_body.png" alt="body">
+        <div class="guides" id="guides"><div class="gh"></div><div class="gv"></div></div>
+        <img id="part-img" src="" alt="part">
+      </div>
+    </div>
+    <label class="tog">
+      <input type="checkbox" id="tog-g" checked onchange="document.getElementById('guides').style.display=this.checked?'':'none'">
+      中心線を表示
+    </label>
+    <div id="cur">x=0 / y=0 / scale=50</div>
+    <label style="cursor:pointer;font-size:0.72em;color:#7c83b0;border:1px solid #2d2f4a;border-radius:6px;padding:5px 10px;display:inline-block;margin-top:2px">
+      素体を変更
+      <input type="file" id="base-in" accept=".png,.webp,.jpg" style="display:none">
+    </label>
+  </div>
+
+</div>
+
+<script>
+const S={x:0,y:0,scale:50};
+let parts=[];
+
+// 素体を個別選択
+document.getElementById('base-in').addEventListener('change',async function(e){
+  const f=e.target.files[0];if(!f)return;
+  document.getElementById('base-img').src=await toDataURL(f);
+  e.target.value='';
+});
+
+// ── ファイル読み込み ──
+document.getElementById('file-in').addEventListener('change',async function(e){
+  const files=[...e.target.files];
+  if(!files.length)return;
+
+  // base_body を探して素体としてセット
+  const base=files.find(f=>/base_body/i.test(f.name));
+  if(base){
+    const url=await toDataURL(base);
+    document.getElementById('base-img').src=url;
+  }
+
+  // パーツ（base_body以外）
+  const ps=files.filter(f=>!/base_body/i.test(f.name));
+  for(const f of ps){
+    if(parts.some(p=>p.name===f.name))continue; // 重複スキップ
+    const url=await toDataURL(f);
+    parts.push({name:f.name,url,file:f});
+  }
+  renderList();
+  e.target.value='';
+});
+
+function toDataURL(file){
+  return new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(file);});
+}
+
+function renderList(){
+  const grid=document.getElementById('parts-list');
+  grid.innerHTML='';
+  parts.sort((a,b)=>a.name.localeCompare(b.name,'ja'));
+  parts.forEach((p,i)=>{
+    const wrap=document.createElement('div');
+    const th=document.createElement('div');th.className='thumb';
+    const img=document.createElement('img');img.src=p.url;img.alt=p.name;
+    th.appendChild(img);th.onclick=()=>pick(i);p.el=th;
+    const lb=document.createElement('div');lb.className='tname';
+    lb.textContent=p.name.replace(/\.[^.]+$/,'');
+    wrap.appendChild(th);wrap.appendChild(lb);
+    grid.appendChild(wrap);
+  });
+  document.getElementById('count').textContent=parts.length+'件';
+  if(parts.length===1)pick(0);
+}
+
+// ── パーツ選択 ──
+function pick(i){
+  const p=parts[i];if(!p)return;
+  parts.forEach(x=>x.el&&x.el.classList.remove('active'));
+  p.el.classList.add('active');
+  document.getElementById('part-img').src=p.url;
+  document.getElementById('part-img').style.display='block';
+  document.getElementById('sel-img').src=p.url;
+  document.getElementById('sel-name').textContent=p.name;
+  const base=p.name.replace(/\.[^.]+$/,'');
+  document.getElementById('m-id').value=base;
+  document.getElementById('m-name').value=base.replace(/_/g,' ');
+  // カテゴリを含むパスを自動生成
+  updateFilePath(p.name);
+  apply();upJson();
+}
+
+// カテゴリ＋ファイル名からパスを生成
+function updateFilePath(fileName){
+  if(!fileName){
+    const selName=document.getElementById('sel-name').textContent;
+    if(selName&&selName!=='← 左のパーツをクリック') fileName=selName;
+    else return;
+  }
+  const cat=document.getElementById('m-cat').value;
+  document.getElementById('m-file').value=`chibi-parts/gacha/${cat}/${fileName}`;
+}
+
+// カテゴリ変更時もパスを更新
+document.getElementById('m-cat').addEventListener('change',function(){
+  updateFilePath(null);
+  upJson();
+});
+
+// ── スライダー ──
+function sv(a,v){S[a]=parseFloat(v);document.getElementById('n-'+a).value=parseFloat(v).toFixed(1);apply();upJson();}
+function ss(a,v){const n=parseFloat(v);if(isNaN(n))return;S[a]=n;document.getElementById('sl-'+a).value=n;apply();upJson();}
+
+// ── chibi-avatar.html と同じ式 ──
+function apply(){
+  const{x,y,scale}=S;
+  const left=50+x-scale/2, top=50+y-scale/2;
+  const img=document.getElementById('part-img');
+  img.style.left=left+'%';img.style.top=top+'%';img.style.width=scale+'%';
+  document.getElementById('cur').textContent=`x=${x.toFixed(1)} / y=${y.toFixed(1)} / scale=${scale.toFixed(1)}`;
+}
+
+// ── 登録リスト ──
+let registered = {}; // { id: { transform, manifest } }
+
+function register(){
+  const id=document.getElementById('m-id').value.trim();
+  if(!id||id==='part_id'){alert('パーツIDを入力してください');return;}
+  const{x,y,scale}=S;
+  const nm=document.getElementById('m-name').value.trim()||id;
+  const fi=document.getElementById('m-file').value.trim()||'chibi-parts/gacha/file.png';
+  const co=+document.getElementById('m-cost').value||1000;
+  const st=+document.getElementById('m-stars').value||4;
+  const z=+document.getElementById('m-z').value||10;
+  const rx=r2(x),ry=r2(y),rs=r2(scale);
+  registered[id]={
+    transform:{x:rx,y:ry,scale:rs},
+    manifest:{id,name:nm,file:fi,cost:co,stars:st,z_index:z,transform:{x:rx,y:ry,scale:rs}}
+  };
+  renderRegList();
+  // サムネイルにチェックマーク
+  const p=parts.find(p=>document.getElementById('m-id').value===p.name.replace(/\.[^.]+$/,''));
+  if(p&&p.el) p.el.style.outline='3px solid #68d391';
+}
+
+function renderRegList(){
+  const list=document.getElementById('reg-list');
+  const keys=Object.keys(registered);
+  document.getElementById('reg-count').textContent=keys.length+'件';
+  list.innerHTML=keys.map(k=>`<div style="padding:1px 0;border-bottom:1px solid #1a1a3e">✅ ${k}</div>`).join('');
+}
+
+function exportAll(type){
+  const keys=Object.keys(registered);
+  if(!keys.length){alert('まだ登録されていません');return;}
+  let text='';
+  if(type==='transforms'){
+    const entries=keys.map(k=>`  "${k}": { "x": ${registered[k].transform.x}, "y": ${registered[k].transform.y}, "scale": ${registered[k].transform.scale} }`);
+    text='{\n'+entries.join(',\n')+'\n}';
+  } else {
+    text='[\n'+keys.map(k=>JSON.stringify(registered[k].manifest,null,2).split('\n').map(l=>'  '+l).join('\n')).join(',\n')+'\n]';
+  }
+  copyText(text);
+  const btn=document.getElementById(type==='transforms'?'ba':'bb');
+  const o=btn.innerHTML;btn.innerHTML='✅ コピーしました';btn.classList.add('ok');
+  setTimeout(()=>{btn.innerHTML=o;btn.classList.remove('ok');},1800);
+}
+
+function clearReg(){
+  if(!confirm('登録リストをクリアしますか？'))return;
+  registered={};
+  parts.forEach(p=>{if(p.el)p.el.style.outline='';});
+  renderRegList();
+}
+
+async function copyText(text){
+  try{await navigator.clipboard.writeText(text);}
+  catch{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}
+}
+
+function downloadManifest(){
+  const keys=Object.keys(registered);
+  if(!keys.length){alert('まだ登録されていません');return;}
+  const text='[\n'+keys.map(k=>JSON.stringify(registered[k].manifest,null,2).split('\n').map(l=>'  '+l).join('\n')).join(',\n')+'\n]';
+  // UTF-8 BOMつきで保存（メモ帳でも文字化けしない）
+  const bom='\uFEFF';
+  const blob=new Blob([bom+text],{type:'application/json;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='gacha-manifest.json';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+// ── JSON ──
+function r2(n){return Math.round(n*100)/100;}
+function upJson(){
+  const{x,y,scale}=S;
+  const id=document.getElementById('m-id').value||'part_id';
+  const nm=document.getElementById('m-name').value||'名称未設定';
+  const fi=document.getElementById('m-file').value||'chibi-parts/gacha/file.png';
+  const co=+document.getElementById('m-cost').value||1000;
+  const st=+document.getElementById('m-stars').value||4;
+  const z=+document.getElementById('m-z').value||10;
+  const rx=r2(x),ry=r2(y),rs=r2(scale);
+  document.getElementById('jt').textContent=`"${id}": { "x": ${rx}, "y": ${ry}, "scale": ${rs} }`;
+  document.getElementById('jm').textContent=JSON.stringify({id,name:nm,file:fi,cost:co,stars:st,z_index:z,transform:{x:rx,y:ry,scale:rs}},null,2);
+}
+
+// ── コピー ──
+async function cp(bid,btn){
+  const t=document.getElementById(bid).textContent;
+  try{await navigator.clipboard.writeText(t);}
+  catch{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}
+  const b=document.getElementById(btn);const o=b.innerHTML;
+  b.innerHTML='✅ コピーしました';b.classList.add('ok');
+  setTimeout(()=>{b.innerHTML=o;b.classList.remove('ok');},1800);
+}
+
+apply();upJson();
+</script>
+</body>
+</html>

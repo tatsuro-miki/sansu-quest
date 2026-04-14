@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>さんすうクエスト</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   nosawa Kids Design System v1.0 — game.html
+   index.htmlと統一したデザイントークン
+============================================================ */
+:root {
+  --bg:       #f0f4ff;
+  --surface:  #ffffff;
+  --surface2: #e8eeff;
+  --surface3: #dde5ff;
+  --border:   rgba(0,0,0,0.08);
+  --border2:  rgba(0,0,0,0.15);
+
+  --primary:  #e94560;
+  --primary2: #ff8fa3;
+  --blue:     #4f8ef7;
+  --blue2:    #a5c4fd;
+  --gold:     #f5a623;
+  --gold2:    #ffd980;
+  --xp:       #2db87a;
+  --xp2:      #7de8b8;
+  --orange:   #fb923c;
+  --purple:   #9f7aea;
+  --heart:    #e94560;
+
+  --text:     #1a1a2e;
+  --text2:    #555577;
+  --text3:    #9999bb;
+
+  --radius:    20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+
+  /* 後方互換（アニメ等で使われている変数名をそのまま残す） */
+  --card:     var(--surface);
+  --glow-primary: 0 4px 20px rgba(233,69,96,.25);
+  --glow-gold:    0 4px 20px rgba(245,166,35,.25);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', 'M PLUS Rounded 1c', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--text);
+  overflow-x: hidden;
+}

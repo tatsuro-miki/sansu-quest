@@ -855,7 +855,110 @@ function genArithmetic(tier){ const op=tier==='easy'?['+','-'][R(0,1)]:tier==='m
 function genFraction(tier){ if(tier==='easy') return genArithmetic('easy'); const t=tier==='mid'?R(0,1):R(0,2); if(t===0){const d1=R(2,6),d2=R(2,6),n1=R(1,d1-1),n2=R(1,d2-1),lcm=Math.round(d1*d2/gcd(d1,d2)),m1=Math.round(lcm/d1),m2=Math.round(lcm/d2),rn=n1*m1+n2*m2,g=gcd(rn,lcm),na=Math.round(rn/g),da=Math.round(lcm/g);return{type:'fraction',lv:'lv2',label:'分数たし算',text:`${n1}/${d1} ＋ ${n2}/${d2} ＝ ?`,hint:`公倍数は${lcm}`,answer:`${na}/${da}`,na:na,da:da};} if(t===1){let dd1=R(2,6),dd2=R(2,6),nn1=R(1,dd1-1),nn2=R(1,dd2-1);const lcm=Math.round(dd1*dd2/gcd(dd1,dd2));let v1=nn1*Math.round(lcm/dd1),v2=nn2*Math.round(lcm/dd2);if(v1<v2){[v1,v2]=[v2,v1];[nn1,nn2]=[nn2,nn1];[dd1,dd2]=[dd2,dd1];}const rn=v1-v2,g=gcd(rn||1,lcm),na=Math.round(rn/g),da=Math.round(lcm/g);return{type:'fraction',lv:'lv2',label:'分数ひき算',text:`${nn1}/${dd1} ー ${nn2}/${dd2} ＝ ?`,hint:`公倍数は${lcm}`,answer:`${na}/${da}`,na:na,da:da};} const n1=R(1,5),d1=R(2,7),n2=R(1,5),d2=R(2,7),rn=n1*n2,rd=d1*d2,g=gcd(rn,rd),na=Math.round(rn/g),da=Math.round(rd/g); return{type:'fraction',lv:'lv3',label:'分数かけ算',text:`${n1}/${d1} × ${n2}/${d2} ＝ ?`,hint:'分子同士・分母同士をかけよう',answer:`${na}/${da}`,na:na,da:da}; }
 function genDecimal(tier){ if(tier==='easy') return genArithmetic('easy'); const t=tier==='mid'?R(0,1):R(0,2); if(t===0){const a=(R(10,99)/10).toFixed(1),b=(R(10,99)/10).toFixed(1),ans=((parseFloat(a)*10+parseFloat(b)*10)/10).toFixed(1);return{type:'number',lv:'lv2',label:'小数たし算',text:`${a} ＋ ${b} ＝ ?`,answer:ans,hint:''};} if(t===1){let a=(R(10,99)/10).toFixed(1),b=(R(10,99)/10).toFixed(1);if(parseFloat(a)<parseFloat(b))[a,b]=[b,a];const ans=((parseFloat(a)*10-parseFloat(b)*10)/10).toFixed(1);return{type:'number',lv:'lv2',label:'小数ひき算',text:`${a} ー ${b} ＝ ?`,answer:ans,hint:''};} const a=(R(2,9)/10).toFixed(1),b=R(2,9),ans=(parseFloat(a)*b).toFixed(1); return{type:'number',lv:'lv3',label:'小数かけ算',text:`${a} × ${b} ＝ ?`,answer:ans,hint:''}; }
 function genWord(tier){ if(tier==='easy') return genArithmetic('easy'); const round4=(n)=>Math.round(n*10000)/10000; const midTs=[()=>{const p=R(100,500),d=R(1,3)*10,s=Math.round(p*(100-d)/100);return{type:'choice',lv:'lv2',label:'文章(割引)',text:`${p}円の商品が${d}%引き。\nいくらになる？`,hint:`${p}×(1-${d}/100)`,answer:s.toString(),choices:shuffle([s,p-d,Math.round(p*d/100),s+R(10,50)]).map(String)};},()=>{const tot=R(500,1500),r=R(2,4),a=Math.round(tot*r/(r+1));return{type:'choice',lv:'lv2',label:'文章(割合)',text:`${tot}円を ${r}:1 で分けます。\n多い方は何円？`,hint:'全体÷(比の合計)×比',answer:a.toString(),choices:shuffle([a,a+R(20,100),tot-a,Math.round(tot/r)]).map(String)};}]; const hardTs=[()=>{const t=R(1,6)*10,s=R(3,12)*10,d=Math.round(s*t/60*10)/10;return{type:'choice',lv:'lv3',label:'文章(速さ)',text:`時速${s}kmの電車が${t}分走りました。\n何km進みましたか？`,hint:'速さ×時間÷60',answer:d.toString(),choices:shuffle([d,d+R(1,5),Math.round(s*t*10)/10,Math.max(1,d-R(1,5))]).map(String)};},()=>{const r=R(3,8),area=round4(r*r*3.14),ans=area.toString();return{type:'choice',lv:'lv3',label:'文章(面積)',text:`半径${r}cmの円の面積は？\n（円周率3.14）`,hint:'半径×半径×3.14',answer:ans,choices:shuffle([area,round4(r*2*3.14),r*r,round4((r+1)*(r+1)*3.14)]).map(String)};}]; const pool=tier==='hard'?[...midTs,...hardTs]:midTs; return pool[R(0,pool.length-1)](); }
-function gen(){ let tier=difficulty; if((category===1||category===2||category===3)&&tier==='easy') tier='mid'; switch(category){case 0:return genArithmetic(tier);case 1:return genFraction(tier);case 2:return genDecimal(tier);case 3:return genWord(tier);} }
+
+// =====================================================================
+// レベル連動問題システム v2
+// =====================================================================
+
+// プレイヤーレベル → 問題レベル(qlv 1-10)
+function getQlv(lv) {
+  if (lv <= 3)  return 1;   // 1桁たし算・ひき算
+  if (lv <= 6)  return 2;   // 2桁たし算・ひき算
+  if (lv <= 10) return 3;   // 2桁 + かけ算入門
+  if (lv <= 15) return 4;   // 全四則(小)
+  if (lv <= 21) return 5;   // 全四則(中)
+  if (lv <= 28) return 6;   // 全四則(大) + 分数入門
+  if (lv <= 36) return 7;   // 3桁計算 + 異分母分数
+  if (lv <= 50) return 8;   // 大きい数 + 分数かけ算
+  if (lv <= 70) return 9;   // 難問
+  return 10;                // 最高難易度
+}
+
+// qlvベース 四則演算ジェネレーター
+function genArithmeticV2(qlv) {
+  const opPool =
+    qlv <= 2 ? ['+','-','+','+'] :
+    qlv <= 3 ? ['+','-','+','-','×'] :
+    qlv <= 5 ? ['+','-','×','÷'] :
+               ['+','-','×','÷'];
+  const op = opPool[R(0, opPool.length-1)];
+  let a, b, ans;
+  if (op === '+') {
+    const max = qlv<=1?9 : qlv<=2?20 : qlv<=3?30 : qlv<=4?50 : qlv<=5?99 : qlv<=6?199 : qlv<=7?499 : qlv<=8?999 : 4999;
+    const min = qlv<=1?1 : qlv<=2?2 : qlv<=4?5 : 10;
+    a = R(min, max); b = R(min, max); ans = a + b;
+  } else if (op === '-') {
+    const max = qlv<=1?10 : qlv<=2?20 : qlv<=3?30 : qlv<=4?50 : qlv<=5?99 : qlv<=6?199 : qlv<=7?499 : 999;
+    const min = qlv<=2?2 : qlv<=4?10 : 20;
+    a = R(min+1, max); b = R(1, a-1); ans = a - b;
+  } else if (op === '×') {
+    if      (qlv <= 3) { a = R(2,5);  b = R(2,5);  }
+    else if (qlv <= 4) { a = R(2,9);  b = R(2,5);  }
+    else if (qlv <= 5) { a = R(2,9);  b = R(2,9);  }
+    else if (qlv <= 6) { a = R(2,12); b = R(2,9);  }
+    else if (qlv <= 8) { a = R(2,25); b = R(2,12); }
+    else               { a = R(2,99); b = R(2,25); }
+    ans = a * b;
+  } else {
+    if      (qlv <= 4) { ans = R(2,9);  b = R(2,5);  }
+    else if (qlv <= 5) { ans = R(2,12); b = R(2,9);  }
+    else if (qlv <= 6) { ans = R(2,15); b = R(2,9);  }
+    else if (qlv <= 8) { ans = R(2,25); b = R(2,12); }
+    else               { ans = R(2,50); b = R(2,20); }
+    a = ans * b;
+  }
+  const lv = qlv<=3?'lv1' : qlv<=6?'lv2' : 'lv3';
+  return {type:'number', lv, label:'四則('+op+')', text:a+' '+op+' '+b+' ＝ ?', answer:ans.toString(), hint:''};
+}
+
+// qlvベース 分数ジェネレーター
+function genFractionV2(qlv) {
+  if (qlv <= 3) {
+    const d = R(2, 6);
+    const n1 = R(1, d-1), n2 = R(1, d-1);
+    const rn = n1+n2, g = gcd(rn||1, d), na = Math.round(rn/g), da = Math.round(d/g);
+    return {type:'fraction', lv:'lv1', label:'分数たし算(同分母)', text:n1+'/'+d+' ＋ '+n2+'/'+d+' ＝ ?', hint:'分母が同じなら分子だけたす', answer:na+'/'+da, na:na, da:da};
+  }
+  if (qlv <= 5) {
+    const op = R(0,1)===0 ? '+' : '-';
+    const d = R(2, 8);
+    let n1 = R(1,d-1), n2 = R(1,d-1);
+    if (op==='-' && n1 < n2) { const tmp=n1; n1=n2; n2=tmp; }
+    const rn = op==='+'? n1+n2 : n1-n2;
+    if (rn <= 0) { return genFractionV2(qlv); }
+    const g = gcd(rn, d), na = Math.round(rn/g), da = Math.round(d/g);
+    const sym = op==='+'?'＋':'ー';
+    return {type:'fraction', lv:'lv2', label:'分数'+(op==='+'?'たし算':'ひき算')+'(同分母)', text:n1+'/'+d+' '+sym+' '+n2+'/'+d+' ＝ ?', hint:'分母が同じなら分子だけ計算', answer:na+'/'+da, na:na, da:da};
+  }
+  if (qlv <= 7) { return genFraction('mid'); }
+  return genFraction('hard');
+}
+
+// qlvベース 小数ジェネレーター
+function genDecimalV2(qlv) {
+  if (qlv <= 4) return genArithmeticV2(qlv);
+  if (qlv <= 7) return genDecimal('mid');
+  return genDecimal('hard');
+}
+
+// qlvベース 文章題ジェネレーター
+function genWordV2(qlv) {
+  if (qlv <= 4) return genArithmeticV2(qlv);
+  if (qlv <= 7) return genWord('mid');
+  return genWord('hard');
+}
+
+function gen() {
+  const baseLv = getQlv(save.level || 1);
+  const boost = difficulty==='hard' ? 3 : difficulty==='mid' ? 1 : 0;
+  const qlv = Math.min(10, baseLv + boost);
+  switch(category) {
+    case 0: return genArithmeticV2(qlv);
+    case 1: return genFractionV2(qlv);
+    case 2: return genDecimalV2(qlv);
+    case 3: return genWordV2(qlv);
+  }
+}
 
 window.setCategory = function(idx) {
   // 四則演算がロック中なら選べない

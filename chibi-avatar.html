@@ -635,9 +635,10 @@ function renderAvatar() {
     img.className = 'layer';
     img.src = layer.item.file;
     img.alt = layer.item.name;
-    var left = 50 + t.x - t.scale / 2;
-    var top  = 50 + t.y - t.scale / 2;
-    img.style.cssText = 'z-index:' + layer.z_index + ';left:' + left + '%;top:' + top + '%;width:' + t.scale + '%;height:auto;';
+    // 画像の中心を (50+x%, 50+y%) に合わせる（アスペクト比に依存しない正確な配置）
+    var cx = 50 + t.x;
+    var cy = 50 + t.y;
+    img.style.cssText = 'z-index:' + layer.z_index + ';left:' + cx + '%;top:' + cy + '%;width:' + t.scale + '%;height:auto;transform:translate(-50%,-50%);';
     img.onerror = function() { this.style.display = 'none'; };
     stage.appendChild(img);
   });
@@ -681,12 +682,15 @@ function exportPNG() {
         else { dw = W; dh = W / ratio; dx = 0; dy = (H-dh)/2; }
         ctx.drawImage(img, dx, dy, dw, dh);
       } else {
+        // left/top は画像中心の座標（%）なので、translate(-50%,-50%)分を補正
         var cl = parseFloat(img.style.left) || 0;
         var ct = parseFloat(img.style.top)  || 0;
         var cw = parseFloat(img.style.width) || 100;
         var drawW = cw / 100 * W;
         var drawH = drawW * img.naturalHeight / img.naturalWidth;
-        ctx.drawImage(img, cl/100*W, ct/100*H, drawW, drawH);
+        var drawX = cl / 100 * W - drawW / 2;
+        var drawY = ct / 100 * H - drawH / 2;
+        ctx.drawImage(img, drawX, drawY, drawW, drawH);
       }
     } catch(e) {}
   });

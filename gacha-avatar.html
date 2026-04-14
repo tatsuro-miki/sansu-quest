@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>アバターガチャ｜さんすうクエスト</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fce4f5;
+  --surface: rgba(255,255,255,0.93);
+  --border: rgba(220,130,200,0.25);
+  --border2: rgba(220,130,200,0.45);
+  --pink: #e9649d;
+  --purple: #9f7aea;
+  --purple2: #b794f6;
+  --gold: #f5a623;
+  --mint: #2db87a;
+  --text: #2d1a3e;
+  --text2: #6a4a7a;
+  --text3: #a080b8;
+  --radius: 20px;
+  --radius-md: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Nunito','M PLUS Rounded 1c',sans-serif;
+  min-height: 100vh; color: var(--text);
+  overflow-x: hidden; background: var(--bg);
+}
+.bg-layer { position: fixed; inset: 0; background: url('parts/gacha_bg.png') center/cover no-repeat; z-index: 0; }
+.bg-overlay { position: fixed; inset: 0; background: rgba(255,200,240,0.35); z-index: 0; }
+
+/* ナビ */
+.nav-bar { position: relative; z-index: 10; max-width: 680px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.back-btn { display: inline-flex; align-items: center; gap: 6px; font-family: inherit; font-size: 14px; font-weight: 800; padding: 8px 16px; border-radius: 20px; border: 2px solid var(--border2); background: var(--surface); color: var(--text2); cursor: pointer; text-decoration: none; transition: .15s; }
+.back-btn:hover { background: white; }
+.coin-badge { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 2px solid rgba(245,166,35,0.35); border-radius: 25px; padding: 8px 18px; font-weight: 900; font-size: 16px; color: var(--gold); box-shadow: 0 2px 12px rgba(245,166,35,0.15); }
+.kisekae-btn { display: inline-flex; align-items: center; gap: 6px; font-family: inherit; font-size: 14px; font-weight: 800; padding: 8px 16px; border-radius: 20px; border: none; background: linear-gradient(135deg,#ff9de2,#c850c0); color: white; cursor: pointer; text-decoration: none; transition: .15s; box-shadow: 0 3px 12px rgba(200,80,192,0.3); }
+.kisekae-btn:hover { transform: translateY(-2px); }
+
+.app { max-width: 680px; margin: 0 auto; padding: 0 16px 40px; position: relative; z-index: 1; }
+.page-title { text-align: center; padding: 8px 0 16px; }
+.page-title h1 { font-size: clamp(24px,6vw,34px); font-weight: 900; color: white; text-shadow: 0 2px 8px rgba(200,60,180,0.5), 0 0 20px rgba(255,200,255,0.3); }
+.page-title p { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); margin-top: 4px; }
+
+/* ガチャステージ */
+.gacha-stage { background: var(--surface); border-radius: var(--radius); border: 2px solid var(--border2); padding: 24px 20px; text-align: center; box-shadow: 0 8px 32px rgba(200,60,180,0.15); margin-bottom: 16px; position: relative; overflow: hidden; }
+.machine-wrap { position: relative; width: 220px; height: 220px; margin: 0 auto 16px; }
+.machine-wrap .machine-emoji { font-size: 120px; line-height: 1; filter: drop-shadow(0 4px 16px rgba(200,60,180,0.35)); transition: transform .3s; display: block; }
+.machine-wrap:hover .machine-emoji { transform: scale(1.05); }
+.machine-wrap.spinning .machine-emoji { animation: machineShake 0.4s ease-in-out infinite; }
+@keyframes machineShake { 0%,100%{transform:rotate(0)}25%{transform:rotate(-3deg)scale(1.03)}75%{transform:rotate(3deg)scale(1.03)} }
+
+/* ボタン */
+.gacha-btns { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.gacha-btn {
+  font-family: inherit; font-size: 20px; font-weight: 900;
+  padding: 16px 40px; border-radius: 50px; border: none; width: 280px;
+  background: linear-gradient(135deg,#ff9de2,#c850c0,#9f7aea);
+  color: white; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(200,80,192,0.45);
+  transition: all .25s; position: relative; overflow: hidden;
+}
+.gacha-btn::before { content:''; position:absolute; inset:-2px; background:linear-gradient(45deg,#ff9de2,#ffd700,#c850c0,#87ceeb,#ff9de2); background-size:300% 300%; border-radius:50px; z-index:-1; animation:shimmer 3s ease infinite; }
+@keyframes shimmer { 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
+.gacha-btn:hover:not(:disabled) { transform: translateY(-3px) scale(1.03); box-shadow: 0 8px 28px rgba(200,80,192,0.55); }
+.gacha-btn:active:not(:disabled) { transform: scale(0.97); }
+.gacha-btn:disabled { opacity:.45; cursor:not-allowed; filter:grayscale(.4); }
+
+.gacha-btn-10 {
+  font-family: inherit; font-size: 18px; font-weight: 900;
+  padding: 14px 32px; border-radius: 50px; border: none; width: 280px;
+  background: linear-gradient(135deg,#ffd700,#ff9de2,#c850c0);
+  color: white; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255,180,50,0.4);
+  transition: all .25s; position: relative; overflow: hidden;
+}
+.gacha-btn-10::before { content:''; position:absolute; inset:-2px; background:linear-gradient(45deg,#ffd700,#ff9de2,#ffd700,#c850c0,#ffd700); background-size:300% 300%; border-radius:50px; z-index:-1; animation:shimmer 2s ease infinite; }
+.gacha-btn-10:hover:not(:disabled) { transform: translateY(-3px) scale(1.03); }
+.gacha-btn-10:active:not(:disabled) { transform: scale(0.97); }
+.gacha-btn-10:disabled { opacity:.45; cursor:not-allowed; filter:grayscale(.4); }
+
+.gacha-cost { font-size: 13px; font-weight: 800; color: var(--text3); margin-top: 4px; }
+.discount { color: var(--mint); font-size: 11px; margin-left: 4px; }
+
+.stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 16px; }
+.stat-box { background: rgba(200,80,192,0.06); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 10px 8px; text-align: center; }
+.stat-num { font-size: 22px; font-weight: 900; color: var(--purple); }
+.stat-lbl { font-size: 11px; font-weight: 700; color: var(--text3); }
+
+/* レアリティ */
+.rarity-tag { display: inline-block; padding: 5px 16px; border-radius: 20px; font-weight: 900; font-size: 14px; margin: 6px 3px; }
+.rarity-c   { background: #8bc34a; color: white; }
+.rarity-uc  { background: linear-gradient(135deg,#4facfe,#00f2fe); color: white; box-shadow: 0 0 10px rgba(79,172,254,.4); }
+.rarity-r   { background: linear-gradient(135deg,#c850c0,#f12711); color: white; box-shadow: 0 0 14px rgba(200,80,192,.4); }
+.rarity-sr  { background: linear-gradient(135deg,#f5af19,#f12711); color: white; box-shadow: 0 0 18px rgba(245,175,25,.5); animation: srGlow 1.5s ease-in-out infinite; }
+.rarity-ssr { background: linear-gradient(135deg,#a18cd1,#fbc2eb,#ffd700); color: white; box-shadow: 0 0 24px rgba(255,215,0,.6); animation: ssrGlow 1.2s ease-in-out infinite; }
+@keyframes srGlow  { 0%,100%{box-shadow:0 0 18px rgba(245,175,25,.5)}50%{box-shadow:0 0 32px rgba(245,175,25,.9)} }
+@keyframes ssrGlow { 0%,100%{box-shadow:0 0 24px rgba(255,215,0,.6)}50%{box-shadow:0 0 40px rgba(255,215,0,1),0 0 80px rgba(161,140,209,.5)} }
+
+.new-tag { display: inline-block; background: #ff4757; color: white; padding: 3px 12px; border-radius: 20px; font-weight: 900; font-size: 12px; animation: newPulse .8s ease-in-out infinite; }
+@keyframes newPulse { 0%,100%{transform:scale(1)}50%{transform:scale(1.15)} }
+
+/* オーバーレイ */
+.gacha-overlay { position: fixed; inset: 0; background: rgba(20,0,40,0.88); z-index: 100; display: none; align-items: center; justify-content: center; flex-direction: column; }
+.gacha-overlay.show { display: flex; }
+.gacha-loading { text-align: center; color: white; display: none; }
+.gacha-loading.show { display: block; }
+.gacha-loading p { font-size: 20px; font-weight: 900; animation: loadPulse 1s ease-in-out infinite; margin-top: 16px; }
+@keyframes loadPulse { 0%,100%{opacity:1}50%{opacity:.4} }
+
+/* 1連結果 */
+.result-card { background: white; border-radius: var(--radius); padding: 28px 24px; text-align: center; max-width: 340px; width: 90%; box-shadow: 0 8px 40px rgba(200,80,192,.5); display: none; animation: resultPop .5s cubic-bezier(.34,1.56,.64,1); position: relative; z-index: 5; }
+.result-card.show { display: block; }
+@keyframes resultPop { 0%{opacity:0;transform:scale(0.3)rotate(-10deg)}60%{transform:scale(1.05)rotate(2deg)}100%{opacity:1;transform:scale(1)rotate(0)} }
+.result-part-img { width: 180px; height: 200px; object-fit: contain; margin: 12px auto; display: block; filter: drop-shadow(0 4px 14px rgba(0,0,0,.18)); }
+.result-msg { font-size: 15px; font-weight: 800; color: var(--text2); margin: 10px 0; }
+.result-close-btn { font-family: inherit; font-size: 16px; font-weight: 900; padding: 12px 30px; border-radius: 50px; border: none; background: linear-gradient(135deg,var(--purple),var(--pink)); color: white; cursor: pointer; box-shadow: 0 4px 16px rgba(159,122,234,.35); transition: .2s; margin: 4px; }
+.result-close-btn:hover { opacity:.88; transform: translateY(-2px); }
+.result-kisekae-btn { font-family: inherit; font-size: 15px; font-weight: 900; padding: 12px 24px; border-radius: 50px; border: none; background: linear-gradient(135deg,#ff9de2,#c850c0); color: white; cursor: pointer; box-shadow: 0 4px 16px rgba(200,80,192,.35); transition: .2s; text-decoration: none; display: inline-block; margin: 4px; }
+.result-kisekae-btn:hover { transform: translateY(-2px); }
+
+/* 10連結果 */
+.result-10 { background: white; border-radius: var(--radius); padding: 18px 14px; max-width: 540px; width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(200,80,192,.5); display: none; animation: resultPop .4s cubic-bezier(.34,1.56,.64,1); position: relative; z-index: 5; text-align: center; }
+.result-10.show { display: block; }
+.r10-title { font-size: 18px; font-weight: 900; color: var(--text); margin-bottom: 10px; }
+.r10-guarantee { font-size: 11px; font-weight: 700; color: var(--mint); margin-bottom: 6px; }
+.r10-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; margin-bottom: 10px; }
+.r10-item { aspect-ratio: 3/4; border-radius: 10px; border: 2.5px solid #ccc; overflow: hidden; position: relative; background: #fdf5ff; animation: r10Pop .35s ease-out both; animation-delay: var(--delay,0s); }
+@keyframes r10Pop { 0%{opacity:0;transform:scale(0.5)rotate(-8deg)}100%{opacity:1;transform:scale(1)rotate(0)} }
+.r10-item img { width:100%; height:100%; object-fit:contain; padding:3px; }
+.r10-item .r10-label { position:absolute; bottom:0; left:0; right:0; font-size:9px; font-weight:900; text-align:center; padding:2px 0; color:white; }
+.r10-item .r10-label.rarity-c  { background:rgba(139,195,74,.9); }
+.r10-item .r10-label.rarity-uc { background:rgba(79,172,254,.9); }
+.r10-item .r10-label.rarity-r  { background:rgba(200,80,192,.9); }
+.r10-item .r10-label.rarity-sr { background:rgba(245,175,25,.95); }
+.r10-item .r10-label.rarity-ssr{ background:linear-gradient(90deg,#a18cd1,#fbc2eb); }
+.r10-new { position:absolute; top:2px; right:2px; background:#ff4757; color:white; font-size:8px; font-weight:900; padding:1px 5px; border-radius:8px; }
+.r10-summary { font-size: 14px; font-weight: 800; color: var(--text2); margin: 8px 0 12px; }
+
+/* コレクション */
+.collection-panel { background: var(--surface); border-radius: var(--radius); border: 2px solid var(--border2); padding: 20px; box-shadow: 0 4px 20px rgba(200,60,180,.12); }
+.collection-title { font-size: 16px; font-weight: 900; color: var(--text); margin-bottom: 4px; }
+.collection-sub { font-size: 12px; font-weight: 700; color: var(--text3); margin-bottom: 14px; }
+
+/* カテゴリタブ */
+.cat-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.cat-tab { font-family: inherit; font-size: 12px; font-weight: 800; padding: 5px 12px; border-radius: 20px; border: 2px solid var(--border2); background: transparent; color: var(--text3); cursor: pointer; transition: .15s; }
+.cat-tab.active { background: var(--purple); color: white; border-color: var(--purple); }
+.cat-tab:hover:not(.active) { border-color: var(--purple); color: var(--purple); }
+
+.collection-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(76px,1fr)); gap: 8px; }
+.coll-slot { aspect-ratio: 3/4; background: rgba(200,80,192,.05); border: 2px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; transition: .2s; }
+.coll-slot.owned { border-color: var(--purple2); background: white; cursor: pointer; }
+.coll-slot.owned:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(159,122,234,.25); }
+.coll-slot img { width:100%; height:100%; object-fit:contain; padding:4px; }
+.lock-icon { font-size: 22px; opacity: .35; }
+.rarity-dot { position:absolute; top:4px; right:4px; width:9px; height:9px; border-radius:50%; }
+.rarity-dot.c   { background:#8bc34a; }
+.rarity-dot.uc  { background:#4facfe; }
+.rarity-dot.r   { background:#c850c0; }
+.rarity-dot.sr  { background:#f5af19; box-shadow:0 0 5px rgba(245,175,25,.6); }
+.rarity-dot.ssr { background:linear-gradient(135deg,#a18cd1,#ffd700); box-shadow:0 0 6px rgba(255,215,0,.7); }
+
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 10px 24px; border-radius: 20px; font-weight: 800; font-size: 14px; opacity: 0; pointer-events: none; z-index: 200; transition: opacity .3s; white-space: nowrap; color: white; }
+.toast.show { opacity: 1; }
+.toast.ok { background: var(--mint); }
+.toast.ng { background: var(--pink); }
+</style>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div class="bg-overlay"></div>
+
+<!-- ナビ -->
+<div class="nav-bar">
+  <a class="back-btn" href="game.html">← もどる</a>
+  <div class="coin-badge">🪙 <span id="coin-count">0</span></div>
+  <a class="kisekae-btn" href="chibi-avatar.html">👗 きせかえ →</a>
+</div>
+
+<div class="app">
+  <div class="page-title">
+    <h1>👗 アバターガチャ 👗</h1>
+    <p>ちびアバター用のパーツをゲットしよう！</p>
+  </div>
+
+  <div class="gacha-stage">
+    <div class="machine-wrap" id="machine-wrap">
+      <span class="machine-emoji">🎀</span>
+    </div>
+
+    <div class="gacha-btns">
+      <div>
+        <button class="gacha-btn" id="gacha-btn" onclick="pullGacha()">✨ 1回ひく</button>
+        <div class="gacha-cost">💰 1000コイン</div>
+      </div>
+      <div>
+        <button class="gacha-btn-10" id="gacha-btn-10" onclick="pull10Gacha()">🌟 10連ガチャ！</button>
+        <div class="gacha-cost">💰 9000コイン <span class="discount">✨ 10%割引 / SR以上1枚確定</span></div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num" id="stat-owned">0</div><div class="stat-lbl">ゲットずみ</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">ぜんぶ</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-percent">0%</div><div class="stat-lbl">コンプりつ</div></div>
+    </div>
+  </div>
+
+  <!-- コレクション -->
+  <div class="collection-panel">
+    <div class="collection-title">🌸 アバターパーツコレクション</div>
+    <div class="collection-sub">ガチャでゲットしたパーツが並ぶよ！</div>
+    <div class="cat-tabs" id="cat-tabs"></div>
+    <div class="collection-grid" id="collection-grid"></div>
+  </div>
+</div>
+
+<!-- オーバーレイ -->
+<div class="gacha-overlay" id="gacha-overlay">
+  <div class="gacha-loading" id="gacha-loading">
+    <div style="font-size:72px;animation:machineShake .4s ease-in-out infinite">🎀</div>
+    <p>ドキドキ…</p>
+  </div>
+
+  <!-- 1連結果 -->
+  <div class="result-card" id="result-card">
+    <img class="result-part-img" id="result-img" src="" alt="">
+    <div>
+      <span class="rarity-tag" id="result-rarity"></span>
+      <span class="new-tag" id="result-new" style="display:none">NEW!</span>
+    </div>
+    <div class="result-msg" id="result-msg"></div>
+    <div>
+      <button class="result-close-btn" onclick="closeResult()">OK！</button>
+      <a class="result-kisekae-btn" href="chibi-avatar.html">👗 きせかえする →</a>
+    </div>
+  </div>
+
+  <!-- 10連結果 -->
+  <div class="result-10" id="result-10">
+    <div class="r10-title">✨ 10連結果 ✨</div>
+    <div class="r10-guarantee" id="r10-guarantee"></div>
+    <div class="r10-grid" id="r10-grid"></div>
+    <div class="r10-summary" id="r10-summary"></div>
+    <div>
+      <button class="result-close-btn" onclick="closeResult()">OK！</button>
+      <a class="result-kisekae-btn" href="chibi-avatar.html">👗 きせかえする →</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { FIREBASE_CONFIG } from './firebase.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const app = initializeApp(FIREBASE_CONFIG);
+const db  = getFirestore(app);
+
+const GACHA_COST    = 1000;
+const GACHA_COST_10 = 9000;
+
+// stars値 → レアリティ定義
+const RARITY_MAP = {
+  1: { key:'C',   css:'rarity-c',   dot:'c',   label:'コモン',          rate:0.40 },
+  2: { key:'UC',  css:'rarity-uc',  dot:'uc',  label:'⭐ アンコモン',    rate:0.30 },
+  3: { key:'R',   css:'rarity-r',   dot:'r',   label:'💎 レア',          rate:0.15 },
+  4: { key:'SR',  css:'rarity-sr',  dot:'sr',  label:'🌟 スーパーレア',  rate:0.10 },
+  5: { key:'SSR', css:'rarity-ssr', dot:'ssr', label:'💫 エクストラ',    rate:0.05 },
+};
+// 10連SR以上保証（stars>=4）
+const GUARANTEE_MIN_STARS = 4;
+
+let manifest = [];    // gacha-manifest.json の配列
+let username = '', save = {}, toastTimer = null;
+let currentCat = 'all';
+
+// ─────────────────────────────────────
+// 初期化
+// ─────────────────────────────────────
+async function init() {
+  username = sessionStorage.getItem('sq_user');
+  if (!username) { location.href = 'index.html'; return; }
+
+  // gacha-manifest.json ロード
+  try {
+    const res = await fetch('gacha-manifest.json');
+    manifest = await res.json();
+  } catch(e) {
+    console.error('gacha-manifest.json の読み込みに失敗:', e);
+    showToast('パーツデータが読み込めませんでした', 'ng');
+    manifest = [];
+  }
+
+  // Firestore ロード
+  try {
+    const snap = await getDoc(doc(db, 'users', username));
+    if (snap.exists()) save = snap.data();
+  } catch(e) { console.error(e); }
+
+  if (!save.coins)            save.coins = 0;
+  if (!save.gachaAvatarOwned) save.gachaAvatarOwned = [];
+
+  buildCatTabs();
+  updateUI();
+  renderCollection();
+}
+
+async function persist() {
+  try { await setDoc(doc(db,'users',username), save, {merge:true}); }
+  catch(e) { console.error(e); }
+}
+
+// ─────────────────────────────────────
+// UI 更新
+// ─────────────────────────────────────
+function updateUI() {
+  document.getElementById('coin-count').textContent = save.coins || 0;
+  const total   = manifest.length;
+  const owned   = (save.gachaAvatarOwned || []).length;
+  document.getElementById('stat-total').textContent   = total;
+  document.getElementById('stat-owned').textContent   = owned;
+  document.getElementById('stat-percent').textContent = total ? Math.round(owned/total*100)+'%' : '0%';
+  document.getElementById('gacha-btn').disabled    = (save.coins||0) < GACHA_COST;
+  document.getElementById('gacha-btn-10').disabled = (save.coins||0) < GACHA_COST_10;
+}
+
+// ─────────────────────────────────────
+// ガチャロジック
+// ─────────────────────────────────────
+function drawOne() {
+  // 重み付きランダム
+  const rand = Math.random();
+  // まず対象stars配列を確率で選ぶ
+  const byStars = {};
+  for (const item of manifest) {
+    const s = item.stars || 4;
+    if (!byStars[s]) byStars[s] = [];
+    byStars[s].push(item);
+  }
+  const starsKeys = Object.keys(byStars).map(Number).sort((a,b)=>a-b);
+
+  // 存在するstars値だけで合計レートを正規化
+  let total = 0;
+  for (const s of starsKeys) total += (RARITY_MAP[s]?.rate || 0.10) * byStars[s].length;
+
+  let cum = 0;
+  const r = rand * total;
+  for (const s of starsKeys) {
+    const rDef = RARITY_MAP[s] || RARITY_MAP[4];
+    cum += rDef.rate * byStars[s].length;
+    if (r <= cum) {
+      const pool = byStars[s];
+      const item = pool[Math.floor(Math.random() * pool.length)];
+      return { item, rarity: rDef, stars: s };
+    }
+  }
+  // フォールバック
+  const fallback = manifest[Math.floor(Math.random()*manifest.length)];
+  return { item: fallback, rarity: RARITY_MAP[fallback.stars||4] || RARITY_MAP[4], stars: fallback.stars||4 };
+}
+
+function isNew(itemId) {
+  return !(save.gachaAvatarOwned || []).includes(itemId);
+}
+function addOwned(itemId) {
+  if (!save.gachaAvatarOwned) save.gachaAvatarOwned = [];
+  if (!save.gachaAvatarOwned.includes(itemId)) save.gachaAvatarOwned.push(itemId);
+}
+
+// 1連
+window.pullGacha = async function() {
+  if ((save.coins||0) < GACHA_COST) { showToast('コインがたりない！', 'ng'); return; }
+  save.coins -= GACHA_COST;
+  updateUI();
+  showOverlay(true);
+
+  await delay(900);
+  const { item, rarity } = drawOne();
+  const wasNew = isNew(item.id);
+  addOwned(item.id);
+  await persist();
+
+  hideLoading();
+  const card = document.getElementById('result-card');
+  document.getElementById('result-img').src    = item.file;
+  document.getElementById('result-rarity').textContent  = rarity.label;
+  document.getElementById('result-rarity').className    = 'rarity-tag ' + rarity.css;
+  document.getElementById('result-new').style.display   = wasNew ? '' : 'none';
+  document.getElementById('result-msg').textContent     = wasNew
+    ? `「${item.name}」をゲット！` : `「${item.name}」(すでにもってる)`;
+  card.classList.add('show');
+  updateUI();
+  renderCollection();
+};
+
+// 10連
+window.pull10Gacha = async function() {
+  if ((save.coins||0) < GACHA_COST_10) { showToast('コインがたりない！', 'ng'); return; }
+  save.coins -= GACHA_COST_10;
+  updateUI();
+  showOverlay(true);
+
+  await delay(1000);
+
+  const results = [];
+  for (let i = 0; i < 10; i++) results.push(drawOne());
+
+  // SR以上保証
+  let guaranteed = false;
+  const hasHigh = results.some(r => r.stars >= GUARANTEE_MIN_STARS);
+  if (!hasHigh) {
+    // 最後の1枚をSR以上に置き換え
+    const srPool = manifest.filter(it => (it.stars||4) >= GUARANTEE_MIN_STARS);
+    if (srPool.length > 0) {
+      const item = srPool[Math.floor(Math.random()*srPool.length)];
+      const rarity = RARITY_MAP[item.stars||4] || RARITY_MAP[4];
+      results[9] = { item, rarity, stars: item.stars||4 };
+      guaranteed = true;
+    }
+  }
+
+  // 所有登録
+  let newCount = 0;
+  results.forEach(r => {
+    const wasNew = isNew(r.item.id);
+    addOwned(r.item.id);
+    if (wasNew) { r.isNew = true; newCount++; }
+  });
+  await persist();
+
+  hideLoading();
+
+  // グリッド表示
+  const grid = document.getElementById('r10-grid');
+  grid.innerHTML = '';
+  results.forEach((r, i) => {
+    const div = document.createElement('div');
+    div.className = 'r10-item';
+    div.style.setProperty('--delay', (i * 0.06) + 's');
+    const borderColor = r.stars >= 5 ? '#ffd700' : r.stars >= 4 ? '#f5af19' : r.stars >= 3 ? '#c850c0' : '#4facfe';
+    div.style.borderColor = borderColor;
+    div.innerHTML = `
+      <img src="${r.item.file}" alt="${r.item.name}" onerror="this.style.display='none'">
+      <div class="r10-label ${r.rarity.css}">${r.rarity.key}</div>
+      ${r.isNew ? '<div class="r10-new">NEW!</div>' : ''}
+    `;
+    grid.appendChild(div);
+  });
+
+  document.getElementById('r10-guarantee').textContent = guaranteed ? '✨ SR以上を1枚確定でゲット！' : '';
+  document.getElementById('r10-summary').textContent   = `NEW ${newCount}件ゲット！`;
+  document.getElementById('result-10').classList.add('show');
+  updateUI();
+  renderCollection();
+};
+
+window.closeResult = function() {
+  document.getElementById('gacha-overlay').classList.remove('show');
+  document.getElementById('result-card').classList.remove('show');
+  document.getElementById('result-10').classList.remove('show');
+  document.getElementById('machine-wrap').classList.remove('spinning');
+};
+
+// ─────────────────────────────────────
+// コレクション表示
+// ─────────────────────────────────────
+function buildCatTabs() {
+  const tabs = document.getElementById('cat-tabs');
+  tabs.innerHTML = '';
+
+  // 全て
+  const all = document.createElement('button');
+  all.className = 'cat-tab' + (currentCat==='all'?' active':'');
+  all.textContent = 'すべて';
+  all.onclick = () => { currentCat = 'all'; refreshTabs(); renderCollection(); };
+  tabs.appendChild(all);
+
+  // カテゴリ別
+  const cats = [...new Set(manifest.map(it => guessCat(it)))].sort();
+  for (const cat of cats) {
+    const btn = document.createElement('button');
+    btn.className = 'cat-tab' + (currentCat===cat?' active':'');
+    btn.textContent = catLabel(cat);
+    btn.dataset.cat = cat;
+    btn.onclick = () => { currentCat = cat; refreshTabs(); renderCollection(); };
+    tabs.appendChild(btn);
+  }
+}
+
+function refreshTabs() {
+  document.querySelectorAll('.cat-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.cat === currentCat || (!b.dataset.cat && currentCat==='all'));
+  });
+}
+
+function guessCat(item) {
+  // ファイルパスから判定: chibi-parts/gacha/xxx.png → "gacha"
+  // または manifest の category フィールドがあればそれ
+  if (item.category) return item.category;
+  const m = item.file.match(/chibi-parts\/([^\/]+)\//);
+  return m ? m[1] : 'other';
+}
+
+function catLabel(cat) {
+  const map = { hair:'髪', eyes:'目', mouth:'くち', tops:'トップス', bottoms:'ボトムス', shoes:'くつ', accessories:'アクセ', gacha:'ガチャ', outfit:'コーデ', other:'その他' };
+  return map[cat] || cat;
+}
+
+function renderCollection() {
+  const grid = document.getElementById('collection-grid');
+  grid.innerHTML = '';
+  const filtered = currentCat === 'all' ? manifest : manifest.filter(it => guessCat(it) === currentCat);
+  const owned = save.gachaAvatarOwned || [];
+
+  for (const item of filtered) {
+    const slot = document.createElement('div');
+    const isOwned = owned.includes(item.id);
+    slot.className = 'coll-slot' + (isOwned ? ' owned' : '');
+    const rDef = RARITY_MAP[item.stars||4] || RARITY_MAP[4];
+    if (isOwned) {
+      slot.title = item.name;
+      slot.innerHTML = `
+        <img src="${item.file}" alt="${item.name}" loading="lazy">
+        <div class="rarity-dot ${rDef.dot}"></div>
+      `;
+    } else {
+      slot.innerHTML = `<span class="lock-icon">🔒</span>`;
+    }
+    grid.appendChild(slot);
+  }
+}
+
+// ─────────────────────────────────────
+// ヘルパー
+// ─────────────────────────────────────
+function showOverlay(loading) {
+  document.getElementById('gacha-overlay').classList.add('show');
+  if (loading) {
+    document.getElementById('gacha-loading').classList.add('show');
+    document.getElementById('machine-wrap').classList.add('spinning');
+  }
+}
+function hideLoading() {
+  document.getElementById('gacha-loading').classList.remove('show');
+}
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+let toastTmr = null;
+function showToast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  clearTimeout(toastTmr);
+  toastTmr = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+init();
+</script>
+</body>
+</html>

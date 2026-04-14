@@ -13,7 +13,7 @@
           "id": "bottoms_パープルパンツ",
           "name": "パープルパンツ",
           "file": "chibi-parts/bottoms/パープルパンツ.png",
-          "cost": 0,
+          "cost": 1000,
           "stars": 0,
           "transform": {
             "x": 0,
@@ -25,7 +25,7 @@
           "id": "bottoms_ピンクショートパンツ",
           "name": "ピンクショートパンツ",
           "file": "chibi-parts/bottoms/ピンクショートパンツ.png",
-          "cost": 5000,
+          "cost": 2000,
           "stars": 2,
           "transform": {
             "x": 0,
@@ -37,7 +37,7 @@
           "id": "bottoms_ピンクスカート",
           "name": "ピンクスカート",
           "file": "chibi-parts/bottoms/ピンクスカート.png",
-          "cost": 7000,
+          "cost": 3000,
           "stars": 3,
           "transform": {
             "x": -1,
@@ -79,7 +79,7 @@
           "id": "eyes_blue1",
           "name": "blue1",
           "file": "chibi-parts/eyes/blue1.png",
-          "cost": 5000,
+          "cost": 3000,
           "stars": 2,
           "transform": {
             "x": 0,
@@ -91,7 +91,7 @@
           "id": "eyes_blue2",
           "name": "blue2",
           "file": "chibi-parts/eyes/blue2.png",
-          "cost": 7000,
+          "cost": 3000,
           "stars": 3,
           "transform": {
             "x": 0,
@@ -103,7 +103,7 @@
           "id": "eyes_blue3",
           "name": "blue3",
           "file": "chibi-parts/eyes/blue3.png",
-          "cost": 9000,
+          "cost": 4000,
           "stars": 4,
           "transform": {
             "x": 0,
@@ -115,7 +115,7 @@
           "id": "eyes_blue4",
           "name": "blue4",
           "file": "chibi-parts/eyes/blue4.png",
-          "cost": 11000,
+          "cost": 5000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -127,7 +127,7 @@
           "id": "eyes_brown1",
           "name": "brown1",
           "file": "chibi-parts/eyes/brown1.png",
-          "cost": 13000,
+          "cost": 3000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -139,7 +139,7 @@
           "id": "eyes_green1",
           "name": "green1",
           "file": "chibi-parts/eyes/green1.png",
-          "cost": 15000,
+          "cost": 3000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -151,7 +151,7 @@
           "id": "eyes_green2",
           "name": "green2",
           "file": "chibi-parts/eyes/green2.png",
-          "cost": 17000,
+          "cost": 4000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -163,7 +163,7 @@
           "id": "eyes_green3",
           "name": "green3",
           "file": "chibi-parts/eyes/green3.png",
-          "cost": 19000,
+          "cost": 6000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -175,7 +175,7 @@
           "id": "eyes_orange1",
           "name": "orange1",
           "file": "chibi-parts/eyes/orange1.png",
-          "cost": 21000,
+          "cost": 5000,
           "stars": 5,
           "transform": {
             "x": -1,
@@ -187,7 +187,7 @@
           "id": "eyes_pink1",
           "name": "pink1",
           "file": "chibi-parts/eyes/pink1.png",
-          "cost": 23000,
+          "cost": 3000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -199,7 +199,7 @@
           "id": "eyes_pink2",
           "name": "pink2",
           "file": "chibi-parts/eyes/pink2.png",
-          "cost": 25000,
+          "cost": 3000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -223,7 +223,7 @@
           "id": "eyes_pink4",
           "name": "pink4",
           "file": "chibi-parts/eyes/pink4.png",
-          "cost": 29000,
+          "cost": 6000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -235,7 +235,7 @@
           "id": "eyes_purple1",
           "name": "purple1",
           "file": "chibi-parts/eyes/purple1.png",
-          "cost": 31000,
+          "cost": 2000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -247,7 +247,7 @@
           "id": "eyes_purple2",
           "name": "purple2",
           "file": "chibi-parts/eyes/purple2.png",
-          "cost": 33000,
+          "cost": 5000,
           "stars": 5,
           "transform": {
             "x": -1,
@@ -259,7 +259,7 @@
           "id": "eyes_purple3",
           "name": "purple3",
           "file": "chibi-parts/eyes/purple3.png",
-          "cost": 35000,
+          "cost": 6000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -271,7 +271,7 @@
           "id": "eyes_yellow1",
           "name": "yellow1",
           "file": "chibi-parts/eyes/yellow1.png",
-          "cost": 37000,
+          "cost": 1000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -289,7 +289,7 @@
           "id": "hair_オレンジツインシニョンセミロング",
           "name": "オレンジツインシニョンセミロング",
           "file": "chibi-parts/hair/オレンジツインシニョンセミロング.png",
-          "cost": 0,
+          "cost": 8000,
           "stars": 0,
           "transform": {
             "x": 0,
@@ -301,7 +301,7 @@
           "id": "hair_ゴシックピンク",
           "name": "ゴシックピンク",
           "file": "chibi-parts/hair/ゴシックピンク.png",
-          "cost": 5000,
+          "cost": 10000,
           "stars": 2,
           "transform": {
             "x": 0,
@@ -313,7 +313,7 @@
           "id": "hair_ショートアッシュ",
           "name": "ショートアッシュ",
           "file": "chibi-parts/hair/ショートアッシュ.png",
-          "cost": 7000,
+          "cost": 0,
           "stars": 3,
           "transform": {
             "x": 0,
@@ -361,7 +361,7 @@
           "id": "hair_ピンクツインシニョン",
           "name": "ピンクツインシニョン",
           "file": "chibi-parts/hair/ピンクツインシニョン.png",
-          "cost": 15000,
+          "cost": 10000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -373,7 +373,7 @@
           "id": "hair_ピンクツインセミロングシニョン",
           "name": "ピンクツインセミロングシニョン",
           "file": "chibi-parts/hair/ピンクツインセミロングシニョン.png",
-          "cost": 17000,
+          "cost": 10000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -385,7 +385,7 @@
           "id": "hair_ピンク猫耳",
           "name": "ピンク猫耳",
           "file": "chibi-parts/hair/ピンク猫耳.png",
-          "cost": 19000,
+          "cost": 10000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -397,7 +397,7 @@
           "id": "hair_ブラウンセミロング",
           "name": "ブラウンセミロング",
           "file": "chibi-parts/hair/ブラウンセミロング.png",
-          "cost": 21000,
+          "cost": 2000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -409,7 +409,7 @@
           "id": "hair_ブルー猫耳セミロング",
           "name": "ブルー猫耳セミロング",
           "file": "chibi-parts/hair/ブルー猫耳セミロング.png",
-          "cost": 23000,
+          "cost": 10000,
           "stars": 5,
           "transform": {
             "x": 1,
@@ -421,7 +421,7 @@
           "id": "hair_茶色ボブ",
           "name": "茶色ボブ",
           "file": "chibi-parts/hair/茶色ボブ.png",
-          "cost": 25000,
+          "cost": 2000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -451,7 +451,7 @@
           "id": "mouth_口2",
           "name": "口2",
           "file": "chibi-parts/mouth/口2.png",
-          "cost": 5000,
+          "cost": 1000,
           "stars": 2,
           "transform": {
             "x": 0,
@@ -463,7 +463,7 @@
           "id": "mouth_口3",
           "name": "口3",
           "file": "chibi-parts/mouth/口3.png",
-          "cost": 7000,
+          "cost": 1000,
           "stars": 3,
           "transform": {
             "x": 0,
@@ -475,7 +475,7 @@
           "id": "mouth_口4",
           "name": "口4",
           "file": "chibi-parts/mouth/口4.png",
-          "cost": 9000,
+          "cost": 1000,
           "stars": 4,
           "transform": {
             "x": 0,
@@ -487,7 +487,7 @@
           "id": "mouth_口5",
           "name": "口5",
           "file": "chibi-parts/mouth/口5.png",
-          "cost": 11000,
+          "cost": 1000,
           "stars": 5,
           "transform": {
             "x": 1,
@@ -499,7 +499,7 @@
           "id": "mouth_口6",
           "name": "口6",
           "file": "chibi-parts/mouth/口6.png",
-          "cost": 13000,
+          "cost": 1000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -511,7 +511,7 @@
           "id": "mouth_口7",
           "name": "口7",
           "file": "chibi-parts/mouth/口7.png",
-          "cost": 15000,
+          "cost": 1000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -523,7 +523,7 @@
           "id": "mouth_口8",
           "name": "口8",
           "file": "chibi-parts/mouth/口8.png",
-          "cost": 17000,
+          "cost": 1000,
           "stars": 5,
           "transform": {
             "x": 0,
@@ -541,7 +541,7 @@
           "id": "shoes_ビッグスニーカー",
           "name": "ビッグスニーカー",
           "file": "chibi-parts/shoes/ビッグスニーカー.png",
-          "cost": 0,
+          "cost": 5000,
           "stars": 0
         },
         {
@@ -572,7 +572,7 @@
           "id": "shoes_ピンクブーツ",
           "name": "ピンクブーツ",
           "file": "chibi-parts/shoes/ピンクブーツ.png",
-          "cost": 9000,
+          "cost": 7000,
           "stars": 4,
           "transform": {
             "x": 0,
@@ -584,7 +584,7 @@
           "id": "shoes_厚底スニーカーピンク",
           "name": "厚底スニーカーピンク",
           "file": "chibi-parts/shoes/厚底スニーカーピンク.png",
-          "cost": 11000,
+          "cost": 10000,
           "stars": 5,
           "transform": {
             "x": -1,
@@ -596,7 +596,7 @@
           "id": "shoes_厚底スニーカー紫",
           "name": "厚底スニーカー紫",
           "file": "chibi-parts/shoes/厚底スニーカー紫.png",
-          "cost": 13000,
+          "cost": 10000,
           "stars": 5,
           "transform": {
             "x": -1,
@@ -608,7 +608,7 @@
           "id": "shoes_厚底スニーカー青",
           "name": "厚底スニーカー青",
           "file": "chibi-parts/shoes/厚底スニーカー青.png",
-          "cost": 15000,
+          "cost": 10000,
           "stars": 5,
           "transform": {
             "x": -2,
@@ -620,7 +620,7 @@
           "id": "shoes_厚底スニーカー黄色",
           "name": "厚底スニーカー黄色",
           "file": "chibi-parts/shoes/厚底スニーカー黄色.png",
-          "cost": 17000,
+          "cost": 10000,
           "stars": 5,
           "transform": {
             "x": -1,
@@ -632,7 +632,7 @@
           "id": "shoes_紫ブーツ",
           "name": "紫ブーツ",
           "file": "chibi-parts/shoes/紫ブーツ.png",
-          "cost": 19000,
+          "cost": 10000,
           "stars": 5,
           "transform": {
             "x": -2,
@@ -650,7 +650,7 @@
           "id": "tops_tops1",
           "name": "tops1",
           "file": "chibi-parts/tops/tops1.png",
-          "cost": 0,
+          "cost": 3000,
           "stars": 0,
           "transform": {
             "x": 0,
@@ -662,7 +662,7 @@
           "id": "tops_tops2",
           "name": "tops2",
           "file": "chibi-parts/tops/tops2.png",
-          "cost": 5000,
+          "cost": 3000,
           "stars": 2,
           "transform": {
             "x": 0,
@@ -674,7 +674,7 @@
           "id": "tops_tops3",
           "name": "tops3",
           "file": "chibi-parts/tops/tops3.png",
-          "cost": 7000,
+          "cost": 5000,
           "stars": 3,
           "transform": {
             "x": 0,
@@ -686,7 +686,7 @@
           "id": "tops_tops4",
           "name": "tops4",
           "file": "chibi-parts/tops/tops4.png",
-          "cost": 9000,
+          "cost": 5000,
           "stars": 4,
           "transform": {
             "x": 0,
@@ -698,7 +698,7 @@
           "id": "tops_ゴシックチョーカー",
           "name": "ゴシックチョーカー",
           "file": "chibi-parts/tops/ゴシックチョーカー.png",
-          "cost": 11000,
+          "cost": 15000,
           "stars": 5,
           "transform": {
             "x": -1,
@@ -710,7 +710,7 @@
           "id": "tops_ゴシックパーカー",
           "name": "ゴシックパーカー",
           "file": "chibi-parts/tops/ゴシックパーカー.png",
-          "cost": 13000,
+          "cost": 15000,
           "stars": 5,
           "transform": {
             "x": -3,
@@ -746,7 +746,7 @@
           "id": "tops_ピンクのカーディガン",
           "name": "ピンクのカーディガン",
           "file": "chibi-parts/tops/ピンクのカーディガン.png",
-          "cost": 19000,
+          "cost": 3000,
           "stars": 5,
           "transform": {
             "x": 0,

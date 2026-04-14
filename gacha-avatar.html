@@ -327,6 +327,29 @@ let manifest = [];
 let username = '', save = {};
 let currentCat = 'all';
 
+// 画像読み込みヘルパー：生パス→エンコード→名前表示 の順でフォールバック
+function loadImg(img, filePath, itemName) {
+  img.src = filePath;
+  img.onerror = function() {
+    // エンコード版を試す
+    const encoded = filePath.split('/').map(s => {
+      try { return encodeURIComponent(decodeURIComponent(s)); }
+      catch(e) { return encodeURIComponent(s); }
+    }).join('/');
+    console.warn('[Image 失敗] raw:', filePath);
+    console.warn('[Image retry] encoded:', encoded);
+    img.onerror = function() {
+      console.error('[Image 完全失敗]', encoded);
+      img.style.display = 'none';
+      const fb = document.createElement('div');
+      fb.style.cssText = 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:.65em;font-weight:900;color:#888;padding:4px;text-align:center;';
+      fb.textContent = itemName || '?';
+      img.parentElement && img.parentElement.appendChild(fb);
+    };
+    img.src = encoded;
+  };
+}
+
 // ─────────────────────────────────────
 // 初期化
 // ─────────────────────────────────────
@@ -338,6 +361,8 @@ async function init() {
   try {
     const res = await fetch('gacha-manifest.json');
     manifest = await res.json();
+    console.log('[Manifest] 読み込み件数:', manifest.length);
+    console.log('[Manifest] 最初の5件のfile:', manifest.slice(0,5).map(m=>m.file));
   } catch(e) {
     console.error('gacha-manifest.json の読み込みに失敗:', e);
     showToast('パーツデータが読み込めませんでした', 'ng');
@@ -457,12 +482,9 @@ window.pullGacha = async function() {
   addOwned(result.item.id);
   await persist();
 
-  document.getElementById('result-img').src = result.item.file;
-  document.getElementById('result-img').style.opacity = '1';
-  document.getElementById('result-img').onerror = function() {
-    this.style.display='none';
-    document.getElementById('result-msg').textContent = result.item.name + (wasNew?' をゲット！':'(すでにもってる)');
-  };
+  const resultImgEl = document.getElementById('result-img');
+  resultImgEl.style.opacity = '1';
+  loadImg(resultImgEl, result.item.file, result.item.name);
   document.getElementById('result-rarity').textContent = result.rarity.label;
   document.getElementById('result-rarity').className   = 'rarity-tag ' + result.rarity.css;
   document.getElementById('result-new').style.display  = wasNew ? 'inline-block' : 'none';
@@ -523,12 +545,15 @@ window.pull10Gacha = async function() {
       const borderColor = r.stars >= 5 ? '#ffd700' : r.stars >= 4 ? '#f5af19' : r.stars >= 3 ? '#c850c0' : '#4facfe';
       div.style.borderColor = borderColor;
       div.innerHTML = `
-        <img src="${r.item.file}" alt="${r.item.name}"
-          onerror="this.parentElement.querySelector('.item-fallback').style.display='flex';this.style.display='none'">
-        <div class="item-fallback" style="display:none;align-items:center;justify-content:center;height:100%;font-size:.65em;font-weight:900;color:#888;padding:4px;text-align:center;">${r.item.name}</div>
+        <div class="r10-img-wrap" style="position:relative;width:100%;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;"></div>
         <div class="r10-label ${r.rarity.css}">${r.rarity.key}</div>
         ${r.isNew ? '<div class="r10-new">NEW!</div>' : ''}
       `;
+      const imgEl = document.createElement('img');
+      imgEl.alt = r.item.name;
+      imgEl.style.cssText = 'width:100%;height:100%;object-fit:contain;';
+      loadImg(imgEl, r.item.file, r.item.name);
+      div.querySelector('.r10-img-wrap').appendChild(imgEl);
     }
     grid.appendChild(div);
   });
@@ -605,10 +630,14 @@ function renderCollection() {
     const rDef = RARITY_MAP[item.stars||4] || RARITY_MAP[4];
     if (isOwned) {
       slot.title = item.name;
-      slot.innerHTML = `
-        <img src="${item.file}" alt="${item.name}" loading="lazy">
-        <div class="rarity-dot ${rDef.dot}"></div>
-      `;
+      const dotEl = document.createElement('div');
+      dotEl.className = 'rarity-dot ' + rDef.dot;
+      const imgEl = document.createElement('img');
+      imgEl.alt = item.name;
+      imgEl.setAttribute('loading', 'lazy');
+      loadImg(imgEl, item.file, item.name);
+      slot.appendChild(imgEl);
+      slot.appendChild(dotEl);
     } else {
       slot.innerHTML = `<span class="lock-icon">🔒</span>`;
     }

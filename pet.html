@@ -347,7 +347,7 @@ header h1 span { color: var(--gold); }
   <!-- エサストック -->
   <div class="food-bar">
     <div class="food-count">
-      <span class="food-icon">🍖</span>
+      <span class="food-icon">🥖</span>
       <span id="food-count">0</span> 
     </div>
     <div class="food-hint">5問といたら1こもらえるよ！</div>
@@ -378,9 +378,9 @@ header h1 span { color: var(--gold); }
     <div class="exchange-bar">
       <div class="exchange-title">🔄 こうかんショップ</div>
       <div class="exchange-btns">
-        <button onclick="exchangeFood(3, 1)">🍖×3 → 🪙×1</button>
-        <button onclick="exchangeFood(10, 5)">🍖×10 → 🪙×5</button>
-        <button onclick="exchangeFood(30, 20)">🍖×30 → 🪙×20</button>
+        <button onclick="exchangeFood(3, 50)">🥖×3 → 🪙×50</button>
+        <button onclick="exchangeFood(10, 300)">🥖×10 → 🪙×300</button>
+        <button onclick="exchangeFood(30, 1000)">🥖×30 → 🪙×1,000</button>
       </div>
     </div>
 
@@ -397,7 +397,7 @@ header h1 span { color: var(--gold); }
       </div>
 
       <button class="feed-btn" id="feed-btn" onclick="feedPet()">
-        🍖 エサをあげる
+        🥖 エサをあげる
       </button>
       <div id="tap-charges" style="position:relative;z-index:2;font-size:13px;font-weight:800;color:var(--text2);margin-top:8px;">
         🖐️ なでる のこり 3回
@@ -414,7 +414,7 @@ header h1 span { color: var(--gold); }
         <span class="status-val" id="val-happy">50%</span>
       </div>
       <div class="status-row">
-        <span class="status-label">🍖 おなか</span>
+        <span class="status-label">🥖 おなか</span>
         <div class="status-bar-wrap">
           <div class="status-bar full" id="bar-full" style="width:50%"></div>
         </div>
@@ -463,7 +463,7 @@ const SPEECHES = {
     hungry: ['おなかぺこぺこ…','{name}エサちょうだい…','ちゅ…（よわよわ）','エサ…エサ…','おなかなってる…'],
   },
   cat: {
-    idle: ['にゃー','…','ゴロゴロ…','{name}、なんか用？','みゃう','ひなたぼっこしたい','…（寝てた）','にゃにゃ','ふにゃぁ…','まあまあかな','{name}みてるにゃ','ふぁ…（あくび）','きょうもいい天気にゃ'],
+    idle: ['にゃー','…','ゴロゴロ…','{name}、なんか用？','みゃう','ひなたぼっこしたい','…（寄ってた）','にゃにゃ','ふにゃぁ…','まあまあかな','{name}みてるにゃ','ふぁ…（あくび）','きょうもいい天気にゃ'],
     feed: ['にゃ！（うれしい）','ゴロゴロゴロ…','まあ、たべてあげる','にゃにゃにゃ！','おいしいにゃ','…（無言でたべる）','もっとちょうだいにゃ','ごちそうさまにゃ'],
     tap: ['ゴロゴロ…','{name}、もっとなでて','みゃ♪','…（しぶしぶ受け入れる）','にゃー！','ゴロゴロゴロゴロ…','まあ、いいか','きもちいいにゃ…'],
     happy: ['ゴロゴロゴロ！','{name}きもちいい〜','にゃにゃ！','さいこうにゃ！','ぷるぷる…'],
@@ -540,7 +540,6 @@ async function init() {
   }
   if (petData.tapCharges === undefined) petData.tapCharges = 0;
 
-  // デッドロック防止: tapChargesが0でlastTapRegenがnullなら自動でタイマー開始
   if ((petData.tapCharges || 0) === 0 && !petData.lastTapRegen) {
     petData.lastTapRegen = Date.now();
     persist();
@@ -575,9 +574,6 @@ async function persist() {
   }
 }
 
-// ============================================================
-// ペット選択
-// ============================================================
 window.selectPet = function(type) {
   if (petData.type && !confirm('ペットをかえますか？きろくはリセットされます。')) return;
   petData = { ...DEFAULT_PET, type, lastDate: new Date().toLocaleDateString('ja-JP') };
@@ -609,9 +605,7 @@ window.exchangeFood = function(foodCost, coinGain) {
   updateStatus();
   showToast(`🪙 ${coinGain}コインとこうかんしたよ！`, 'ok');
 };
-// ============================================================
-// メイン画面
-// ============================================================
+
 function showPetMain() {
   document.getElementById('pet-select').style.display = 'none';
   document.getElementById('pet-main').classList.add('show');
@@ -623,11 +617,11 @@ function showPetMain() {
   startIdleSpeech();
   setInterval(() => updateStatus(), 60000);
   setInterval(() => {
-    petData.happy   = Math.max(0, (petData.happy   || 50) - 5);
-    petData.fullness = Math.max(0, (petData.fullness || 50) - 8);
+    petData.happy   = Math.max(0, (petData.happy   || 50) - 15);
+    petData.fullness = Math.max(0, (petData.fullness || 50) - 24);
     updateStatus();
     persist();
-  }, 60 * 60 * 1000);  // 1時間ごと
+  }, 60 * 60 * 1000);  // 1時間ごと（きもち-15、おなか-24）
 }
 
 function renderPet(mood) {}
@@ -642,9 +636,8 @@ function updateStatus() {
   const food = petData.food || 0;
   const feedBtn = document.getElementById('feed-btn');
   feedBtn.disabled = food <= 0;
-  feedBtn.textContent = food > 0 ? `🍖 エサをあげる（${food}こ）` : '🍖 エサがないよ…';
+  feedBtn.textContent = food > 0 ? `🥖 エサをあげる（${food}こ）` : '🥖 エサがないよ…';
 
-  // なでる回数とタイマー表示
   const charges = petData.tapCharges ?? 0;
   const tapEl = document.getElementById('tap-charges');
   const timerEl = document.getElementById('tap-regen-timer');
@@ -654,14 +647,13 @@ function updateStatus() {
     tapEl.style.color = charges === 0 ? 'var(--primary)' : 'var(--text2)';
   }
 
-  // タイマー表示（独立したdiv要素）
   if (timerEl) {
     if (charges < TAP_MAX) {
       if (petData.lastTapRegen) {
         const elapsed = Date.now() - petData.lastTapRegen;
         const remaining = TAP_REGEN_MS - (elapsed % TAP_REGEN_MS);
         const mins = Math.ceil(remaining / 60000);
-        timerEl.textContent = `⏰ あと約${mins}分で回復`;
+        timerEl.textContent = `⏰ あと紏${mins}分で回復`;
         timerEl.style.color = 'var(--blue)';
       } else {
         timerEl.textContent = '⏰ なでると回復タイマーが始まるよ';
@@ -683,9 +675,6 @@ function updateFoodDisplay() {
   document.getElementById('food-count').textContent = petData.food || 0;
 }
 
-// ============================================================
-// エサやり
-// ============================================================
 window.feedPet = function() {
   if ((petData.food || 0) <= 0) { showToast('エサがないよ！問題を解こう🎯', 'ng'); return; }
   petData.food = Math.max(0, (petData.food || 0) - 1);
@@ -701,9 +690,6 @@ window.feedPet = function() {
   persist();
 };
 
-// ============================================================
-// なでる
-// ============================================================
 window.petTap = function() {
   if ((petData.tapCharges || 0) <= 0) {
     showToast('なでは30分後に回復するよ！', 'ng');
@@ -721,9 +707,6 @@ window.petTap = function() {
   persist();
 };
 
-// ============================================================
-// 吹き出し
-// ============================================================
 function setSpeech(text) {
   const el = document.getElementById('speech-bubble');
   el.textContent = text.replace('{name}', username);

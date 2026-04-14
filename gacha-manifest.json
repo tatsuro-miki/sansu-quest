@@ -1,0 +1,223 @@
+[
+  {
+    "id": "パジャマグレー",
+    "name": "パジャマグレー",
+    "file": "chibi-parts/gacha/パジャマグレー.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": 0,
+      "y": 27.5,
+      "scale": 39
+    }
+  },
+  {
+    "id": "ぱじゃま黄色",
+    "name": "ぱじゃま黄色",
+    "file": "chibi-parts/gacha/ぱじゃま黄色.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": -2,
+      "y": 29,
+      "scale": 43
+    }
+  },
+  {
+    "id": "パジャマ黒",
+    "name": "パジャマ黒",
+    "file": "chibi-parts/gacha/パジャマ黒.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": 0.5,
+      "y": 28.5,
+      "scale": 45
+    }
+  },
+  {
+    "id": "ぱじゃま紫",
+    "name": "ぱじゃま紫",
+    "file": "chibi-parts/gacha/ぱじゃま紫.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": 0.5,
+      "y": 28.5,
+      "scale": 41.5
+    }
+  },
+  {
+    "id": "パジャマ水色",
+    "name": "パジャマ水色",
+    "file": "chibi-parts/gacha/パジャマ水色.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": 0.5,
+      "y": 28.5,
+      "scale": 41.5
+    }
+  },
+  {
+    "id": "パジャマ白",
+    "name": "パジャマ白",
+    "file": "chibi-parts/gacha/パジャマ白.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": 0.5,
+      "y": 27,
+      "scale": 41.5
+    }
+  },
+  {
+    "id": "ピンクジャージ",
+    "name": "ピンクジャージ",
+    "file": "chibi-parts/gacha/ピンクジャージ.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": 0.5,
+      "y": 35.5,
+      "scale": 55.5
+    }
+  },
+  {
+    "id": "ピンクのスウェット",
+    "name": "ピンクのスウェット",
+    "file": "chibi-parts/gacha/ピンクのスウェット.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": -1,
+      "y": 7.5,
+      "scale": 78
+    }
+  },
+  {
+    "id": "白ジャージ",
+    "name": "白ジャージ",
+    "file": "chibi-parts/gacha/白ジャージ.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": 2,
+      "y": 35.5,
+      "scale": 55
+    }
+  },
+  {
+    "id": "青ジャージ",
+    "name": "青ジャージ",
+    "file": "chibi-parts/gacha/青ジャージ.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": 2,
+      "y": 35.5,
+      "scale": 55
+    }
+  },
+  {
+    "id": "黒ジャージ",
+    "name": "黒ジャージ",
+    "file": "chibi-parts/gacha/黒ジャージ.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": 2,
+      "y": 35.5,
+      "scale": 55
+    }
+  },
+  {
+    "id": "猫口1",
+    "name": "猫口1",
+    "file": "chibi-parts/gacha/猫口1.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": -1,
+      "y": 8.5,
+      "scale": 11
+    }
+  },
+  {
+    "id": "猫口2",
+    "name": "猫口2",
+    "file": "chibi-parts/gacha/猫口2.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": -1,
+      "y": 8.5,
+      "scale": 11
+    }
+  },
+  {
+    "id": "猫の目",
+    "name": "猫の目",
+    "file": "chibi-parts/gacha/猫の目.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": -0.5,
+      "y": 9,
+      "scale": 37
+    }
+  },
+  {
+    "id": "pink1",
+    "name": "pink1",
+    "file": "chibi-parts/gacha/pink1.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": 0,
+      "y": 10,
+      "scale": 28
+    }
+  },
+  {
+    "id": "猫耳の瞳 (1)",
+    "name": "猫耳の瞳 (1)",
+    "file": "chibi-parts/gacha/猫耳の瞳 (1).png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": -0.5,
+      "y": 10.5,
+      "scale": 29
+    }
+  },
+  {
+    "id": "エクステピンクツインテール",
+    "name": "エクステピンクツインテール",
+    "file": "chibi-parts/gacha/エクステピンクツインテール.png",
+    "cost": 1000,
+    "stars": 4,
+    "z_index": 10,
+    "transform": {
+      "x": -0.5,
+      "y": -6.5,
+      "scale": 89
+    }
+  }
+]

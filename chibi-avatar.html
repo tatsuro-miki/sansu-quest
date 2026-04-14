@@ -3,93 +3,243 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>さんすうクエスト - アバター きせかえ</title>
+<title>チビきせかえ｜さんすうクエスト</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
-  background: linear-gradient(180deg, #fce4ec 0%, #f8bbd0 30%, #f48fb1 100%);
-  min-height: 100vh; padding: 16px;
+:root {
+  --bg: #fff0f7;
+  --surface: #ffffff;
+  --surface2: #fce4f0;
+  --surface3: #f8d0e8;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(233,100,157,0.25);
+  --pink: #e9649d;
+  --pink2: #f4a0c8;
+  --purple: #b07ae8;
+  --mint: #2db87a;
+  --gold: #f5a623;
+  --blue: #4f8ef7;
+  --text: #2d1a3e;
+  --text2: #7a5a8a;
+  --text3: #b89ac8;
+  --radius: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
 }
-.header { text-align: center; margin-bottom: 12px; }
-.header h1 { font-size: 18px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.15); letter-spacing: 2px; }
-.points-bar {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(255,255,255,0.9); border-radius: 20px; padding: 6px 18px; margin-top: 8px;
-}
-.points-bar .amount { font-size: 18px; font-weight: bold; color: #ff6f00; }
-.points-bar .label { font-size: 12px; color: #999; }
 
-.main-layout { display: flex; gap: 16px; max-width: 1100px; margin: 0 auto; align-items: flex-start; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', 'M PLUS Rounded 1c', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--text);
+}
+
+/* トップバー */
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: inherit; font-size: 13px; font-weight: 800;
+  padding: 7px 14px; border-radius: 20px;
+  border: 2px solid var(--border2);
+  background: white; color: var(--text2);
+  cursor: pointer; text-decoration: none; transition: .15s;
+  white-space: nowrap;
+}
+.back-btn:hover { background: var(--surface2); color: var(--pink); }
+
+.top-title {
+  font-size: 15px; font-weight: 900; color: var(--text2);
+  flex: 1; text-align: center;
+}
+
+.coin-display {
+  display: flex; align-items: center; gap: 5px;
+  background: white; border: 2px solid rgba(245,166,35,0.3);
+  border-radius: 20px; padding: 5px 14px;
+  font-weight: 900; font-size: 14px; color: var(--gold);
+  white-space: nowrap;
+}
+
+.username-display {
+  font-size: 12px; color: var(--text3); font-weight: 700;
+  white-space: nowrap;
+}
+
+/* メインレイアウト */
+.main-layout {
+  display: flex; gap: 16px;
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 16px 40px;
+  align-items: flex-start;
+}
 
 .avatar-panel {
-  background: #fff; border-radius: 20px; padding: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12); text-align: center; flex-shrink: 0; width: 320px;
+  background: #fff; border-radius: var(--radius); padding: 16px;
+  box-shadow: 0 4px 20px rgba(233,100,157,0.10);
+  border: 2px solid var(--border2);
+  text-align: center; flex-shrink: 0; width: 300px;
 }
+
 .avatar-stage {
-  position: relative; width: 280px; height: 360px; margin: 0 auto;
-  background: linear-gradient(180deg, #e1f5fe 0%, #b3e5fc 50%, #81d4fa 100%);
-  border-radius: 16px; border: 3px solid #4fc3f7; overflow: hidden;
+  position: relative; width: 268px; height: 340px; margin: 0 auto;
+  background: linear-gradient(160deg, #fce4f0 0%, #ede0ff 100%);
+  border-radius: 16px; border: 2px solid var(--border2); overflow: hidden;
 }
 .avatar-stage .layer { position: absolute; pointer-events: none; }
 
-.btn-row { display: flex; gap: 6px; margin-top: 10px; justify-content: center; flex-wrap: wrap; }
+.btn-row {
+  display: flex; gap: 6px; margin-top: 10px;
+  justify-content: center; flex-wrap: wrap;
+}
 .action-btn {
   border: none; border-radius: 10px; padding: 7px 14px; font-size: 12px;
-  font-weight: bold; cursor: pointer; transition: all 0.2s; color: #fff;
+  font-weight: 800; cursor: pointer; transition: all 0.2s; color: #fff;
+  font-family: inherit;
 }
 .action-btn:hover { transform: scale(1.05); }
-.btn-save { background: linear-gradient(135deg, #e91e63, #f06292); }
 .btn-random { background: linear-gradient(135deg, #ff6f00, #ffa726); }
+.btn-save { background: linear-gradient(135deg, #e91e63, #f06292); }
 
+/* パーツパネル */
 .parts-panel {
-  background: #fff; border-radius: 20px; padding: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12); flex: 1; min-width: 300px;
+  background: #fff; border-radius: var(--radius); padding: 16px;
+  box-shadow: 0 4px 20px rgba(233,100,157,0.10);
+  border: 2px solid var(--border2);
+  flex: 1; min-width: 300px;
   max-height: 85vh; overflow-y: auto;
 }
-.category-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
-.cat-tab {
-  border: none; background: #f5f5f5; border-radius: 10px; padding: 7px 14px;
-  font-size: 13px; cursor: pointer; transition: all 0.2s;
-}
-.cat-tab:hover { background: #fce4ec; }
-.cat-tab.active { background: linear-gradient(135deg, #e91e63, #f06292); color: #fff; font-weight: bold; }
 
-.parts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-.part-card {
-  border: 3px solid #eee; border-radius: 12px; background: #fafafa;
-  cursor: pointer; overflow: hidden; transition: all 0.2s; text-align: center; position: relative;
+.category-tabs {
+  display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap;
 }
-.part-card:hover { border-color: #f48fb1; transform: scale(1.03); }
-.part-card.selected { border-color: #e91e63; box-shadow: 0 0 0 2px #e91e63; background: #fce4ec; }
-.part-card.locked { opacity: 0.5; cursor: not-allowed; }
-.part-card .thumb { width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; display: block; }
+.cat-tab {
+  border: none; background: var(--surface2); border-radius: 10px;
+  padding: 7px 14px; font-size: 13px; font-weight: 800;
+  cursor: pointer; transition: all 0.2s; font-family: inherit;
+  color: var(--text2);
+}
+.cat-tab:hover { background: var(--surface3); }
+.cat-tab.active {
+  background: linear-gradient(135deg, #e91e63, #f06292); color: #fff;
+}
+
+.parts-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px;
+}
+
+.part-card {
+  border: 2px solid var(--border2); border-radius: var(--radius-sm); background: #fafafa;
+  cursor: pointer; overflow: hidden; transition: all 0.2s;
+  text-align: center; position: relative;
+}
+.part-card:hover { border-color: var(--pink2); transform: scale(1.03); }
+.part-card.selected {
+  border-color: var(--pink); box-shadow: 0 0 0 2px var(--pink); background: #fce4ec;
+}
+.part-card.locked { opacity: 0.55; cursor: default; }
+.part-card.locked:hover { transform: none; }
+
+.part-card .thumb {
+  width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; display: block;
+}
 .part-card .info { padding: 4px 6px 6px; font-size: 11px; }
-.part-card .part-name { color: #333; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.part-card .cost { color: #ff6f00; font-weight: bold; font-size: 12px; }
-.part-card .stars { color: #ffc107; font-size: 10px; }
-.part-card .free-tag { color: #4caf50; font-weight: bold; font-size: 10px; }
-.part-card.none-card { display: flex; align-items: center; justify-content: center; min-height: 90px; }
+.part-card .part-name {
+  color: #333; font-weight: 800; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; display: block;
+}
+.part-card .cost { color: var(--gold); font-weight: 900; font-size: 12px; }
+.part-card .free-tag { color: var(--mint); font-weight: 900; font-size: 10px; }
+.part-card .owned-tag { color: var(--mint); font-weight: 900; font-size: 10px; }
+
+.part-card.none-card {
+  display: flex; align-items: center; justify-content: center; min-height: 90px;
+}
 .part-card.none-card .none-icon { font-size: 22px; color: #ccc; font-weight: bold; }
-.part-card.none-card.selected .none-icon { color: #e91e63; }
+.part-card.none-card.selected .none-icon { color: var(--pink); }
+
+/* 購入モーダル */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999; opacity: 0; pointer-events: none; transition: .2s;
+}
+.modal-overlay.show { opacity: 1; pointer-events: all; }
+.modal-box {
+  background: white; border-radius: var(--radius);
+  padding: 28px 24px; text-align: center;
+  max-width: 300px; width: 90%;
+  border: 2px solid var(--border2);
+  transform: scale(.85); transition: .25s;
+}
+.modal-overlay.show .modal-box { transform: scale(1); }
+.modal-thumb {
+  width: 100px; height: 100px; object-fit: contain;
+  background: var(--surface2); border-radius: 12px;
+  margin: 0 auto 12px; display: block;
+}
+.modal-title { font-size: 16px; font-weight: 900; color: var(--text); margin-bottom: 4px; }
+.modal-cost { font-size: 18px; font-weight: 900; color: var(--gold); margin-bottom: 16px; }
+.modal-btns { display: flex; gap: 10px; justify-content: center; }
+.modal-btn {
+  font-family: inherit; font-size: 14px; font-weight: 900;
+  padding: 10px 22px; border-radius: 50px; border: none; cursor: pointer; transition: .15s;
+}
+.modal-btn.buy {
+  background: var(--pink); color: white;
+  box-shadow: 0 4px 12px rgba(233,100,157,0.3);
+}
+.modal-btn.buy:hover { opacity: .88; }
+.modal-btn.cancel {
+  background: var(--surface2); color: var(--text2);
+  border: 1.5px solid var(--border2);
+}
+
+/* トースト */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: white;
+  padding: 10px 24px; border-radius: 20px;
+  font-weight: 800; font-size: 14px;
+  opacity: 0; pointer-events: none; z-index: 9999;
+  transition: opacity .3s; white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+.toast.ok { background: var(--mint); }
+.toast.ng { background: var(--pink); }
 
 @media (max-width: 700px) {
   .main-layout { flex-direction: column; align-items: center; }
   .avatar-panel { width: 100%; max-width: 340px; }
   .parts-panel { max-height: none; width: 100%; }
+  .top-title { display: none; }
 }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>さんすうクエスト きせかえ</h1>
-  <div class="points-bar">
-    <span class="amount" id="user-points">0</span>
-    <span class="label">ポイント</span>
+<!-- トップバー -->
+<div class="top-bar">
+  <a class="back-btn" href="avatar.html">← アバターにもどる</a>
+  <div class="top-title">チビきせかえ</div>
+  <span class="username-display" id="avatar-username"></span>
+  <div class="coin-display">
+    <span>🪙</span>
+    <span id="coin-count">0</span> コイン
   </div>
 </div>
 
+<!-- メインレイアウト -->
 <div class="main-layout">
   <div class="avatar-panel">
     <div class="avatar-stage" id="avatar-stage"></div>
@@ -105,53 +255,99 @@ body {
   </div>
 </div>
 
-<script>
-// ============================================================
-// さんすうクエスト チビアバター きせかえ（本番用）
-// manifest.json を読んで動作、サーバー不要
-// ============================================================
+<!-- 購入モーダル -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <img class="modal-thumb" id="modal-thumb" src="" alt="">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-cost" id="modal-cost"></div>
+    <div class="modal-btns">
+      <button class="modal-btn cancel" id="modal-cancel">やめる</button>
+      <button class="modal-btn buy" id="modal-buy">かう！</button>
+    </div>
+  </div>
+</div>
+
+<!-- トースト -->
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { FIREBASE_CONFIG } from './firebase.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const app = initializeApp(FIREBASE_CONFIG);
+const db = getFirestore(app);
 
 var manifest = null;
-var userPoints = 0;
+var save = {};
+var username = '';
 var unlockedParts = {};
 var selected = {};
 var activeCategory = '';
-
-// Firebaseからポイントとアンロック済みパーツを取得する場合はここに実装
-// 現在はローカル動作のみ
-function loadUserData() {
-  // TODO: Firestoreからユーザーデータを読み込む
-  // db.collection('users').doc(uid).get().then(...)
-  userPoints = 5000; // 仮の値
-  document.getElementById('user-points').textContent = userPoints.toLocaleString();
-}
+var pendingBuy = null;
 
 async function init() {
-  loadUserData();
+  username = sessionStorage.getItem('sq_user');
+  if (!username) { location.href = 'index.html'; return; }
+
+  try {
+    var snap = await getDoc(doc(db, 'users', username));
+    if (snap.exists()) save = snap.data();
+  } catch(e) {
+    console.warn('Firestore読み込みエラー:', e);
+  }
+
+  if (!save.coins) save.coins = 0;
+  if (!save.chibOwned) save.chibOwned = [];
+  if (!save.chibEquipped) save.chibEquipped = {};
+
+  document.getElementById('avatar-username').textContent = username + ' ちゃん';
+  document.getElementById('coin-count').textContent = save.coins.toLocaleString();
 
   try {
     var resp = await fetch('manifest.json');
     manifest = await resp.json();
   } catch(e) {
-    document.querySelector('.parts-panel').textContent = 'manifest.json が見つかりません。generate_manifest.py を実行してください。';
+    document.querySelector('.parts-panel').innerHTML =
+      '<p style="color:#e91e63;padding:20px;font-weight:800;">manifest.json が見つかりません。<br>generate_manifest.py を実行してください。</p>';
     return;
   }
 
-  // 初期化
+  unlockedParts = {};
   for (var catId in manifest.categories) {
-    var catData = manifest.categories[catId];
-    catData.items.forEach(function(item) {
+    manifest.categories[catId].items.forEach(function(item) {
       if (item.cost === 0) unlockedParts[item.id] = true;
     });
-    selected[catId] = catData.items.length > 0 ? catData.items[0].id : null;
+  }
+  save.chibOwned.forEach(function(id) { unlockedParts[id] = true; });
+
+  selected = {};
+  for (var catId in manifest.categories) {
+    if (save.chibEquipped[catId] !== undefined) {
+      selected[catId] = save.chibEquipped[catId];
+    } else {
+      var items = manifest.categories[catId].items;
+      selected[catId] = items.length > 0 ? items[0].id : null;
+    }
   }
 
-  var catIds = Object.keys(manifest.categories);
-  activeCategory = catIds[0] || '';
+  activeCategory = Object.keys(manifest.categories)[0] || '';
 
   buildCategoryTabs();
   buildPartsGrid();
   renderAvatar();
+
+  document.getElementById('modal-cancel').onclick = closeModal;
+  document.getElementById('modal-buy').onclick = confirmBuy;
+}
+
+async function persist() {
+  try {
+    await setDoc(doc(db, 'users', username), save, { merge: true });
+  } catch(e) {
+    console.warn('Firestore保存エラー:', e);
+  }
 }
 
 function buildCategoryTabs() {
@@ -162,7 +358,11 @@ function buildCategoryTabs() {
       var btn = document.createElement('button');
       btn.className = 'cat-tab' + (activeCategory === cid ? ' active' : '');
       btn.textContent = manifest.categories[cid].display_name;
-      btn.onclick = function() { activeCategory = cid; buildCategoryTabs(); buildPartsGrid(); };
+      btn.onclick = function() {
+        activeCategory = cid;
+        buildCategoryTabs();
+        buildPartsGrid();
+      };
       tabs.appendChild(btn);
     })(catId);
   }
@@ -177,7 +377,7 @@ function buildPartsGrid() {
   if (activeCategory !== 'eyes' && activeCategory !== 'hair') {
     var noneCard = document.createElement('div');
     noneCard.className = 'part-card none-card' + (selected[activeCategory] === null ? ' selected' : '');
-    noneCard.innerHTML = '<span class="none-icon">x</span>';
+    noneCard.innerHTML = '<span class="none-icon">✕</span>';
     noneCard.onclick = function() { selectPart(activeCategory, null); };
     grid.appendChild(noneCard);
   }
@@ -187,48 +387,48 @@ function buildPartsGrid() {
     var isSelected = selected[activeCategory] === item.id;
 
     var card = document.createElement('div');
-    card.className = 'part-card' + (isSelected ? ' selected' : '') + (!isUnlocked ? ' locked' : '');
+    card.className = 'part-card'
+      + (isSelected ? ' selected' : '')
+      + (!isUnlocked ? ' locked' : '');
 
     var thumb = document.createElement('img');
-    thumb.className = 'thumb'; thumb.src = item.file; thumb.alt = item.name; thumb.loading = 'lazy';
+    thumb.className = 'thumb';
+    thumb.src = item.file;
+    thumb.alt = item.name;
+    thumb.loading = 'lazy';
     thumb.onerror = function() {
       this.style.display = 'none';
       var ph = document.createElement('div');
-      ph.style.cssText = 'width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#f0f0f0;font-size:12px;color:#bbb;';
+      ph.style.cssText = 'width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#f0f0f0;font-size:11px;color:#bbb;';
       ph.textContent = item.name;
       this.parentElement.insertBefore(ph, this);
     };
     card.appendChild(thumb);
 
     var info = document.createElement('div'); info.className = 'info';
-    var name = document.createElement('div'); name.className = 'part-name'; name.textContent = item.name;
-    info.appendChild(name);
+    var nameEl = document.createElement('div'); nameEl.className = 'part-name'; nameEl.textContent = item.name;
+    info.appendChild(nameEl);
 
     if (item.cost === 0) {
-      var ft = document.createElement('div'); ft.className = 'free-tag'; ft.textContent = '無料'; info.appendChild(ft);
+      var ft = document.createElement('div'); ft.className = 'free-tag'; ft.textContent = '無料';
+      info.appendChild(ft);
+    } else if (isUnlocked) {
+      var ot = document.createElement('div'); ot.className = 'owned-tag'; ot.textContent = '✓ もってる';
+      info.appendChild(ot);
     } else {
       var c = document.createElement('div'); c.className = 'cost';
-      c.textContent = item.cost.toLocaleString() + ' pt'; info.appendChild(c);
-      if (item.stars > 0) {
-        var s = document.createElement('div'); s.className = 'stars';
-        s.textContent = '\u2605'.repeat(item.stars) + '\u2606'.repeat(5 - item.stars); info.appendChild(s);
-      }
+      c.textContent = '🪙 ' + item.cost.toLocaleString();
+      info.appendChild(c);
     }
     card.appendChild(info);
 
     card.onclick = (function(it) { return function() {
       if (!unlockedParts[it.id]) {
-        if (userPoints >= it.cost) {
-          if (confirm(it.name + ' を ' + it.cost.toLocaleString() + ' pt で買う？')) {
-            userPoints -= it.cost;
-            unlockedParts[it.id] = true;
-            document.getElementById('user-points').textContent = userPoints.toLocaleString();
-            // TODO: Firestoreに保存
-            selectPart(activeCategory, it.id);
-          }
-        } else {
-          alert('ポイントが足りません');
+        if (save.coins < it.cost) {
+          showToast('コインが足りないよ…', 'ng');
+          return;
         }
+        showModal(it);
       } else {
         selectPart(activeCategory, it.id);
       }
@@ -240,23 +440,47 @@ function buildPartsGrid() {
 
 function selectPart(catId, itemId) {
   selected[catId] = itemId;
-  // TODO: Firestoreに選択状態を保存
-  // db.collection('users').doc(uid).update({ avatar: selected })
+  save.chibEquipped[catId] = itemId;
+  persist();
   buildPartsGrid();
   renderAvatar();
 }
 
+function showModal(item) {
+  pendingBuy = item;
+  document.getElementById('modal-thumb').src = item.file;
+  document.getElementById('modal-title').textContent = item.name;
+  document.getElementById('modal-cost').textContent = '🪙 ' + item.cost.toLocaleString() + ' コイン';
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+  pendingBuy = null;
+}
+
+async function confirmBuy() {
+  if (!pendingBuy) return;
+  var item = pendingBuy;
+  save.coins -= item.cost;
+  save.chibOwned.push(item.id);
+  unlockedParts[item.id] = true;
+  document.getElementById('coin-count').textContent = save.coins.toLocaleString();
+  closeModal();
+  await persist();
+  selectPart(activeCategory, item.id);
+  showToast(item.name + ' をゲット！', 'ok');
+}
+
 function getTransform(item, catId) {
-  // manifest.jsonにtransformが埋め込まれている
   if (item.transform) return item.transform;
-  // デフォルト値
   var defaults = {
-    eyes: { x: 0, y: -10, scale: 35 },
-    mouth: { x: 0, y: -5, scale: 20 },
-    hair: { x: 0, y: -15, scale: 60 },
-    tops: { x: 0, y: 10, scale: 45 },
-    bottoms: { x: 0, y: 20, scale: 40 },
-    shoes: { x: 0, y: 35, scale: 30 },
+    eyes:        { x: 0, y: -10, scale: 35 },
+    mouth:       { x: 0, y: -5,  scale: 20 },
+    hair:        { x: 0, y: -15, scale: 60 },
+    tops:        { x: 0, y: 10,  scale: 45 },
+    bottoms:     { x: 0, y: 20,  scale: 40 },
+    shoes:       { x: 0, y: 35,  scale: 30 },
     accessories: { x: 0, y: -20, scale: 30 },
   };
   return defaults[catId] || { x: 0, y: 0, scale: 100 };
@@ -266,7 +490,6 @@ function renderAvatar() {
   var stage = document.getElementById('avatar-stage');
   stage.innerHTML = '';
 
-  // 素体
   var baseImg = document.createElement('img');
   baseImg.className = 'layer';
   baseImg.src = 'chibi-parts/base_body.png';
@@ -274,7 +497,6 @@ function renderAvatar() {
   baseImg.onerror = function() { this.style.display = 'none'; };
   stage.appendChild(baseImg);
 
-  // パーツをz_index順に重ねる
   var layers = [];
   for (var catId in selected) {
     var itemId = selected[catId];
@@ -293,7 +515,7 @@ function renderAvatar() {
     img.src = layer.item.file;
     img.alt = layer.item.name;
     var left = 50 + t.x - t.scale / 2;
-    var top = 50 + t.y - t.scale / 2;
+    var top  = 50 + t.y - t.scale / 2;
     img.style.cssText = 'z-index:' + layer.z_index + ';left:' + left + '%;top:' + top + '%;width:' + t.scale + '%;height:auto;';
     img.onerror = function() { this.style.display = 'none'; };
     stage.appendChild(img);
@@ -302,52 +524,68 @@ function renderAvatar() {
 
 function randomize() {
   for (var catId in manifest.categories) {
-    var available = manifest.categories[catId].items.filter(function(i) { return !!unlockedParts[i.id]; });
-    if (available.length > 0) selected[catId] = available[Math.floor(Math.random() * available.length)].id;
+    var available = manifest.categories[catId].items.filter(function(i) {
+      return !!unlockedParts[i.id];
+    });
+    if (available.length > 0) {
+      selected[catId] = available[Math.floor(Math.random() * available.length)].id;
+      save.chibEquipped[catId] = selected[catId];
+    }
   }
-  buildPartsGrid(); renderAvatar();
+  persist();
+  buildPartsGrid();
+  renderAvatar();
 }
+window.randomize = randomize;
 
 function exportPNG() {
   var canvas = document.createElement('canvas');
-  var W = 560, H = 720;
+  var W = 536, H = 680;
   canvas.width = W; canvas.height = H;
   var ctx = canvas.getContext('2d');
   var grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, '#e1f5fe'); grad.addColorStop(0.5, '#b3e5fc'); grad.addColorStop(1, '#81d4fa');
+  grad.addColorStop(0, '#fce4f0'); grad.addColorStop(1, '#ede0ff');
   ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
 
   var imgs = Array.from(document.getElementById('avatar-stage').querySelectorAll('.layer'))
     .filter(function(i) { return i.style.display !== 'none' && i.naturalWidth > 0; })
-    .sort(function(a, b) { return parseInt(a.style.zIndex || 0) - parseInt(b.style.zIndex || 0); });
+    .sort(function(a, b) { return parseInt(a.style.zIndex||0) - parseInt(b.style.zIndex||0); });
 
   imgs.forEach(function(img) {
     try {
-      if (parseInt(img.style.zIndex || 0) === 0) {
+      if (parseInt(img.style.zIndex||0) === 0) {
         var ratio = img.naturalWidth / img.naturalHeight;
         var dw, dh, dx, dy;
-        if (W / H > ratio) { dh = H; dw = H * ratio; dx = (W - dw) / 2; dy = 0; }
-        else { dw = W; dh = W / ratio; dx = 0; dy = (H - dh) / 2; }
+        if (W / H > ratio) { dh = H; dw = H * ratio; dx = (W-dw)/2; dy = 0; }
+        else { dw = W; dh = W / ratio; dx = 0; dy = (H-dh)/2; }
         ctx.drawImage(img, dx, dy, dw, dh);
       } else {
         var cl = parseFloat(img.style.left) || 0;
-        var ct = parseFloat(img.style.top) || 0;
+        var ct = parseFloat(img.style.top)  || 0;
         var cw = parseFloat(img.style.width) || 100;
         var drawW = cw / 100 * W;
         var drawH = drawW * img.naturalHeight / img.naturalWidth;
-        ctx.drawImage(img, cl / 100 * W, ct / 100 * H, drawW, drawH);
+        ctx.drawImage(img, cl/100*W, ct/100*H, drawW, drawH);
       }
     } catch(e) {}
   });
 
   try {
     var link = document.createElement('a');
-    link.download = 'my-avatar.png'; link.href = canvas.toDataURL('image/png'); link.click();
+    link.download = 'my-chibi.png'; link.href = canvas.toDataURL('image/png'); link.click();
   } catch(e) {
-    var win = window.open('', '_blank', 'width=600,height=800');
-    win.document.write('<html><body style="text-align:center;padding:20px;"><h2>右クリックで保存</h2><div id="c"></div></body></html>');
-    canvas.style.cssText = 'max-width:100%;'; win.document.getElementById('c').appendChild(canvas);
+    showToast('保存はローカルサーバーで起動してください', 'ng');
   }
+}
+window.exportPNG = exportPNG;
+
+var toastTimer = null;
+function showToast(msg, type) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (type || '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { el.className = 'toast'; }, 2200);
 }
 
 init();

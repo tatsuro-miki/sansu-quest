@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>さんすうクエスト - アバター きせかえ</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+  background: linear-gradient(180deg, #fce4ec 0%, #f8bbd0 30%, #f48fb1 100%);
+  min-height: 100vh; padding: 16px;
+}
+.header { text-align: center; margin-bottom: 12px; }
+.header h1 { font-size: 18px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.15); letter-spacing: 2px; }
+.points-bar {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.9); border-radius: 20px; padding: 6px 18px; margin-top: 8px;
+}
+.points-bar .amount { font-size: 18px; font-weight: bold; color: #ff6f00; }
+.points-bar .label { font-size: 12px; color: #999; }
+
+.main-layout { display: flex; gap: 16px; max-width: 1100px; margin: 0 auto; align-items: flex-start; }
+
+.avatar-panel {
+  background: #fff; border-radius: 20px; padding: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12); text-align: center; flex-shrink: 0; width: 320px;
+}
+.avatar-stage {
+  position: relative; width: 280px; height: 360px; margin: 0 auto;
+  background: linear-gradient(180deg, #e1f5fe 0%, #b3e5fc 50%, #81d4fa 100%);
+  border-radius: 16px; border: 3px solid #4fc3f7; overflow: hidden;
+}
+.avatar-stage .layer { position: absolute; pointer-events: none; }
+
+.btn-row { display: flex; gap: 6px; margin-top: 10px; justify-content: center; flex-wrap: wrap; }
+.action-btn {
+  border: none; border-radius: 10px; padding: 7px 14px; font-size: 12px;
+  font-weight: bold; cursor: pointer; transition: all 0.2s; color: #fff;
+}
+.action-btn:hover { transform: scale(1.05); }
+.btn-save { background: linear-gradient(135deg, #e91e63, #f06292); }
+.btn-random { background: linear-gradient(135deg, #ff6f00, #ffa726); }
+
+.parts-panel {
+  background: #fff; border-radius: 20px; padding: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12); flex: 1; min-width: 300px;
+  max-height: 85vh; overflow-y: auto;
+}
+.category-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+.cat-tab {
+  border: none; background: #f5f5f5; border-radius: 10px; padding: 7px 14px;
+  font-size: 13px; cursor: pointer; transition: all 0.2s;
+}
+.cat-tab:hover { background: #fce4ec; }
+.cat-tab.active { background: linear-gradient(135deg, #e91e63, #f06292); color: #fff; font-weight: bold; }
+
+.parts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+.part-card {
+  border: 3px solid #eee; border-radius: 12px; background: #fafafa;
+  cursor: pointer; overflow: hidden; transition: all 0.2s; text-align: center; position: relative;
+}
+.part-card:hover { border-color: #f48fb1; transform: scale(1.03); }
+.part-card.selected { border-color: #e91e63; box-shadow: 0 0 0 2px #e91e63; background: #fce4ec; }
+.part-card.locked { opacity: 0.5; cursor: not-allowed; }
+.part-card .thumb { width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; display: block; }
+.part-card .info { padding: 4px 6px 6px; font-size: 11px; }
+.part-card .part-name { color: #333; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.part-card .cost { color: #ff6f00; font-weight: bold; font-size: 12px; }
+.part-card .stars { color: #ffc107; font-size: 10px; }
+.part-card .free-tag { color: #4caf50; font-weight: bold; font-size: 10px; }
+.part-card.none-card { display: flex; align-items: center; justify-content: center; min-height: 90px; }
+.part-card.none-card .none-icon { font-size: 22px; color: #ccc; font-weight: bold; }
+.part-card.none-card.selected .none-icon { color: #e91e63; }
+
+@media (max-width: 700px) {
+  .main-layout { flex-direction: column; align-items: center; }
+  .avatar-panel { width: 100%; max-width: 340px; }
+  .parts-panel { max-height: none; width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>さんすうクエスト きせかえ</h1>
+  <div class="points-bar">
+    <span class="amount" id="user-points">0</span>
+    <span class="label">ポイント</span>
+  </div>
+</div>
+
+<div class="main-layout">
+  <div class="avatar-panel">
+    <div class="avatar-stage" id="avatar-stage"></div>
+    <div class="btn-row">
+      <button class="action-btn btn-random" onclick="randomize()">ランダム</button>
+      <button class="action-btn btn-save" onclick="exportPNG()">保存</button>
+    </div>
+  </div>
+
+  <div class="parts-panel">
+    <div class="category-tabs" id="category-tabs"></div>
+    <div class="parts-grid" id="parts-grid"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// さんすうクエスト チビアバター きせかえ（本番用）
+// manifest.json を読んで動作、サーバー不要
+// ============================================================
+
+var manifest = null;
+var userPoints = 0;
+var unlockedParts = {};
+var selected = {};
+var activeCategory = '';
+
+// Firebaseからポイントとアンロック済みパーツを取得する場合はここに実装
+// 現在はローカル動作のみ
+function loadUserData() {
+  // TODO: Firestoreからユーザーデータを読み込む
+  // db.collection('users').doc(uid).get().then(...)
+  userPoints = 5000; // 仮の値
+  document.getElementById('user-points').textContent = userPoints.toLocaleString();
+}
+
+async function init() {
+  loadUserData();
+
+  try {
+    var resp = await fetch('manifest.json');
+    manifest = await resp.json();
+  } catch(e) {
+    document.querySelector('.parts-panel').textContent = 'manifest.json が見つかりません。generate_manifest.py を実行してください。';
+    return;
+  }
+
+  // 初期化
+  for (var catId in manifest.categories) {
+    var catData = manifest.categories[catId];
+    catData.items.forEach(function(item) {
+      if (item.cost === 0) unlockedParts[item.id] = true;
+    });
+    selected[catId] = catData.items.length > 0 ? catData.items[0].id : null;
+  }
+
+  var catIds = Object.keys(manifest.categories);
+  activeCategory = catIds[0] || '';
+
+  buildCategoryTabs();
+  buildPartsGrid();
+  renderAvatar();
+}
+
+function buildCategoryTabs() {
+  var tabs = document.getElementById('category-tabs');
+  tabs.innerHTML = '';
+  for (var catId in manifest.categories) {
+    (function(cid) {
+      var btn = document.createElement('button');
+      btn.className = 'cat-tab' + (activeCategory === cid ? ' active' : '');
+      btn.textContent = manifest.categories[cid].display_name;
+      btn.onclick = function() { activeCategory = cid; buildCategoryTabs(); buildPartsGrid(); };
+      tabs.appendChild(btn);
+    })(catId);
+  }
+}
+
+function buildPartsGrid() {
+  var grid = document.getElementById('parts-grid');
+  grid.innerHTML = '';
+  var catData = manifest.categories[activeCategory];
+  if (!catData) return;
+
+  if (activeCategory !== 'eyes' && activeCategory !== 'hair') {
+    var noneCard = document.createElement('div');
+    noneCard.className = 'part-card none-card' + (selected[activeCategory] === null ? ' selected' : '');
+    noneCard.innerHTML = '<span class="none-icon">x</span>';
+    noneCard.onclick = function() { selectPart(activeCategory, null); };
+    grid.appendChild(noneCard);
+  }
+
+  catData.items.forEach(function(item) {
+    var isUnlocked = !!unlockedParts[item.id];
+    var isSelected = selected[activeCategory] === item.id;
+
+    var card = document.createElement('div');
+    card.className = 'part-card' + (isSelected ? ' selected' : '') + (!isUnlocked ? ' locked' : '');
+
+    var thumb = document.createElement('img');
+    thumb.className = 'thumb'; thumb.src = item.file; thumb.alt = item.name; thumb.loading = 'lazy';
+    thumb.onerror = function() {
+      this.style.display = 'none';
+      var ph = document.createElement('div');
+      ph.style.cssText = 'width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#f0f0f0;font-size:12px;color:#bbb;';
+      ph.textContent = item.name;
+      this.parentElement.insertBefore(ph, this);
+    };
+    card.appendChild(thumb);
+
+    var info = document.createElement('div'); info.className = 'info';
+    var name = document.createElement('div'); name.className = 'part-name'; name.textContent = item.name;
+    info.appendChild(name);
+
+    if (item.cost === 0) {
+      var ft = document.createElement('div'); ft.className = 'free-tag'; ft.textContent = '無料'; info.appendChild(ft);
+    } else {
+      var c = document.createElement('div'); c.className = 'cost';
+      c.textContent = item.cost.toLocaleString() + ' pt'; info.appendChild(c);
+      if (item.stars > 0) {
+        var s = document.createElement('div'); s.className = 'stars';
+        s.textContent = '\u2605'.repeat(item.stars) + '\u2606'.repeat(5 - item.stars); info.appendChild(s);
+      }
+    }
+    card.appendChild(info);
+
+    card.onclick = (function(it) { return function() {
+      if (!unlockedParts[it.id]) {
+        if (userPoints >= it.cost) {
+          if (confirm(it.name + ' を ' + it.cost.toLocaleString() + ' pt で買う？')) {
+            userPoints -= it.cost;
+            unlockedParts[it.id] = true;
+            document.getElementById('user-points').textContent = userPoints.toLocaleString();
+            // TODO: Firestoreに保存
+            selectPart(activeCategory, it.id);
+          }
+        } else {
+          alert('ポイントが足りません');
+        }
+      } else {
+        selectPart(activeCategory, it.id);
+      }
+    }; })(item);
+
+    grid.appendChild(card);
+  });
+}
+
+function selectPart(catId, itemId) {
+  selected[catId] = itemId;
+  // TODO: Firestoreに選択状態を保存
+  // db.collection('users').doc(uid).update({ avatar: selected })
+  buildPartsGrid();
+  renderAvatar();
+}
+
+function getTransform(item, catId) {
+  // manifest.jsonにtransformが埋め込まれている
+  if (item.transform) return item.transform;
+  // デフォルト値
+  var defaults = {
+    eyes: { x: 0, y: -10, scale: 35 },
+    mouth: { x: 0, y: -5, scale: 20 },
+    hair: { x: 0, y: -15, scale: 60 },
+    tops: { x: 0, y: 10, scale: 45 },
+    bottoms: { x: 0, y: 20, scale: 40 },
+    shoes: { x: 0, y: 35, scale: 30 },
+    accessories: { x: 0, y: -20, scale: 30 },
+  };
+  return defaults[catId] || { x: 0, y: 0, scale: 100 };
+}
+
+function renderAvatar() {
+  var stage = document.getElementById('avatar-stage');
+  stage.innerHTML = '';
+
+  // 素体
+  var baseImg = document.createElement('img');
+  baseImg.className = 'layer';
+  baseImg.src = 'chibi-parts/base_body.png';
+  baseImg.style.cssText = 'left:0;top:0;width:100%;height:100%;z-index:0;object-fit:contain;';
+  baseImg.onerror = function() { this.style.display = 'none'; };
+  stage.appendChild(baseImg);
+
+  // パーツをz_index順に重ねる
+  var layers = [];
+  for (var catId in selected) {
+    var itemId = selected[catId];
+    if (!itemId) continue;
+    var catData = manifest.categories[catId];
+    if (!catData) continue;
+    var item = catData.items.find(function(i) { return i.id === itemId; });
+    if (item) layers.push({ item: item, catId: catId, z_index: catData.z_index });
+  }
+  layers.sort(function(a, b) { return a.z_index - b.z_index; });
+
+  layers.forEach(function(layer) {
+    var t = getTransform(layer.item, layer.catId);
+    var img = document.createElement('img');
+    img.className = 'layer';
+    img.src = layer.item.file;
+    img.alt = layer.item.name;
+    var left = 50 + t.x - t.scale / 2;
+    var top = 50 + t.y - t.scale / 2;
+    img.style.cssText = 'z-index:' + layer.z_index + ';left:' + left + '%;top:' + top + '%;width:' + t.scale + '%;height:auto;';
+    img.onerror = function() { this.style.display = 'none'; };
+    stage.appendChild(img);
+  });
+}
+
+function randomize() {
+  for (var catId in manifest.categories) {
+    var available = manifest.categories[catId].items.filter(function(i) { return !!unlockedParts[i.id]; });
+    if (available.length > 0) selected[catId] = available[Math.floor(Math.random() * available.length)].id;
+  }
+  buildPartsGrid(); renderAvatar();
+}
+
+function exportPNG() {
+  var canvas = document.createElement('canvas');
+  var W = 560, H = 720;
+  canvas.width = W; canvas.height = H;
+  var ctx = canvas.getContext('2d');
+  var grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#e1f5fe'); grad.addColorStop(0.5, '#b3e5fc'); grad.addColorStop(1, '#81d4fa');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+
+  var imgs = Array.from(document.getElementById('avatar-stage').querySelectorAll('.layer'))
+    .filter(function(i) { return i.style.display !== 'none' && i.naturalWidth > 0; })
+    .sort(function(a, b) { return parseInt(a.style.zIndex || 0) - parseInt(b.style.zIndex || 0); });
+
+  imgs.forEach(function(img) {
+    try {
+      if (parseInt(img.style.zIndex || 0) === 0) {
+        var ratio = img.naturalWidth / img.naturalHeight;
+        var dw, dh, dx, dy;
+        if (W / H > ratio) { dh = H; dw = H * ratio; dx = (W - dw) / 2; dy = 0; }
+        else { dw = W; dh = W / ratio; dx = 0; dy = (H - dh) / 2; }
+        ctx.drawImage(img, dx, dy, dw, dh);
+      } else {
+        var cl = parseFloat(img.style.left) || 0;
+        var ct = parseFloat(img.style.top) || 0;
+        var cw = parseFloat(img.style.width) || 100;
+        var drawW = cw / 100 * W;
+        var drawH = drawW * img.naturalHeight / img.naturalWidth;
+        ctx.drawImage(img, cl / 100 * W, ct / 100 * H, drawW, drawH);
+      }
+    } catch(e) {}
+  });
+
+  try {
+    var link = document.createElement('a');
+    link.download = 'my-avatar.png'; link.href = canvas.toDataURL('image/png'); link.click();
+  } catch(e) {
+    var win = window.open('', '_blank', 'width=600,height=800');
+    win.document.write('<html><body style="text-align:center;padding:20px;"><h2>右クリックで保存</h2><div id="c"></div></body></html>');
+    canvas.style.cssText = 'max-width:100%;'; win.document.getElementById('c').appendChild(canvas);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

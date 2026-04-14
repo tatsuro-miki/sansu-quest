@@ -110,6 +110,26 @@ body {
 .btn-random { background: linear-gradient(135deg, #ff6f00, #ffa726); }
 .btn-save { background: linear-gradient(135deg, #e91e63, #f06292); }
 
+/* 試着バー */
+.preview-bar {
+  margin-top: 10px;
+  background: linear-gradient(135deg, #fff8e1, #fce4f0);
+  border: 2px solid rgba(245,166,35,0.45);
+  border-radius: 12px;
+  padding: 10px 14px;
+  text-align: center;
+}
+.preview-bar .preview-label { font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 3px; }
+.preview-bar .preview-cost { font-size: 14px; font-weight: 900; color: var(--gold); margin-bottom: 8px; }
+.preview-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.preview-btn {
+  font-family: inherit; font-size: 13px; font-weight: 900;
+  padding: 7px 16px; border-radius: 20px; border: none; cursor: pointer; transition: .15s;
+}
+.preview-btn.buy { background: var(--gold); color: white; }
+.preview-btn.buy:hover { opacity: .88; }
+.preview-btn.cancel { background: var(--surface2); color: var(--text2); border: 1.5px solid var(--border2); }
+
 /* パーツパネル */
 .parts-panel {
   background: #fff; border-radius: var(--radius); padding: 16px;
@@ -146,8 +166,9 @@ body {
 .part-card.selected {
   border-color: var(--pink); box-shadow: 0 0 0 2px var(--pink); background: #fce4ec;
 }
-.part-card.locked { opacity: 0.55; cursor: default; }
-.part-card.locked:hover { transform: none; }
+.part-card.locked { opacity: 0.75; cursor: pointer; }
+.part-card.locked:hover { border-color: rgba(245,166,35,0.6); transform: scale(1.03); }
+.part-card.locked.selected { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); background: #fff8e1; }
 
 .part-card .thumb {
   width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; display: block;
@@ -262,6 +283,15 @@ body {
       <button class="action-btn btn-random" onclick="randomize()">ランダム</button>
       <button class="action-btn btn-save" onclick="exportPNG()">保存</button>
     </div>
+    <!-- 試着バー -->
+    <div class="preview-bar" id="preview-bar" style="display:none;">
+      <div class="preview-label">👗 試着中: <span id="preview-name"></span></div>
+      <div class="preview-cost">🪙 <span id="preview-cost-val"></span> コイン</div>
+      <div class="preview-btns">
+        <button class="preview-btn buy" onclick="buyPreviewItem()">購入する</button>
+        <button class="preview-btn cancel" onclick="cancelPreview()">やめる</button>
+      </div>
+    </div>
   </div>
 
   <div class="parts-panel">
@@ -301,6 +331,8 @@ var unlockedParts = {};
 var selected = {};
 var activeCategory = '';
 var pendingBuy = null;
+var previewItem = null;   // 試着中アイテム
+var previewCatId = null;  // 試着中カテゴリ
 
 async function init() {
   username = sessionStorage.getItem('sq_user');
@@ -379,9 +411,18 @@ function buildCategoryTabs() {
       btn.className = 'cat-tab' + (activeCategory === cid ? ' active' : '');
       btn.textContent = manifest.categories[cid].display_name;
       btn.onclick = function() {
+        // カテゴリ切替時に試着中なら元に戻す
+        if (previewItem && previewCatId !== cid) {
+          selected[previewCatId] = save.chibEquipped[previewCatId] !== undefined
+            ? save.chibEquipped[previewCatId] : null;
+          previewItem = null;
+          previewCatId = null;
+          document.getElementById('preview-bar').style.display = 'none';
+        }
         activeCategory = cid;
         buildCategoryTabs();
         buildPartsGrid();
+        renderAvatar();
       };
       tabs.appendChild(btn);
     })(catId);
@@ -445,12 +486,10 @@ function buildPartsGrid() {
 
     card.onclick = (function(it) { return function() {
       if (!unlockedParts[it.id]) {
-        if (save.coins < it.cost) {
-          showToast('コインが足りないよ…', 'ng');
-          return;
-        }
-        showModal(it);
+        // 試着モード: アバターにプレビュー表示（Firestoreには保存しない）
+        previewPart(activeCategory, it.id, it);
       } else {
+        // 持っているアイテムはそのまま装備・保存
         selectPart(activeCategory, it.id);
       }
     }; })(item);
@@ -460,12 +499,59 @@ function buildPartsGrid() {
 }
 
 function selectPart(catId, itemId) {
+  // 試着中だった場合はプレビューバーを閉じる
+  if (previewItem && previewCatId === catId) {
+    previewItem = null;
+    previewCatId = null;
+    document.getElementById('preview-bar').style.display = 'none';
+  }
   selected[catId] = itemId;
   save.chibEquipped[catId] = itemId;
   persist();
   buildPartsGrid();
   renderAvatar();
 }
+
+// ===== 試着モード関数 =====
+function previewPart(catId, itemId, item) {
+  previewItem = item;
+  previewCatId = catId;
+  selected[catId] = itemId;  // アバターにのみ反映（Firestoreには保存しない）
+
+  document.getElementById('preview-name').textContent = item.name;
+  document.getElementById('preview-cost-val').textContent = item.cost.toLocaleString();
+  document.getElementById('preview-bar').style.display = 'block';
+
+  buildPartsGrid();
+  renderAvatar();
+}
+
+function cancelPreview() {
+  if (!previewItem || !previewCatId) return;
+  // 保存済みの装備状態に戻す
+  selected[previewCatId] = save.chibEquipped[previewCatId] !== undefined
+    ? save.chibEquipped[previewCatId]
+    : null;
+  previewItem = null;
+  previewCatId = null;
+  document.getElementById('preview-bar').style.display = 'none';
+  buildPartsGrid();
+  renderAvatar();
+}
+window.cancelPreview = cancelPreview;
+
+function buyPreviewItem() {
+  if (!previewItem) return;
+  var item = previewItem;
+  if (save.coins < item.cost) {
+    showToast('コインが足りないよ…', 'ng');
+    return;
+  }
+  // 購入モーダルを表示（previewItemはconfirmBuy後にクリア）
+  showModal(item);
+}
+window.buyPreviewItem = buyPreviewItem;
+// ===========================
 
 function showModal(item) {
   pendingBuy = item;
@@ -478,6 +564,10 @@ function showModal(item) {
 function closeModal() {
   document.getElementById('modal').classList.remove('show');
   pendingBuy = null;
+  // 試着中のアイテムがあれば試着バーを再表示
+  if (previewItem) {
+    document.getElementById('preview-bar').style.display = 'block';
+  }
 }
 
 async function confirmBuy() {
@@ -491,6 +581,12 @@ async function confirmBuy() {
   document.getElementById('coin-count').textContent = save.coins.toLocaleString();
 
   closeModal();
+
+  // 試着中だった場合はプレビューをクリア
+  previewItem = null;
+  previewCatId = null;
+  document.getElementById('preview-bar').style.display = 'none';
+
   await persist();
 
   selectPart(activeCategory, item.id);

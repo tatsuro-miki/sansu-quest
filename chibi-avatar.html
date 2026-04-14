@@ -91,7 +91,7 @@ body {
 }
 
 .avatar-stage {
-  position: relative; width: 268px; height: 345px; margin: 0 auto;
+  position: relative; width: 268px; height: 340px; margin: 0 auto;
   background: linear-gradient(160deg, #fce4f0 0%, #ede0ff 100%);
   border-radius: 16px; border: 2px solid var(--border2); overflow: hidden;
 }
@@ -109,26 +109,6 @@ body {
 .action-btn:hover { transform: scale(1.05); }
 .btn-random { background: linear-gradient(135deg, #ff6f00, #ffa726); }
 .btn-save { background: linear-gradient(135deg, #e91e63, #f06292); }
-
-/* 試着バー */
-.preview-bar {
-  margin-top: 10px;
-  background: linear-gradient(135deg, #fff8e1, #fce4f0);
-  border: 2px solid rgba(245,166,35,0.45);
-  border-radius: 12px;
-  padding: 10px 14px;
-  text-align: center;
-}
-.preview-bar .preview-label { font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 3px; }
-.preview-bar .preview-cost { font-size: 14px; font-weight: 900; color: var(--gold); margin-bottom: 8px; }
-.preview-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-.preview-btn {
-  font-family: inherit; font-size: 13px; font-weight: 900;
-  padding: 7px 16px; border-radius: 20px; border: none; cursor: pointer; transition: .15s;
-}
-.preview-btn.buy { background: var(--gold); color: white; }
-.preview-btn.buy:hover { opacity: .88; }
-.preview-btn.cancel { background: var(--surface2); color: var(--text2); border: 1.5px solid var(--border2); }
 
 /* パーツパネル */
 .parts-panel {
@@ -166,9 +146,8 @@ body {
 .part-card.selected {
   border-color: var(--pink); box-shadow: 0 0 0 2px var(--pink); background: #fce4ec;
 }
-.part-card.locked { opacity: 0.75; cursor: pointer; }
-.part-card.locked:hover { border-color: rgba(245,166,35,0.6); transform: scale(1.03); }
-.part-card.locked.selected { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); background: #fff8e1; }
+.part-card.locked { opacity: 0.55; cursor: default; }
+.part-card.locked:hover { transform: none; }
 
 .part-card .thumb {
   width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; display: block;
@@ -241,17 +220,17 @@ body {
 
 @media (min-width: 701px) {
   .avatar-panel { width: 360px; }
-  .avatar-stage { width: 328px; height: 422px; }
+  .avatar-stage { width: 328px; height: 410px; }
 }
 
 @media (min-width: 900px) {
   .avatar-panel { width: 420px; }
-  .avatar-stage { width: 388px; height: 499px; }
+  .avatar-stage { width: 388px; height: 480px; }
 }
 
 @media (min-width: 1200px) {
   .avatar-panel { width: 500px; }
-  .avatar-stage { width: 468px; height: 601px; }
+  .avatar-stage { width: 468px; height: 570px; }
 }
 
 @media (max-width: 700px) {
@@ -282,15 +261,6 @@ body {
     <div class="btn-row">
       <button class="action-btn btn-random" onclick="randomize()">ランダム</button>
       <button class="action-btn btn-save" onclick="exportPNG()">保存</button>
-    </div>
-    <!-- 試着バー -->
-    <div class="preview-bar" id="preview-bar" style="display:none;">
-      <div class="preview-label">👗 試着中: <span id="preview-name"></span></div>
-      <div class="preview-cost">🪙 <span id="preview-cost-val"></span> コイン</div>
-      <div class="preview-btns">
-        <button class="preview-btn buy" onclick="buyPreviewItem()">購入する</button>
-        <button class="preview-btn cancel" onclick="cancelPreview()">やめる</button>
-      </div>
     </div>
   </div>
 
@@ -324,20 +294,26 @@ import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/fireb
 const app = initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(app);
 
+// ============================================================
+// 状態管理
+// ============================================================
 var manifest = null;
 var save = {};
 var username = '';
-var unlockedParts = {};
-var selected = {};
+var unlockedParts = {};  // { itemId: true } 形式
+var selected = {};       // { catId: itemId } 形式
 var activeCategory = '';
-var pendingBuy = null;
-var previewItem = null;   // 試着中アイテム
-var previewCatId = null;  // 試着中カテゴリ
+var pendingBuy = null;   // 購入確認待ちのアイテム
 
+// ============================================================
+// 初期化
+// ============================================================
 async function init() {
+  // ログインチェック
   username = sessionStorage.getItem('sq_user');
   if (!username) { location.href = 'index.html'; return; }
 
+  // Firestoreからユーザーデータ読み込み
   try {
     var snap = await getDoc(doc(db, 'users', username));
     if (snap.exists()) save = snap.data();
@@ -345,13 +321,16 @@ async function init() {
     console.warn('Firestore読み込みエラー:', e);
   }
 
+  // 初期値セット
   if (!save.coins) save.coins = 0;
   if (!save.chibOwned) save.chibOwned = [];
   if (!save.chibEquipped) save.chibEquipped = {};
 
+  // ヘッダー表示
   document.getElementById('avatar-username').textContent = username + ' ちゃん';
   document.getElementById('coin-count').textContent = save.coins.toLocaleString();
 
+  // manifest.json を読み込む
   try {
     var resp = await fetch('manifest.json');
     manifest = await resp.json();
@@ -361,6 +340,42 @@ async function init() {
     return;
   }
 
+  // gacha-manifest.json を読み込み、所持アイテムをカテゴリに注入
+  try {
+    var gResp = await fetch('gacha-manifest.json');
+    var gachaManifest = await gResp.json();
+    var ownedGachaSet = new Set(save.gachaAvatarOwned || []);
+
+    gachaManifest.forEach(function(gItem) {
+      if (!ownedGachaSet.has(gItem.id)) return; // 未所持はスキップ
+
+      // ファイルパスからカテゴリを推定: chibi-parts/gacha/tops/xxx.png → tops
+      var fileParts = (gItem.file || '').split('/');
+      var gachaIdx = fileParts.indexOf('gacha');
+      var cat = (gachaIdx >= 0 && gachaIdx + 2 < fileParts.length)
+        ? fileParts[gachaIdx + 1] : null;
+
+      if (!cat || !manifest.categories[cat]) return;
+
+      // 重複チェック
+      var exists = manifest.categories[cat].items.some(function(i) { return i.id === gItem.id; });
+      if (!exists) {
+        manifest.categories[cat].items.push({
+          id: gItem.id,
+          name: gItem.name,
+          file: gItem.file,
+          cost: gItem.cost || 1000,
+          z_index: gItem.z_index || manifest.categories[cat].z_index,
+          transform: gItem.transform,
+          isGacha: true
+        });
+      }
+    });
+  } catch(e) {
+    console.warn('gacha-manifest.json 読み込みスキップ:', e);
+  }
+
+  // アンロック済みパーツを構築（無料 + 購入済み）
   unlockedParts = {};
   for (var catId in manifest.categories) {
     manifest.categories[catId].items.forEach(function(item) {
@@ -368,6 +383,8 @@ async function init() {
     });
   }
   save.chibOwned.forEach(function(id) { unlockedParts[id] = true; });
+  // ガチャ所持アイテムもアンロック済みに
+  (save.gachaAvatarOwned || []).forEach(function(id) { unlockedParts[id] = true; });
 
   // 装備中パーツを構築（Firestoreのデータ or 初期値：目だけ装備・他はなし）
   selected = {};
@@ -390,10 +407,14 @@ async function init() {
   buildPartsGrid();
   renderAvatar();
 
+  // モーダルのボタン設定
   document.getElementById('modal-cancel').onclick = closeModal;
   document.getElementById('modal-buy').onclick = confirmBuy;
 }
 
+// ============================================================
+// Firestoreに保存
+// ============================================================
 async function persist() {
   try {
     await setDoc(doc(db, 'users', username), save, { merge: true });
@@ -402,6 +423,9 @@ async function persist() {
   }
 }
 
+// ============================================================
+// カテゴリタブ
+// ============================================================
 function buildCategoryTabs() {
   var tabs = document.getElementById('category-tabs');
   tabs.innerHTML = '';
@@ -411,24 +435,18 @@ function buildCategoryTabs() {
       btn.className = 'cat-tab' + (activeCategory === cid ? ' active' : '');
       btn.textContent = manifest.categories[cid].display_name;
       btn.onclick = function() {
-        // カテゴリ切替時に試着中なら元に戻す
-        if (previewItem && previewCatId !== cid) {
-          selected[previewCatId] = save.chibEquipped[previewCatId] !== undefined
-            ? save.chibEquipped[previewCatId] : null;
-          previewItem = null;
-          previewCatId = null;
-          document.getElementById('preview-bar').style.display = 'none';
-        }
         activeCategory = cid;
         buildCategoryTabs();
         buildPartsGrid();
-        renderAvatar();
       };
       tabs.appendChild(btn);
     })(catId);
   }
 }
 
+// ============================================================
+// パーツグリッド
+// ============================================================
 function buildPartsGrid() {
   var grid = document.getElementById('parts-grid');
   grid.innerHTML = '';
@@ -471,7 +489,10 @@ function buildPartsGrid() {
     var nameEl = document.createElement('div'); nameEl.className = 'part-name'; nameEl.textContent = item.name;
     info.appendChild(nameEl);
 
-    if (item.cost === 0) {
+    if (item.isGacha) {
+      var gt = document.createElement('div'); gt.className = 'owned-tag'; gt.textContent = '✨ ガチャ';
+      info.appendChild(gt);
+    } else if (item.cost === 0) {
       var ft = document.createElement('div'); ft.className = 'free-tag'; ft.textContent = '無料';
       info.appendChild(ft);
     } else if (isUnlocked) {
@@ -486,10 +507,13 @@ function buildPartsGrid() {
 
     card.onclick = (function(it) { return function() {
       if (!unlockedParts[it.id]) {
-        // 試着モード: アバターにプレビュー表示（Firestoreには保存しない）
-        previewPart(activeCategory, it.id, it);
+        // 購入確認モーダルを表示
+        if (save.coins < it.cost) {
+          showToast('コインが足りないよ…', 'ng');
+          return;
+        }
+        showModal(it);
       } else {
-        // 持っているアイテムはそのまま装備・保存
         selectPart(activeCategory, it.id);
       }
     }; })(item);
@@ -498,13 +522,10 @@ function buildPartsGrid() {
   });
 }
 
+// ============================================================
+// パーツ選択 → Firestoreに保存
+// ============================================================
 function selectPart(catId, itemId) {
-  // 試着中だった場合はプレビューバーを閉じる
-  if (previewItem && previewCatId === catId) {
-    previewItem = null;
-    previewCatId = null;
-    document.getElementById('preview-bar').style.display = 'none';
-  }
   selected[catId] = itemId;
   save.chibEquipped[catId] = itemId;
   persist();
@@ -512,47 +533,9 @@ function selectPart(catId, itemId) {
   renderAvatar();
 }
 
-// ===== 試着モード関数 =====
-function previewPart(catId, itemId, item) {
-  previewItem = item;
-  previewCatId = catId;
-  selected[catId] = itemId;  // アバターにのみ反映（Firestoreには保存しない）
-
-  document.getElementById('preview-name').textContent = item.name;
-  document.getElementById('preview-cost-val').textContent = item.cost.toLocaleString();
-  document.getElementById('preview-bar').style.display = 'block';
-
-  buildPartsGrid();
-  renderAvatar();
-}
-
-function cancelPreview() {
-  if (!previewItem || !previewCatId) return;
-  // 保存済みの装備状態に戻す
-  selected[previewCatId] = save.chibEquipped[previewCatId] !== undefined
-    ? save.chibEquipped[previewCatId]
-    : null;
-  previewItem = null;
-  previewCatId = null;
-  document.getElementById('preview-bar').style.display = 'none';
-  buildPartsGrid();
-  renderAvatar();
-}
-window.cancelPreview = cancelPreview;
-
-function buyPreviewItem() {
-  if (!previewItem) return;
-  var item = previewItem;
-  if (save.coins < item.cost) {
-    showToast('コインが足りないよ…', 'ng');
-    return;
-  }
-  // 購入モーダルを表示（previewItemはconfirmBuy後にクリア）
-  showModal(item);
-}
-window.buyPreviewItem = buyPreviewItem;
-// ===========================
-
+// ============================================================
+// 購入モーダル
+// ============================================================
 function showModal(item) {
   pendingBuy = item;
   document.getElementById('modal-thumb').src = item.file;
@@ -564,10 +547,6 @@ function showModal(item) {
 function closeModal() {
   document.getElementById('modal').classList.remove('show');
   pendingBuy = null;
-  // 試着中のアイテムがあれば試着バーを再表示
-  if (previewItem) {
-    document.getElementById('preview-bar').style.display = 'block';
-  }
 }
 
 async function confirmBuy() {
@@ -581,18 +560,15 @@ async function confirmBuy() {
   document.getElementById('coin-count').textContent = save.coins.toLocaleString();
 
   closeModal();
-
-  // 試着中だった場合はプレビューをクリア
-  previewItem = null;
-  previewCatId = null;
-  document.getElementById('preview-bar').style.display = 'none';
-
   await persist();
 
   selectPart(activeCategory, item.id);
   showToast(item.name + ' をゲット！', 'ok');
 }
 
+// ============================================================
+// アバター描画
+// ============================================================
 function getTransform(item, catId) {
   if (item.transform) return item.transform;
   var defaults = {
@@ -611,6 +587,7 @@ function renderAvatar() {
   var stage = document.getElementById('avatar-stage');
   stage.innerHTML = '';
 
+  // 素体
   var baseImg = document.createElement('img');
   baseImg.className = 'layer';
   baseImg.src = 'chibi-parts/base_body.png';
@@ -618,6 +595,7 @@ function renderAvatar() {
   baseImg.onerror = function() { this.style.display = 'none'; };
   stage.appendChild(baseImg);
 
+  // パーツをz_index順に重ねる
   var layers = [];
   for (var catId in selected) {
     var itemId = selected[catId];
@@ -643,6 +621,9 @@ function renderAvatar() {
   });
 }
 
+// ============================================================
+// ランダム
+// ============================================================
 function randomize() {
   for (var catId in manifest.categories) {
     var available = manifest.categories[catId].items.filter(function(i) {
@@ -659,9 +640,12 @@ function randomize() {
 }
 window.randomize = randomize;
 
+// ============================================================
+// PNG保存
+// ============================================================
 function exportPNG() {
   var canvas = document.createElement('canvas');
-  var W = 536, H = 689;
+  var W = 536, H = 680;
   canvas.width = W; canvas.height = H;
   var ctx = canvas.getContext('2d');
   var grad = ctx.createLinearGradient(0, 0, 0, H);
@@ -700,6 +684,9 @@ function exportPNG() {
 }
 window.exportPNG = exportPNG;
 
+// ============================================================
+// トースト
+// ============================================================
 var toastTimer = null;
 function showToast(msg, type) {
   var el = document.getElementById('toast');

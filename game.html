@@ -393,40 +393,51 @@ body::before {
 .choice-btn.ok { border-color: var(--xp); background: rgba(45,184,122,0.10); color: var(--xp); }
 .choice-btn.ng { border-color: var(--heart); background: rgba(233,69,96,0.10); color: var(--heart); }
 
-/* メモ */
-.memo-wrap { margin-top: 12px; }
-.memo-toggle {
-  font-family: inherit; font-size: .75rem; font-weight: 800;
-  padding: 5px 13px; border-radius: 20px;
-  border: 1.5px solid rgba(79,142,247,0.3);
-  background: rgba(79,142,247,0.06); color: var(--blue);
-  cursor: pointer; display: flex; align-items: center; gap: 4px;
-  margin: 0 auto; transition: .2s;
+/* フローティングメモ */
+.memo-fab {
+  position: fixed; bottom: 20px; right: 16px; z-index: 200;
+  font-family: inherit; font-size: .8rem; font-weight: 900;
+  padding: 10px 16px; border-radius: 24px;
+  border: 2px solid rgba(79,142,247,0.35); background: white; color: var(--blue);
+  cursor: pointer; box-shadow: 0 4px 16px rgba(79,142,247,0.22);
+  display: flex; align-items: center; gap: 5px; transition: .2s;
 }
-.memo-toggle:hover { background: rgba(79,142,247,0.12); }
-.memo-area { margin-top: 8px; animation: popIn .25s ease; }
-.memo-label { font-size: .68rem; color: var(--text2); font-weight: 700; margin-bottom: 5px; text-align: center; }
-.memo-toolbar {
-  display: flex; gap: 6px; margin-bottom: 6px; justify-content: center; align-items: center;
+.memo-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(79,142,247,0.32); }
+.memo-fab.open { background: var(--blue); color: white; border-color: var(--blue); }
+
+.memo-float-panel {
+  position: fixed; bottom: 72px; right: 16px; z-index: 199;
+  width: min(300px, calc(100vw - 32px));
+  background: var(--surface); border-radius: var(--radius);
+  border: 1.5px solid var(--border2);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+  overflow: hidden; animation: popIn .22s ease;
+  display: none;
 }
+.memo-float-panel.visible { display: block; }
+.memo-float-header {
+  display: flex; align-items: center; gap: 5px;
+  padding: 7px 10px; background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.memo-float-title { font-size: .72rem; font-weight: 800; color: var(--text2); flex:1; }
 .memo-tool-btn {
-  font-family: inherit; font-size: .72rem; font-weight: 800;
-  padding: 5px 12px; border-radius: 20px;
-  border: 1.5px solid var(--border2); background: var(--surface2);
+  font-family: inherit; font-size: .7rem; font-weight: 800;
+  padding: 4px 10px; border-radius: 14px;
+  border: 1.5px solid var(--border2); background: var(--surface);
   color: var(--text2); cursor: pointer; transition: .15s;
 }
 .memo-tool-btn.active { background: var(--blue); color: white; border-color: var(--blue); }
 .memo-clear-btn {
-  font-family: inherit; font-size: .72rem; font-weight: 800;
-  padding: 5px 12px; border-radius: 20px;
+  font-family: inherit; font-size: .7rem; font-weight: 800;
+  padding: 4px 10px; border-radius: 14px;
   border: 1.5px solid rgba(233,69,96,0.3); background: rgba(233,69,96,0.06);
-  color: var(--primary); cursor: pointer; margin-left: auto; transition: .15s;
+  color: var(--primary); cursor: pointer; transition: .15s;
 }
 .memo-clear-btn:hover { background: rgba(233,69,96,0.12); }
 #memo-canvas {
-  width: 100%; height: 160px; border-radius: var(--radius-md); display: block;
-  background: #f8f9ff; border: 1.5px solid rgba(79,142,247,0.25);
-  touch-action: none; cursor: crosshair;
+  display: block; width: 100%; height: 200px;
+  background: #f8f9ff; touch-action: none; cursor: crosshair;
 }
 
 /* フィードバック */
@@ -1045,12 +1056,7 @@ function nextQuestion(){
     needsNumpad=true;
   }
 
-  document.getElementById('main-area').innerHTML=`<div class="question-card"><div class="q-meta"><span class="q-cat">${question.label}</span><span class="q-lv ${question.lv}">${lvLabel}</span><span class="q-xp">+${dispXp}XP</span></div><div class="q-text">${qDisplay}</div>${ansArea}${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}<div class="memo-wrap"><button class="memo-toggle" onclick="toggleMemo()">✏️ 計算メモを使う</button><div class="memo-area" id="memo-area" style="display:none"><div class="memo-toolbar">
-      <button id="memo-pen-btn" class="memo-tool-btn active" onclick="setMemoTool('pen')">✏️ ペン</button>
-      <button id="memo-eraser-btn" class="memo-tool-btn" onclick="setMemoTool('eraser')">🧹 消しゴム</button>
-      <button class="memo-clear-btn" onclick="memoClear()">🗑️ 全消し</button>
-    </div>
-    <canvas id="memo-canvas"></canvas></div></div></div><div id="numpad-area"></div><div class="feedback" id="fb"></div><div id="btn-area"></div>`;
+  document.getElementById('main-area').innerHTML=`<div class="question-card"><div class="q-meta"><span class="q-cat">${question.label}</span><span class="q-lv ${question.lv}">${lvLabel}</span><span class="q-xp">+${dispXp}XP</span></div><div class="q-text">${qDisplay}</div>${ansArea}${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}</div><div id="numpad-area"></div><div class="feedback" id="fb"></div><div id="btn-area"></div>`;
 
   if(needsNumpad){ showNumpad(); } else { hideNumpad(); }
 
@@ -1176,11 +1182,11 @@ window.checkRevive=function(){ const elapsed=Date.now()-(save.lastHeartRegen||Da
 window.toggleHint=function(){ hintVisible=!hintVisible; const box=document.getElementById('hint-box'),btn=document.getElementById('hint-btn'); if(box) box.style.display=hintVisible?'block':'none'; if(btn) btn.textContent=hintVisible?'💡 ヒントを隠す':'💡 ヒントを見る'; };
 window.toggleMemo=function(){
   memoVisible=!memoVisible;
-  const area=document.getElementById('memo-area');
-  if(area){
-    area.style.display=memoVisible?'block':'none';
-    if(memoVisible) setTimeout(initMemoCanvas, 50);
-  }
+  const panel=document.getElementById('memo-panel');
+  const fab=document.getElementById('memo-fab');
+  if(panel) panel.classList.toggle('visible', memoVisible);
+  if(fab)   fab.classList.toggle('open', memoVisible);
+  if(memoVisible) setTimeout(initMemoCanvas, 50);
 };
 
 /* === キャンバスメモ（タッチ対応） === */
@@ -1437,5 +1443,18 @@ function renderLessonCorner(catIndex) {
   corner.classList.add('visible');
 }
 </script>
+
+<!-- フローティングメモ -->
+<button class="memo-fab" id="memo-fab" onclick="toggleMemo()">✏️ メモ</button>
+<div class="memo-float-panel" id="memo-panel">
+  <div class="memo-float-header">
+    <span class="memo-float-title">📝 計算メモ</span>
+    <button id="memo-pen-btn" class="memo-tool-btn active" onclick="setMemoTool('pen')">✏️ ペン</button>
+    <button id="memo-eraser-btn" class="memo-tool-btn" onclick="setMemoTool('eraser')">🧹</button>
+    <button class="memo-clear-btn" onclick="memoClear()">🗑️</button>
+  </div>
+  <canvas id="memo-canvas"></canvas>
+</div>
+
 </body>
 </html>

@@ -670,38 +670,25 @@ body::before {
 }
 .avatar-btn:hover { background: rgba(233,100,157,0.22); transform: scale(1.1); }
 
-/* 手書き/数字 モード切り替えトグル */
-.input-mode-toggle {
-  display: flex; gap: 0; margin-bottom: 10px;
-  border-radius: var(--radius-md); overflow: hidden;
-  border: 1.5px solid var(--border2);
+
+/* メモ内タブ */
+.memo-mode-tabs {
+  display: flex; border-bottom: 1px solid var(--border);
 }
-.mode-btn {
-  flex: 1; font-family: inherit; font-size: .78rem; font-weight: 900;
-  padding: 9px 6px; border: none; background: var(--surface2);
+.memo-tab {
+  flex: 1; font-family: inherit; font-size: .72rem; font-weight: 800;
+  padding: 7px 4px; border: none; background: var(--surface2);
   color: var(--text2); cursor: pointer; transition: .15s;
-  display: flex; align-items: center; justify-content: center; gap: 4px;
 }
-.mode-btn.active { background: var(--blue); color: white; }
-.mode-btn:first-child { border-right: 1px solid var(--border2); }
-
-/* インラインキャンバス（手書きモード時） */
-.memo-inline-area {
-  display: none; margin-bottom: 10px;
+.memo-tab.active { background: var(--surface); color: var(--blue); border-bottom: 2px solid var(--blue); }
+.memo-textarea {
+  width: 100%; height: 160px; padding: 8px 10px; resize: none;
+  font-family: 'M PLUS Rounded 1c', sans-serif; font-size: .9rem;
+  background: #f8f9ff; color: var(--text);
+  border: 1.5px solid rgba(79,142,247,0.25); border-radius: var(--radius-sm);
+  outline: none; line-height: 1.6; display: block;
 }
-.memo-inline-area.visible { display: block; }
-.memo-inline-area #memo-canvas {
-  height: 220px; border-radius: var(--radius-md);
-  border: 1.5px solid rgba(79,142,247,0.3);
-}
-.memo-inline-toolbar {
-  display: flex; gap: 6px; margin-bottom: 6px; align-items: center;
-}
-.memo-inline-toolbar .memo-float-title { font-size: .72rem; font-weight: 800; color: var(--text2); flex:1; }
-
-/* フローティングパネルはインラインモード時に非表示 */
-.memo-float-panel.mode-inline { display: none !important; }
-.memo-fab.mode-inline { display: none !important; }
+.memo-textarea:focus { border-color: var(--blue); }
 
 </style>
 </head>
@@ -1090,20 +1077,7 @@ function nextQuestion(){
     needsNumpad=true;
   }
 
-  document.getElementById('main-area').innerHTML=`<div class="question-card"><div class="q-meta"><span class="q-cat">${question.label}</span><span class="q-lv ${question.lv}">${lvLabel}</span><span class="q-xp">+${dispXp}XP</span></div><div class="q-text">${qDisplay}</div>${ansArea}${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}</div><div class="input-mode-toggle" id="input-mode-toggle">
-  <button class="mode-btn active" id="mode-btn-num" onclick="setInputMode('num')">🔢 数字入力</button>
-  <button class="mode-btn" id="mode-btn-draw" onclick="setInputMode('draw')">✏️ 手書き</button>
-</div>
-<div class="memo-inline-area" id="memo-inline-area">
-  <div class="memo-inline-toolbar">
-    <span class="memo-float-title">📝 ここに計算を書こう</span>
-    <button id="memo-pen-btn-i" class="memo-tool-btn active" onclick="setMemoTool('pen')">✏️ ペン</button>
-    <button id="memo-eraser-btn-i" class="memo-tool-btn" onclick="setMemoTool('eraser')">🧹</button>
-    <button class="memo-clear-btn" onclick="memoClear()">🗑️</button>
-  </div>
-  <canvas id="memo-canvas"></canvas>
-</div>
-<div id="numpad-area"></div><div class="feedback" id="fb"></div><div id="btn-area"></div>`;
+  document.getElementById('main-area').innerHTML=`<div class="question-card"><div class="q-meta"><span class="q-cat">${question.label}</span><span class="q-lv ${question.lv}">${lvLabel}</span><span class="q-xp">+${dispXp}XP</span></div><div class="q-text">${qDisplay}</div>${ansArea}${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}</div><div id="numpad-area"></div><div class="feedback" id="fb"></div><div id="btn-area"></div>`;
 
   if(needsNumpad){ showNumpad(); } else { hideNumpad(); }
 
@@ -1227,37 +1201,6 @@ function renderGameOver(){ hideNumpad(); document.getElementById('main-area').in
 window.checkRevive=function(){ const elapsed=Date.now()-(save.lastHeartRegen||Date.now()); const regen=Math.floor(elapsed/(30*60*1000)); if(regen>0||save.hearts>0){save.hearts=Math.min(HEARTS_MAX,(save.hearts||0)+regen);save.lastHeartRegen=Date.now();persistSave();renderUI();nextQuestion();}else{const mins=Math.ceil((30*60*1000-(Date.now()-(save.lastHeartRegen||Date.now())))/60000);alert(`あと約${mins}分でハートが回復します！`);} };
 
 window.toggleHint=function(){ hintVisible=!hintVisible; const box=document.getElementById('hint-box'),btn=document.getElementById('hint-btn'); if(box) box.style.display=hintVisible?'block':'none'; if(btn) btn.textContent=hintVisible?'💡 ヒントを隠す':'💡 ヒントを見る'; };
-
-/* === 入力モード切替（手書き / 数字） === */
-let inputMode = 'num'; // 'num' or 'draw'
-
-window.setInputMode = function(mode) {
-  inputMode = mode;
-  const isNum = mode === 'num';
-
-  // トグルボタンのスタイル
-  const btnNum  = document.getElementById('mode-btn-num');
-  const btnDraw = document.getElementById('mode-btn-draw');
-  if (btnNum)  btnNum.classList.toggle('active', isNum);
-  if (btnDraw) btnDraw.classList.toggle('active', !isNum);
-
-  // インラインキャンバス
-  const inlineArea = document.getElementById('memo-inline-area');
-  if (inlineArea) inlineArea.classList.toggle('visible', !isNum);
-
-  // テンキー
-  const numpad = document.getElementById('numpad-area');
-  if (numpad) numpad.style.display = isNum ? '' : 'none';
-
-  // フローティングFABとパネル（手書きモードでは非表示）
-  const fab   = document.getElementById('memo-fab');
-  const panel = document.getElementById('memo-panel');
-  if (fab)   fab.classList.toggle('mode-inline', !isNum);
-  if (panel) panel.classList.toggle('mode-inline', !isNum);
-
-  // キャンバス初期化
-  if (!isNum) setTimeout(initMemoCanvas, 50);
-};
 
 window.toggleMemo=function(){
   memoVisible=!memoVisible;
@@ -1523,14 +1466,26 @@ function renderLessonCorner(catIndex) {
 }
 </script>
 
-<!-- フローティングメモ (数字モード時のみ表示) -->
+<!-- フローティングメモ -->
 <button class="memo-fab" id="memo-fab" onclick="toggleMemo()">✏️ メモ</button>
 <div class="memo-float-panel" id="memo-panel">
-  <div class="memo-float-header">
-    <span class="memo-float-title">📝 計算メモ</span>
-    <button id="memo-pen-btn" class="memo-tool-btn active" onclick="setMemoTool('pen')">✏️ ペン</button>
-    <button id="memo-eraser-btn" class="memo-tool-btn" onclick="setMemoTool('eraser')">🧹</button>
-    <button class="memo-clear-btn" onclick="memoClear()">🗑️</button>
+  <!-- タブ切替 -->
+  <div class="memo-mode-tabs">
+    <button class="memo-tab active" id="memo-tab-draw" onclick="setMemoInputMode('draw')">✏️ 手書き</button>
+    <button class="memo-tab" id="memo-tab-text" onclick="setMemoInputMode('text')">123 テキスト</button>
+  </div>
+  <!-- 手書きビュー -->
+  <div id="memo-draw-view">
+    <div class="memo-float-header">
+      <button id="memo-pen-btn" class="memo-tool-btn active" onclick="setMemoTool('pen')">✏️ ペン</button>
+      <button id="memo-eraser-btn" class="memo-tool-btn" onclick="setMemoTool('eraser')">🧹</button>
+      <button class="memo-clear-btn" onclick="memoClear()">🗑️</button>
+    </div>
+    <canvas id="memo-canvas"></canvas>
+  </div>
+  <!-- テキストビュー -->
+  <div id="memo-text-view" style="display:none; padding:8px;">
+    <textarea id="memo-textarea" class="memo-textarea" placeholder="ここに計算を書こう"></textarea>
   </div>
 </div>
 

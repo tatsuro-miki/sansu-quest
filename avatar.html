@@ -174,6 +174,16 @@ body::before {
   border-color: var(--purple);
 }
 
+/* チビきせかえタブ */
+.cat-tab.chibi-tab {
+  background: linear-gradient(135deg, #4f8ef7, #2db87a);
+  color: white;
+  border: 1.5px solid #4f8ef7;
+  text-decoration: none;
+  display: inline-flex; align-items: center;
+}
+.cat-tab.chibi-tab:hover { opacity: .88; transform: translateY(-1px); }
+
 /* パーツグリッド */
 .parts-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
@@ -360,6 +370,7 @@ body::before {
           <button class="cat-tab" onclick="switchCat('shoes', this)">👟 くつ</button>
           <button class="cat-tab" onclick="switchCat('accessory', this)">🎀 アクセ</button>
           <button class="cat-tab gacha-tab" onclick="switchCat('gacha', this)">✨ ガチャ衣装</button>
+          <a class="cat-tab chibi-tab" href="chibi-avatar.html">チビきせかえ →</a>
         </div>
       <div class="parts-grid" id="parts-grid"></div>
     </div>
@@ -458,7 +469,6 @@ async function init() {
   if (!save.ownedParts) save.ownedParts = ['tops_none', 'under_none', 'shoes_none', 'acc_none'];
   if (!save.equipped) save.equipped = { ...DEFAULT_EQUIPPED };
   if (!save.gachaOwned) save.gachaOwned = [];
-  // ガチャ衣装の装備状態（outfit_XX形式、空文字なら未装備）
   if (!save.equippedGacha) save.equippedGacha = '';
 
   document.getElementById('avatar-username').textContent = username + ' ちゃん';
@@ -479,7 +489,6 @@ function renderAvatar() {
   const layersDiv = document.getElementById('avatar-layers');
   const gachaLayer = document.getElementById('layer-gacha-outfit');
 
-  // ガチャ衣装が装備されている場合
   if (save.equippedGacha) {
     layersDiv.style.display = 'none';
     gachaLayer.src = `./parts/${save.equippedGacha}.png`;
@@ -487,7 +496,6 @@ function renderAvatar() {
     return;
   }
 
-  // パーツ重ね着モード
   layersDiv.style.display = 'block';
   gachaLayer.style.display = 'none';
 
@@ -518,7 +526,6 @@ function renderShop(cat) {
   currentCat = cat;
   const grid = document.getElementById('parts-grid');
 
-  // ガチャ衣装タブ
   if (cat === 'gacha') {
     grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
     grid.style.maxHeight = '520px';
@@ -526,7 +533,6 @@ function renderShop(cat) {
     return;
   }
 
-  // 通常パーツタブ（3列に戻す）
   grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
   grid.style.maxHeight = '340px';
   const parts = PARTS[cat];
@@ -570,7 +576,6 @@ function renderGachaTab(grid) {
 
   const owned = save.gachaOwned || [];
 
-  // 衣装を持っていない場合
   if (owned.length === 0) {
     grid.innerHTML = `
       <div class="gacha-empty" style="grid-column: 1 / -1;">
@@ -582,7 +587,6 @@ function renderGachaTab(grid) {
     return;
   }
 
-  // 「はずす」ボタン（ガチャ衣装を外してパーツモードに戻す）
   const resetCard = document.createElement('div');
   resetCard.className = 'part-card' + (!save.equippedGacha ? ' equipped' : '');
   resetCard.innerHTML = `
@@ -599,7 +603,6 @@ function renderGachaTab(grid) {
   };
   grid.appendChild(resetCard);
 
-  // ガチャで持っている衣装を表示
   for (const id of owned) {
     const num = parseInt(id.split('_')[1]);
     const rarity = getRarityForOutfit(num);
@@ -608,7 +611,6 @@ function renderGachaTab(grid) {
     const card = document.createElement('div');
     card.className = 'gacha-card' + (isEquipped ? ' equipped' : '');
 
-    // レア度ドット
     if (rarity) {
       const dot = document.createElement('div');
       dot.className = `rarity-dot ${rarity.dot}`;
@@ -643,7 +645,6 @@ function renderGachaTab(grid) {
 
     grid.appendChild(card);
   }
-
 }
 
 // ============================================================
@@ -651,7 +652,6 @@ function renderGachaTab(grid) {
 // ============================================================
 function onPartClick(part, cat, owned) {
   if (owned || part.cost === 0) {
-    // 装備する（ガチャ衣装を外す）
     save.equippedGacha = '';
     save.equipped[cat] = part.id;
     if (!save.ownedParts.includes(part.id)) save.ownedParts.push(part.id);
@@ -660,7 +660,6 @@ function onPartClick(part, cat, owned) {
     renderShop(cat);
     showToast('着替えたよ！✨', 'ok');
   } else {
-    // 購入確認
     if (part.cost > (save.coins || 0)) {
       showToast('コインが足りないよ…', 'ng');
       return;
@@ -679,7 +678,7 @@ window.confirmBuy = function() {
   save.coins = (save.coins || 0) - part.cost;
   if (!save.ownedParts) save.ownedParts = [];
   save.ownedParts.push(part.id);
-  save.equippedGacha = '';  // パーツを買ったらガチャ衣装を外す
+  save.equippedGacha = '';
   save.equipped[cat] = part.id;
   persist();
   document.getElementById('coin-count').textContent = save.coins;

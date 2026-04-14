@@ -406,14 +406,28 @@ body::before {
 .memo-toggle:hover { background: rgba(79,142,247,0.12); }
 .memo-area { margin-top: 8px; animation: popIn .25s ease; }
 .memo-label { font-size: .68rem; color: var(--text2); font-weight: 700; margin-bottom: 5px; text-align: center; }
-.memo-textarea {
-  width: 100%; min-height: 80px; padding: 10px 12px;
-  font-family: 'M PLUS Rounded 1c', sans-serif; font-size: .95rem;
-  background: var(--surface2); color: var(--text);
-  border: 1.5px solid rgba(79,142,247,0.25); border-radius: var(--radius-md);
-  outline: none; resize: vertical; line-height: 1.6;
+.memo-toolbar {
+  display: flex; gap: 6px; margin-bottom: 6px; justify-content: center; align-items: center;
 }
-.memo-textarea:focus { border-color: var(--blue); }
+.memo-tool-btn {
+  font-family: inherit; font-size: .72rem; font-weight: 800;
+  padding: 5px 12px; border-radius: 20px;
+  border: 1.5px solid var(--border2); background: var(--surface2);
+  color: var(--text2); cursor: pointer; transition: .15s;
+}
+.memo-tool-btn.active { background: var(--blue); color: white; border-color: var(--blue); }
+.memo-clear-btn {
+  font-family: inherit; font-size: .72rem; font-weight: 800;
+  padding: 5px 12px; border-radius: 20px;
+  border: 1.5px solid rgba(233,69,96,0.3); background: rgba(233,69,96,0.06);
+  color: var(--primary); cursor: pointer; margin-left: auto; transition: .15s;
+}
+.memo-clear-btn:hover { background: rgba(233,69,96,0.12); }
+#memo-canvas {
+  width: 100%; height: 160px; border-radius: var(--radius-md); display: block;
+  background: #f8f9ff; border: 1.5px solid rgba(79,142,247,0.25);
+  touch-action: none; cursor: crosshair;
+}
 
 /* フィードバック */
 .feedback {
@@ -1031,7 +1045,12 @@ function nextQuestion(){
     needsNumpad=true;
   }
 
-  document.getElementById('main-area').innerHTML=`<div class="question-card"><div class="q-meta"><span class="q-cat">${question.label}</span><span class="q-lv ${question.lv}">${lvLabel}</span><span class="q-xp">+${dispXp}XP</span></div><div class="q-text">${qDisplay}</div>${ansArea}${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}<div class="memo-wrap"><button class="memo-toggle" onclick="toggleMemo()">✏️ 計算メモを使う</button><div class="memo-area" id="memo-area" style="display:none"><div class="memo-label">📝 ここにメモしてOK！</div><textarea class="memo-textarea" placeholder="ここに計算を書こう"></textarea></div></div></div><div id="numpad-area"></div><div class="feedback" id="fb"></div><div id="btn-area"></div>`;
+  document.getElementById('main-area').innerHTML=`<div class="question-card"><div class="q-meta"><span class="q-cat">${question.label}</span><span class="q-lv ${question.lv}">${lvLabel}</span><span class="q-xp">+${dispXp}XP</span></div><div class="q-text">${qDisplay}</div>${ansArea}${question.hint?`<div style="text-align:center;margin-bottom:10px"><button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button><div class="hint-box" id="hint-box" style="display:none">${question.hint}</div></div>`:''}<div class="memo-wrap"><button class="memo-toggle" onclick="toggleMemo()">✏️ 計算メモを使う</button><div class="memo-area" id="memo-area" style="display:none"><div class="memo-toolbar">
+      <button id="memo-pen-btn" class="memo-tool-btn active" onclick="setMemoTool('pen')">✏️ ペン</button>
+      <button id="memo-eraser-btn" class="memo-tool-btn" onclick="setMemoTool('eraser')">🧹 消しゴム</button>
+      <button class="memo-clear-btn" onclick="memoClear()">🗑️ 全消し</button>
+    </div>
+    <canvas id="memo-canvas"></canvas></div></div></div><div id="numpad-area"></div><div class="feedback" id="fb"></div><div id="btn-area"></div>`;
 
   if(needsNumpad){ showNumpad(); } else { hideNumpad(); }
 
@@ -1155,7 +1174,84 @@ function renderGameOver(){ hideNumpad(); document.getElementById('main-area').in
 window.checkRevive=function(){ const elapsed=Date.now()-(save.lastHeartRegen||Date.now()); const regen=Math.floor(elapsed/(30*60*1000)); if(regen>0||save.hearts>0){save.hearts=Math.min(HEARTS_MAX,(save.hearts||0)+regen);save.lastHeartRegen=Date.now();persistSave();renderUI();nextQuestion();}else{const mins=Math.ceil((30*60*1000-(Date.now()-(save.lastHeartRegen||Date.now())))/60000);alert(`あと約${mins}分でハートが回復します！`);} };
 
 window.toggleHint=function(){ hintVisible=!hintVisible; const box=document.getElementById('hint-box'),btn=document.getElementById('hint-btn'); if(box) box.style.display=hintVisible?'block':'none'; if(btn) btn.textContent=hintVisible?'💡 ヒントを隠す':'💡 ヒントを見る'; };
-window.toggleMemo=function(){ memoVisible=!memoVisible; const area=document.getElementById('memo-area'); if(area){area.style.display=memoVisible?'block':'none';if(memoVisible)setTimeout(()=>area.querySelector('textarea')?.focus(),80);} };
+window.toggleMemo=function(){
+  memoVisible=!memoVisible;
+  const area=document.getElementById('memo-area');
+  if(area){
+    area.style.display=memoVisible?'block':'none';
+    if(memoVisible) setTimeout(initMemoCanvas, 50);
+  }
+};
+
+/* === キャンバスメモ（タッチ対応） === */
+let memoCanvas=null, memoCtx=null, memoDrawing=false, memoTool='pen', memoInited=false;
+
+function initMemoCanvas(){
+  const c=document.getElementById('memo-canvas');
+  if(!c) return;
+  if(!memoInited){
+    // キャンバスの実ピクセルサイズを設定（DPR対応）
+    const dpr=window.devicePixelRatio||1;
+    const rect=c.getBoundingClientRect();
+    const w=Math.floor(rect.width||c.parentElement.clientWidth||300);
+    c.width=w*dpr; c.height=160*dpr;
+    c.style.height='160px';
+    memoCtx=c.getContext('2d');
+    memoCtx.scale(dpr,dpr);
+    memoCtx.fillStyle='#f8f9ff';
+    memoCtx.fillRect(0,0,w,160);
+    memoCtx.lineCap='round'; memoCtx.lineJoin='round';
+    // マウスイベント
+    c.addEventListener('mousedown', e=>{ memoDrawing=true; memoBegin(e); });
+    c.addEventListener('mousemove', e=>{ if(memoDrawing) memoLine(e); });
+    c.addEventListener('mouseup',   ()=>{ memoDrawing=false; memoCtx.beginPath(); });
+    c.addEventListener('mouseleave',()=>{ memoDrawing=false; memoCtx.beginPath(); });
+    // タッチイベント
+    c.addEventListener('touchstart', e=>{ e.preventDefault(); memoDrawing=true; memoBegin(e.touches[0]); },{passive:false});
+    c.addEventListener('touchmove',  e=>{ e.preventDefault(); if(memoDrawing) memoLine(e.touches[0]); },{passive:false});
+    c.addEventListener('touchend',   ()=>{ memoDrawing=false; memoCtx.beginPath(); },{passive:false});
+    memoCanvas=c; memoInited=true;
+  }
+}
+
+function memoPos(e){
+  const rect=memoCanvas.getBoundingClientRect();
+  return {
+    x:(e.clientX-rect.left)*(memoCanvas.width/(window.devicePixelRatio||1)/rect.width),
+    y:(e.clientY-rect.top)*(memoCanvas.height/(window.devicePixelRatio||1)/rect.height)
+  };
+}
+function memoBegin(e){ const p=memoPos(e); memoCtx.beginPath(); memoCtx.moveTo(p.x,p.y); }
+function memoLine(e){
+  const p=memoPos(e);
+  if(memoTool==='eraser'){
+    memoCtx.globalCompositeOperation='destination-out';
+    memoCtx.lineWidth=22;
+  } else {
+    memoCtx.globalCompositeOperation='source-over';
+    memoCtx.strokeStyle='#1a1a2e'; memoCtx.lineWidth=3;
+  }
+  memoCtx.lineTo(p.x,p.y); memoCtx.stroke();
+  memoCtx.beginPath(); memoCtx.moveTo(p.x,p.y);
+}
+
+window.memoClear=function(){
+  if(!memoCtx||!memoCanvas) return;
+  memoCtx.globalCompositeOperation='source-over';
+  memoCtx.fillStyle='#f8f9ff';
+  const dpr=window.devicePixelRatio||1;
+  memoCtx.fillRect(0,0,memoCanvas.width/dpr,memoCanvas.height/dpr);
+};
+
+window.setMemoTool=function(tool){
+  memoTool=tool;
+  const pen=document.getElementById('memo-pen-btn'),ers=document.getElementById('memo-eraser-btn');
+  if(pen) pen.classList.toggle('active',tool==='pen');
+  if(ers) ers.classList.toggle('active',tool==='eraser');
+  if(memoCanvas) memoCanvas.style.cursor=tool==='eraser'?'cell':'crosshair';
+};
+
+
 
 /* === テンキー === */
 let activeNumpadInput = null; // 現在フォーカスしている入力欄

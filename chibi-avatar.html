@@ -218,19 +218,20 @@ body {
 .toast.ok { background: var(--mint); }
 .toast.ng { background: var(--pink); }
 
+/* ステージは常に 268:340 = 約 0.788 の縦横比を維持 */
 @media (min-width: 701px) {
   .avatar-panel { width: 360px; }
-  .avatar-stage { width: 328px; height: 410px; }
+  .avatar-stage { width: 328px; height: 416px; }
 }
 
 @media (min-width: 900px) {
   .avatar-panel { width: 420px; }
-  .avatar-stage { width: 388px; height: 480px; }
+  .avatar-stage { width: 388px; height: 492px; }
 }
 
 @media (min-width: 1200px) {
   .avatar-panel { width: 500px; }
-  .avatar-stage { width: 468px; height: 570px; }
+  .avatar-stage { width: 468px; height: 594px; }
 }
 
 @media (max-width: 700px) {
@@ -349,11 +350,14 @@ async function init() {
     gachaManifest.forEach(function(gItem) {
       if (!ownedGachaSet.has(gItem.id)) return; // 未所持はスキップ
 
-      // ファイルパスからカテゴリを推定: chibi-parts/gacha/tops/xxx.png → tops
-      var fileParts = (gItem.file || '').split('/');
-      var gachaIdx = fileParts.indexOf('gacha');
-      var cat = (gachaIdx >= 0 && gachaIdx + 2 < fileParts.length)
-        ? fileParts[gachaIdx + 1] : null;
+      // categoryフィールド優先、なければファイルパスから推定
+      var cat = gItem.category || null;
+      if (!cat) {
+        var fileParts = (gItem.file || '').split('/');
+        var gachaIdx = fileParts.indexOf('gacha');
+        cat = (gachaIdx >= 0 && gachaIdx + 2 < fileParts.length)
+          ? fileParts[gachaIdx + 1] : null;
+      }
 
       if (!cat || !manifest.categories[cat]) return;
 

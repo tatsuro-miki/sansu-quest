@@ -327,11 +327,6 @@ let manifest = [];
 let username = '', save = {};
 let currentCat = 'all';
 
-// 日本語ファイル名をURLエンコード（パス区切り/は保持）
-function encodeFilePath(path) {
-  return path.split('/').map(seg => encodeURIComponent(seg)).join('/');
-}
-
 // ─────────────────────────────────────
 // 初期化
 // ─────────────────────────────────────
@@ -462,7 +457,7 @@ window.pullGacha = async function() {
   addOwned(result.item.id);
   await persist();
 
-  document.getElementById('result-img').src = encodeFilePath(result.item.file);
+  document.getElementById('result-img').src = result.item.file;
   document.getElementById('result-img').style.opacity = '1';
   document.getElementById('result-img').onerror = function() {
     this.style.display='none';
@@ -528,7 +523,7 @@ window.pull10Gacha = async function() {
       const borderColor = r.stars >= 5 ? '#ffd700' : r.stars >= 4 ? '#f5af19' : r.stars >= 3 ? '#c850c0' : '#4facfe';
       div.style.borderColor = borderColor;
       div.innerHTML = `
-        <img src="${encodeFilePath(r.item.file)}" alt="${r.item.name}"
+        <img src="${r.item.file}" alt="${r.item.name}"
           onerror="this.parentElement.querySelector('.item-fallback').style.display='flex';this.style.display='none'">
         <div class="item-fallback" style="display:none;align-items:center;justify-content:center;height:100%;font-size:.65em;font-weight:900;color:#888;padding:4px;text-align:center;">${r.item.name}</div>
         <div class="r10-label ${r.rarity.css}">${r.rarity.key}</div>
@@ -611,7 +606,7 @@ function renderCollection() {
     if (isOwned) {
       slot.title = item.name;
       slot.innerHTML = `
-        <img src="${encodeFilePath(item.file)}" alt="${item.name}" loading="lazy">
+        <img src="${item.file}" alt="${item.name}" loading="lazy">
         <div class="rarity-dot ${rDef.dot}"></div>
       `;
     } else {

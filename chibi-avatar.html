@@ -91,7 +91,7 @@ body {
 }
 
 .avatar-stage {
-  position: relative; width: 268px; height: 340px; margin: 0 auto;
+  position: relative; width: 268px; height: 345px; margin: 0 auto;
   background: linear-gradient(160deg, #fce4f0 0%, #ede0ff 100%);
   border-radius: 16px; border: 2px solid var(--border2); overflow: hidden;
 }
@@ -241,17 +241,17 @@ body {
 
 @media (min-width: 701px) {
   .avatar-panel { width: 360px; }
-  .avatar-stage { width: 328px; height: 410px; }
+  .avatar-stage { width: 328px; height: 422px; }
 }
 
 @media (min-width: 900px) {
   .avatar-panel { width: 420px; }
-  .avatar-stage { width: 388px; height: 480px; }
+  .avatar-stage { width: 388px; height: 499px; }
 }
 
 @media (min-width: 1200px) {
   .avatar-panel { width: 500px; }
-  .avatar-stage { width: 468px; height: 570px; }
+  .avatar-stage { width: 468px; height: 601px; }
 }
 
 @media (max-width: 700px) {
@@ -661,7 +661,7 @@ window.randomize = randomize;
 
 function exportPNG() {
   var canvas = document.createElement('canvas');
-  var W = 536, H = 680;
+  var W = 536, H = 689;
   canvas.width = W; canvas.height = H;
   var ctx = canvas.getContext('2d');
   var grad = ctx.createLinearGradient(0, 0, 0, H);

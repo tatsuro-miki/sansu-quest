@@ -24,205 +24,142 @@
   --radius: 20px;
   --radius-md: 14px;
 }
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
   font-family: 'Nunito', 'M PLUS Rounded 1c', sans-serif;
-  min-height: 100vh;
-  color: var(--text);
-  overflow-x: hidden;
-  background: var(--bg);
-  position: relative;
+  min-height: 100vh; color: var(--text);
+  overflow-x: hidden; background: var(--bg); position: relative;
 }
-
-.bg-layer {
-  position: fixed; inset: 0;
-  background: url('parts/gacha_bg.png') center center / cover no-repeat;
-  z-index: 0;
-}
-.bg-overlay {
-  position: fixed; inset: 0;
-  background: rgba(200,160,240,0.3);
-  z-index: 0;
-}
-
-.nav-bar {
-  position: relative; z-index: 10;
-  max-width: 680px; margin: 0 auto;
-  padding: 12px 16px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.back-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-family: inherit; font-size: 14px; font-weight: 800;
-  padding: 8px 16px; border-radius: 20px;
-  border: 2px solid var(--border2);
-  background: var(--surface); color: var(--text2);
-  cursor: pointer; text-decoration: none; transition: .15s;
-}
+.bg-layer { position: fixed; inset: 0; background: url('parts/gacha_bg.png') center center / cover no-repeat; z-index: 0; }
+.bg-overlay { position: fixed; inset: 0; background: rgba(200,160,240,0.3); z-index: 0; }
+.nav-bar { position: relative; z-index: 10; max-width: 680px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+.back-btn { display: inline-flex; align-items: center; gap: 6px; font-family: inherit; font-size: 14px; font-weight: 800; padding: 8px 16px; border-radius: 20px; border: 2px solid var(--border2); background: var(--surface); color: var(--text2); cursor: pointer; text-decoration: none; transition: .15s; }
 .back-btn:hover { background: white; }
-
-.coin-badge {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--surface); border: 2px solid rgba(245,166,35,0.35);
-  border-radius: 25px; padding: 8px 18px;
-  font-weight: 900; font-size: 16px; color: var(--gold);
-  box-shadow: 0 2px 12px rgba(245,166,35,0.15);
-}
-
-.app {
-  max-width: 680px; margin: 0 auto;
-  padding: 0 16px 40px;
-  position: relative; z-index: 1;
-}
-
+.coin-badge { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 2px solid rgba(245,166,35,0.35); border-radius: 25px; padding: 8px 18px; font-weight: 900; font-size: 16px; color: var(--gold); box-shadow: 0 2px 12px rgba(245,166,35,0.15); }
+.app { max-width: 680px; margin: 0 auto; padding: 0 16px 40px; position: relative; z-index: 1; }
 .page-title { text-align: center; padding: 8px 0 16px; }
-.page-title h1 {
-  font-size: clamp(26px, 6vw, 36px); font-weight: 900;
-  color: white;
-  text-shadow: 0 2px 8px rgba(140,60,200,0.5), 0 0 20px rgba(255,200,255,0.3);
-}
-
-.gacha-stage {
-  background: var(--surface);
-  border-radius: var(--radius);
-  border: 2px solid var(--border2);
-  padding: 24px 20px;
-  text-align: center;
-  box-shadow: 0 8px 32px rgba(140,60,200,0.15);
-  margin-bottom: 16px;
-  position: relative; overflow: hidden;
-}
-
+.page-title h1 { font-size: clamp(26px, 6vw, 36px); font-weight: 900; color: white; text-shadow: 0 2px 8px rgba(140,60,200,0.5), 0 0 20px rgba(255,200,255,0.3); }
+.gacha-stage { background: var(--surface); border-radius: var(--radius); border: 2px solid var(--border2); padding: 24px 20px; text-align: center; box-shadow: 0 8px 32px rgba(140,60,200,0.15); margin-bottom: 16px; position: relative; overflow: hidden; }
 .machine-wrap { position: relative; width: 260px; height: 260px; margin: 0 auto 16px; }
-.machine-wrap img {
-  width: 100%; height: 100%; object-fit: contain;
-  filter: drop-shadow(0 4px 16px rgba(200,100,255,0.3));
-  transition: transform .3s;
-}
+.machine-wrap img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 16px rgba(200,100,255,0.3)); transition: transform .3s; }
 .machine-wrap:hover img { transform: scale(1.03); }
 .machine-wrap.spinning img { animation: machineShake 0.5s ease-in-out infinite; }
+@keyframes machineShake { 0%,100% { transform: rotate(0deg); } 25% { transform: rotate(-2deg) scale(1.02); } 75% { transform: rotate(2deg) scale(1.02); } }
 
-@keyframes machineShake {
-  0%,100% { transform: rotate(0deg); }
-  25% { transform: rotate(-2deg) scale(1.02); }
-  75% { transform: rotate(2deg) scale(1.02); }
-}
-
+/* ─── ボタン群 ─── */
+.gacha-btns { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .gacha-btn {
   font-family: inherit; font-size: 20px; font-weight: 900;
   padding: 16px 40px; border-radius: 50px; border: none;
   background: linear-gradient(135deg, #ff69b4, #ff1493, #c850c0);
   color: white; cursor: pointer;
   box-shadow: 0 4px 20px rgba(255,20,147,0.4), 0 0 40px rgba(200,80,192,0.2);
-  transition: all .25s; display: inline-block; position: relative; overflow: hidden;
+  transition: all .25s; display: inline-block; position: relative; overflow: hidden; width: 280px;
 }
-.gacha-btn::before {
-  content: ''; position: absolute; inset: -2px;
-  background: linear-gradient(45deg, #ff69b4, #ffd700, #ff69b4, #87ceeb, #ff69b4);
-  background-size: 300% 300%; border-radius: 50px; z-index: -1;
-  animation: shimmer 3s ease infinite;
-}
-@keyframes shimmer {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+.gacha-btn::before { content: ''; position: absolute; inset: -2px; background: linear-gradient(45deg, #ff69b4, #ffd700, #ff69b4, #87ceeb, #ff69b4); background-size: 300% 300%; border-radius: 50px; z-index: -1; animation: shimmer 3s ease infinite; }
+@keyframes shimmer { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 .gacha-btn:hover:not(:disabled) { transform: translateY(-3px) scale(1.03); box-shadow: 0 8px 28px rgba(255,20,147,0.5); }
 .gacha-btn:active:not(:disabled) { transform: scale(0.97); }
 .gacha-btn:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(0.4); }
 
-.gacha-cost { font-size: 14px; font-weight: 800; color: var(--text3); margin-top: 10px; }
+.gacha-btn-10 {
+  font-family: inherit; font-size: 18px; font-weight: 900;
+  padding: 14px 32px; border-radius: 50px; border: none;
+  background: linear-gradient(135deg, #f5a623, #f12711, #ff6b35);
+  color: white; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(245,166,35,0.45);
+  transition: all .25s; position: relative; overflow: hidden; width: 280px;
+}
+.gacha-btn-10::before { content: ''; position: absolute; inset: -2px; background: linear-gradient(45deg, #ffd700, #ff6b35, #ffd700, #ff1493, #ffd700); background-size: 300% 300%; border-radius: 50px; z-index: -1; animation: shimmer 2s ease infinite; }
+.gacha-btn-10:hover:not(:disabled) { transform: translateY(-3px) scale(1.03); box-shadow: 0 8px 28px rgba(245,166,35,0.55); }
+.gacha-btn-10:active:not(:disabled) { transform: scale(0.97); }
+.gacha-btn-10:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(0.4); }
+
+.gacha-cost { font-size: 13px; font-weight: 800; color: var(--text3); margin-top: 2px; }
+.gacha-cost .discount { color: var(--mint); font-size: 11px; margin-left: 4px; }
 
 .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
 .stat-box { background: rgba(159,122,234,0.08); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 10px 8px; text-align: center; }
 .stat-num { font-size: 22px; font-weight: 900; color: var(--purple); }
 .stat-lbl { font-size: 11px; font-weight: 700; color: var(--text3); }
 
-.gacha-overlay {
-  position: fixed; inset: 0; background: rgba(20,0,40,0.85); z-index: 100;
-  display: none; align-items: center; justify-content: center; flex-direction: column;
-}
+/* ─── オーバーレイ共通 ─── */
+.gacha-overlay { position: fixed; inset: 0; background: rgba(20,0,40,0.85); z-index: 100; display: none; align-items: center; justify-content: center; flex-direction: column; }
 .gacha-overlay.show { display: flex; }
-
 .gacha-loading { text-align: center; color: white; display: none; }
 .gacha-loading.show { display: block; }
 .gacha-loading p { font-size: 20px; font-weight: 900; animation: loadPulse 1s ease-in-out infinite; margin-top: 16px; }
 @keyframes loadPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+.sparkle-burst { position: absolute; width: 6px; height: 6px; border-radius: 50%; pointer-events: none; animation: sparkleFly 1s ease-out forwards; }
+@keyframes sparkleFly { 0% { opacity: 1; transform: translate(0,0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); } }
 
-.sparkle-burst {
-  position: absolute; width: 6px; height: 6px; border-radius: 50%;
-  pointer-events: none; animation: sparkleFly 1s ease-out forwards;
-}
-@keyframes sparkleFly {
-  0% { opacity: 1; transform: translate(0,0) scale(1); }
-  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
-}
-
-.result-card {
-  background: white; border-radius: var(--radius); padding: 28px 24px;
-  text-align: center; max-width: 340px; width: 90%;
-  box-shadow: 0 8px 40px rgba(200,100,255,0.4);
-  display: none; animation: resultPop 0.5s cubic-bezier(.34,1.56,.64,1); position: relative;
-}
+/* ─── 1連 結果カード ─── */
+.result-card { background: white; border-radius: var(--radius); padding: 28px 24px; text-align: center; max-width: 340px; width: 90%; box-shadow: 0 8px 40px rgba(200,100,255,0.4); display: none; animation: resultPop 0.5s cubic-bezier(.34,1.56,.64,1); position: relative; z-index: 5; }
 .result-card.show { display: block; }
-.result-card { z-index: 5; }
-
-@keyframes resultPop {
-  0% { opacity: 0; transform: scale(0.3) rotate(-10deg); }
-  60% { transform: scale(1.05) rotate(2deg); }
-  100% { opacity: 1; transform: scale(1) rotate(0); }
-}
-
+@keyframes resultPop { 0% { opacity: 0; transform: scale(0.3) rotate(-10deg); } 60% { transform: scale(1.05) rotate(2deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
 .result-outfit-img { width: 180px; height: 240px; object-fit: contain; margin: 12px auto; display: block; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)); }
-
 .rarity-tag { display: inline-block; padding: 6px 18px; border-radius: 20px; font-weight: 900; font-size: 15px; margin: 8px 4px; }
 .rarity-miss { background: #999; color: white; }
-.rarity-c { background: #8bc34a; color: white; }
-.rarity-uc { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; box-shadow: 0 0 12px rgba(79,172,254,0.4); }
-.rarity-r { background: linear-gradient(135deg, #c850c0, #f12711); color: white; box-shadow: 0 0 15px rgba(200,80,192,0.4); }
-.rarity-sr { background: linear-gradient(135deg, #f5af19, #f12711); color: white; box-shadow: 0 0 20px rgba(245,175,25,0.5); animation: srGlow 1.5s ease-in-out infinite; }
+.rarity-c   { background: #8bc34a; color: white; }
+.rarity-uc  { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; box-shadow: 0 0 12px rgba(79,172,254,0.4); }
+.rarity-r   { background: linear-gradient(135deg, #c850c0, #f12711); color: white; box-shadow: 0 0 15px rgba(200,80,192,0.4); }
+.rarity-sr  { background: linear-gradient(135deg, #f5af19, #f12711); color: white; box-shadow: 0 0 20px rgba(245,175,25,0.5); animation: srGlow 1.5s ease-in-out infinite; }
 @keyframes srGlow { 0%,100% { box-shadow: 0 0 20px rgba(245,175,25,0.5); } 50% { box-shadow: 0 0 30px rgba(245,175,25,0.8), 0 0 60px rgba(241,39,17,0.3); } }
-
 .new-tag { display: inline-block; background: #ff4757; color: white; padding: 4px 14px; border-radius: 20px; font-weight: 900; font-size: 13px; animation: newPulse 0.8s ease-in-out infinite; }
 @keyframes newPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
-
 .result-msg { font-size: 15px; font-weight: 800; color: var(--text2); margin: 12px 0; }
-
-.result-close-btn {
-  font-family: inherit; font-size: 16px; font-weight: 900;
-  padding: 12px 36px; border-radius: 50px; border: none;
-  background: linear-gradient(135deg, var(--purple), var(--pink));
-  color: white; cursor: pointer; box-shadow: 0 4px 16px rgba(159,122,234,0.3); transition: .2s;
-}
+.result-close-btn { font-family: inherit; font-size: 16px; font-weight: 900; padding: 12px 36px; border-radius: 50px; border: none; background: linear-gradient(135deg, var(--purple), var(--pink)); color: white; cursor: pointer; box-shadow: 0 4px 16px rgba(159,122,234,0.3); transition: .2s; }
 .result-close-btn:hover { opacity: .88; transform: translateY(-2px); }
 
+/* ─── 10連 結果カード ─── */
+.result-10 {
+  background: white; border-radius: var(--radius); padding: 18px 14px;
+  max-width: 540px; width: 95%; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(200,100,255,0.4);
+  display: none; animation: resultPop 0.4s cubic-bezier(.34,1.56,.64,1);
+  position: relative; z-index: 5; text-align: center;
+}
+.result-10.show { display: block; }
+.r10-title { font-size: 18px; font-weight: 900; color: var(--text); margin-bottom: 12px; }
+.r10-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 12px; }
+.r10-item {
+  aspect-ratio: 3/4; border-radius: 10px; border: 2.5px solid #ccc;
+  overflow: hidden; position: relative; background: #f8f5ff;
+  animation: r10Pop .35s ease-out both;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes r10Pop { 0% { opacity:0; transform:scale(0.5) rotate(-8deg); } 100% { opacity:1; transform:scale(1) rotate(0); } }
+.r10-item img { width: 100%; height: 100%; object-fit: contain; padding: 2px; }
+.r10-item .r10-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  font-size: 9px; font-weight: 900; text-align: center;
+  padding: 2px 0; color: white;
+}
+.r10-item .r10-label.rarity-miss { background: rgba(120,120,120,0.85); }
+.r10-item .r10-label.rarity-c    { background: rgba(139,195,74,0.9); }
+.r10-item .r10-label.rarity-uc   { background: rgba(79,172,254,0.9); }
+.r10-item .r10-label.rarity-r    { background: rgba(200,80,192,0.9); }
+.r10-item .r10-label.rarity-sr   { background: rgba(245,175,25,0.95); }
+.r10-new { position: absolute; top: 2px; right: 2px; background: #ff4757; color: white; font-size: 8px; font-weight: 900; padding: 1px 5px; border-radius: 8px; }
+.r10-summary { font-size: 14px; font-weight: 800; color: var(--text2); margin: 10px 0 14px; min-height: 20px; }
+.r10-guarantee { font-size: 11px; font-weight: 700; color: var(--mint); margin-bottom: 4px; }
+
+/* ─── コレクション ─── */
 .collection-panel { background: var(--surface); border-radius: var(--radius); border: 2px solid var(--border2); padding: 20px; box-shadow: 0 4px 20px rgba(140,60,200,0.1); }
 .collection-title { font-size: 16px; font-weight: 900; color: var(--text); margin-bottom: 4px; }
 .collection-sub { font-size: 12px; font-weight: 700; color: var(--text3); margin-bottom: 14px; }
-
 .collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; }
-.coll-slot {
-  aspect-ratio: 3/4; background: rgba(159,122,234,0.06); border: 2px solid var(--border);
-  border-radius: 12px; display: flex; align-items: center; justify-content: center;
-  overflow: hidden; position: relative; cursor: default; transition: .2s;
-}
+.coll-slot { aspect-ratio: 3/4; background: rgba(159,122,234,0.06); border: 2px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; cursor: default; transition: .2s; }
 .coll-slot.owned { border-color: var(--purple2); background: white; }
 .coll-slot.owned:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(159,122,234,0.2); }
 .coll-slot img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
 .coll-slot .lock-icon { font-size: 24px; color: var(--text3); opacity: 0.5; }
 .coll-slot .rarity-dot { position: absolute; top: 4px; right: 4px; width: 10px; height: 10px; border-radius: 50%; }
-.rarity-dot.c { background: #8bc34a; }
+.rarity-dot.c  { background: #8bc34a; }
 .rarity-dot.uc { background: #4facfe; }
-.rarity-dot.r { background: #c850c0; }
+.rarity-dot.r  { background: #c850c0; }
 .rarity-dot.sr { background: #f5af19; box-shadow: 0 0 6px rgba(245,175,25,0.6); }
-
-.toast {
-  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-  padding: 10px 24px; border-radius: 20px; font-weight: 800; font-size: 14px;
-  opacity: 0; pointer-events: none; z-index: 200; transition: opacity .3s; white-space: nowrap; color: white;
-}
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 10px 24px; border-radius: 20px; font-weight: 800; font-size: 14px; opacity: 0; pointer-events: none; z-index: 200; transition: opacity .3s; white-space: nowrap; color: white; }
 .toast.show { opacity: 1; }
 .toast.ok { background: var(--mint); }
 .toast.ng { background: var(--pink); }
@@ -235,40 +172,32 @@ body {
 
 <div class="nav-bar">
   <a class="back-btn" href="game.html">← もどる</a>
-  <div class="coin-badge">
-    <span>🪙</span>
-    <span id="coin-count">0</span>
-  </div>
+  <div class="coin-badge"><span>🪙</span><span id="coin-count">0</span></div>
 </div>
 
 <div class="app">
-  <div class="page-title">
-    <h1>✨ ガチャガチャ ✨</h1>
-  </div>
+  <div class="page-title"><h1>✨ ガチャガチャ ✨</h1></div>
 
   <div class="gacha-stage">
     <div class="machine-wrap" id="machine-wrap">
       <img src="parts/gacha_machine.png" alt="ガチャマシン">
     </div>
 
-    <button class="gacha-btn" id="gacha-btn" onclick="pullGacha()">
-      🎰 ガチャをひく！
-    </button>
-    <div class="gacha-cost">💰 100コイン</div>
+    <div class="gacha-btns">
+      <div>
+        <button class="gacha-btn" id="gacha-btn" onclick="pullGacha()">🎰 1回ひく</button>
+        <div class="gacha-cost">💰 100コイン</div>
+      </div>
+      <div>
+        <button class="gacha-btn-10" id="gacha-btn-10" onclick="pull10Gacha()">🎉 10連ガチャ！</button>
+        <div class="gacha-cost">💰 900コイン <span class="discount">✨ 10%割引 / UC以上1枚確定</span></div>
+      </div>
+    </div>
 
     <div class="stats-row">
-      <div class="stat-box">
-        <div class="stat-num" id="stat-owned">0</div>
-        <div class="stat-lbl">ゲットずみ</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-num">25</div>
-        <div class="stat-lbl">ぜんぶ</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-num" id="stat-percent">0%</div>
-        <div class="stat-lbl">コンプりつ</div>
-      </div>
+      <div class="stat-box"><div class="stat-num" id="stat-owned">0</div><div class="stat-lbl">ゲットずみ</div></div>
+      <div class="stat-box"><div class="stat-num">25</div><div class="stat-lbl">ぜんぶ</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-percent">0%</div><div class="stat-lbl">コンプりつ</div></div>
     </div>
   </div>
 
@@ -280,14 +209,13 @@ body {
 </div>
 
 <div class="gacha-overlay" id="gacha-overlay">
-  <!-- ガチャ演出動画 -->
   <video id="gacha-video" playsinline preload="auto"
-    style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;z-index:1;">
-  </video>
+    style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;z-index:1;"></video>
   <div class="gacha-loading" id="gacha-loading">
     <div style="font-size:60px;animation:machineShake 0.4s ease-in-out infinite;">🎰</div>
     <p>ガチャガチャ…</p>
   </div>
+  <!-- 1連 結果 -->
   <div class="result-card" id="result-card">
     <img class="result-outfit-img" id="result-img" src="" alt="">
     <div>
@@ -295,6 +223,14 @@ body {
       <span class="new-tag" id="result-new" style="display:none;">NEW!</span>
     </div>
     <div class="result-msg" id="result-msg"></div>
+    <button class="result-close-btn" onclick="closeResult()">OK！</button>
+  </div>
+  <!-- 10連 結果 -->
+  <div class="result-10" id="result-10">
+    <div class="r10-title">✨ 10連結果 ✨</div>
+    <div class="r10-guarantee" id="r10-guarantee"></div>
+    <div class="r10-grid" id="r10-grid"></div>
+    <div class="r10-summary" id="r10-summary"></div>
     <button class="result-close-btn" onclick="closeResult()">OK！</button>
   </div>
 </div>
@@ -307,285 +243,249 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const app = initializeApp(FIREBASE_CONFIG);
-const db = getFirestore(app);
+const db  = getFirestore(app);
 
-const GACHA_COST = 100;
-const MISS_REFUND = 30;
+const GACHA_COST    = 100;
+const GACHA_COST_10 = 900;
+const MISS_REFUND   = 30;
 const TOTAL_OUTFITS = 25;
 
 const RARITIES = [
-  { key: 'C',  ids: [4,5,6,10,11,16,17,19,20,21], rate: 0.40, label: 'コモン',          css: 'rarity-c',  dot: 'c'  },
-  { key: 'UC', ids: [7,8,9,13,15],                 rate: 0.30, label: '⭐ アンコモン',    css: 'rarity-uc', dot: 'uc' },
-  { key: 'R',  ids: [12,14,18,23,24],              rate: 0.08, label: '💎 レア',          css: 'rarity-r',  dot: 'r'  },
-  { key: 'SR', ids: [22,25,1,2,3],                 rate: 0.02, label: '🌟 スーパーレア',  css: 'rarity-sr', dot: 'sr' },
+  { key:'C',  ids:[4,5,6,10,11,16,17,19,20,21], rate:0.40, label:'コモン',         css:'rarity-c',  dot:'c'  },
+  { key:'UC', ids:[7,8,9,13,15],                rate:0.30, label:'⭐ アンコモン',   css:'rarity-uc', dot:'uc' },
+  { key:'R',  ids:[12,14,18,23,24],             rate:0.08, label:'💎 レア',         css:'rarity-r',  dot:'r'  },
+  { key:'SR', ids:[22,25,1,2,3],                rate:0.02, label:'🌟 スーパーレア', css:'rarity-sr', dot:'sr' },
 ];
 const MISS_RATE = 0.20;
 
-let username = '';
-let save = {};
-let toastTimer = null;
+let username='', save={}, toastTimer=null;
 
 async function init() {
   username = sessionStorage.getItem('sq_user');
-  if (!username) { location.href = 'index.html'; return; }
-  try {
-    const snap = await getDoc(doc(db, 'users', username));
-    if (snap.exists()) save = snap.data();
-  } catch(e) { console.error('読み込みエラー:', e); }
-  if (!save.coins) save.coins = 0;
-  if (!save.gachaOwned) save.gachaOwned = [];
-  updateUI();
-  renderCollection();
+  if (!username) { location.href='index.html'; return; }
+  try { const snap=await getDoc(doc(db,'users',username)); if(snap.exists()) save=snap.data(); }
+  catch(e) { console.error('読み込みエラー:',e); }
+  if (!save.coins) save.coins=0;
+  if (!save.gachaOwned) save.gachaOwned=[];
+  updateUI(); renderCollection();
 }
 
 async function persist() {
-  try { await setDoc(doc(db, 'users', username), save, { merge: true }); }
-  catch(e) { console.error('保存エラー:', e); }
+  try { await setDoc(doc(db,'users',username), save, {merge:true}); }
+  catch(e) { console.error('保存エラー:',e); }
 }
 
 function updateUI() {
-  document.getElementById('coin-count').textContent = save.coins || 0;
+  document.getElementById('coin-count').textContent = save.coins||0;
   const allNums = getAllOutfitNums();
-  const ownedCount = (save.gachaOwned || []).filter(id => {
-    const num = parseInt(id.split('_')[1]);
-    return allNums.includes(num);
+  const ownedCount = (save.gachaOwned||[]).filter(id=>{
+    const num=parseInt(id.split('_')[1]); return allNums.includes(num);
   }).length;
-  document.getElementById('stat-owned').textContent = ownedCount;
-  document.getElementById('stat-percent').textContent = Math.round((ownedCount / TOTAL_OUTFITS) * 100) + '%';
-  document.getElementById('gacha-btn').disabled = (save.coins || 0) < GACHA_COST;
+  document.getElementById('stat-owned').textContent    = ownedCount;
+  document.getElementById('stat-percent').textContent  = Math.round((ownedCount/TOTAL_OUTFITS)*100)+'%';
+  document.getElementById('gacha-btn').disabled    = (save.coins||0) < GACHA_COST;
+  document.getElementById('gacha-btn-10').disabled = (save.coins||0) < GACHA_COST_10;
 }
 
-function getRarityForOutfit(num) { return RARITIES.find(r => r.ids.includes(num)); }
-
-function getAllOutfitNums() {
-  const all = [];
-  for (const r of RARITIES) all.push(...r.ids);
-  return all.sort((a,b) => a - b);
-}
+function getRarityForOutfit(num) { return RARITIES.find(r=>r.ids.includes(num)); }
+function getAllOutfitNums() { const a=[]; for(const r of RARITIES) a.push(...r.ids); return a.sort((a,b)=>a-b); }
 
 function drawGacha() {
   const rand = Math.random();
-  if (rand < MISS_RATE) return { id: null, num: null, rarity: null, isMiss: true };
+  if (rand < MISS_RATE) return {id:null, num:null, rarity:null, isMiss:true};
   const remaining = rand - MISS_RATE;
-  let cumulative = 0;
-  let rarity = RARITIES[0];
-  for (const r of RARITIES) {
-    cumulative += r.rate;
-    if (remaining < cumulative) { rarity = r; break; }
-  }
-  const pick = rarity.ids[Math.floor(Math.random() * rarity.ids.length)];
-  const id = `outfit_${String(pick).padStart(2, '0')}`;
-  return { id, num: pick, rarity, isMiss: false };
+  let cumulative=0, rarity=RARITIES[0];
+  for(const r of RARITIES){ cumulative+=r.rate; if(remaining<cumulative){rarity=r;break;} }
+  const pick = rarity.ids[Math.floor(Math.random()*rarity.ids.length)];
+  const id   = `outfit_${String(pick).padStart(2,'0')}`;
+  return {id, num:pick, rarity, isMiss:false};
 }
 
-// ============================================================
-// ガチャ演出動画の設定
-// ============================================================
-// レア度ごとに別の動画を設定可能（なければ共通動画を使用）
-const GACHA_VIDEOS = {
-  common: './parts/gacha_normal.mp4',   // C・UC・ハズレ用
-  rare:   './parts/gacha_rare.mp4',     // R用
-  sr:     './parts/gacha_sr.mp4',       // SR用
-};
-// 動画がない場合は従来のローディング演出にフォールバック
-let videoAvailable = { common: false, rare: false, sr: false };
-
-// 動画の存在チェック（起動時）
+// 動画設定
+const GACHA_VIDEOS = { common:'./parts/gacha_normal.mp4', rare:'./parts/gacha_rare.mp4', sr:'./parts/gacha_sr.mp4' };
+let videoAvailable = {common:false, rare:false, sr:false};
 async function checkVideos() {
-  for (const key of Object.keys(GACHA_VIDEOS)) {
-    try {
-      const res = await fetch(GACHA_VIDEOS[key], { method: 'HEAD' });
-      videoAvailable[key] = res.ok;
-    } catch(e) { videoAvailable[key] = false; }
+  for(const key of Object.keys(GACHA_VIDEOS)){
+    try{ const r=await fetch(GACHA_VIDEOS[key],{method:'HEAD'}); videoAvailable[key]=r.ok; }
+    catch(e){ videoAvailable[key]=false; }
   }
 }
 checkVideos();
 
 function getVideoKey(result) {
-  if (result.isMiss) return 'common';
-  if (result.rarity.key === 'SR') return 'sr';
-  if (result.rarity.key === 'R') return 'rare';
+  if(result.isMiss) return 'common';
+  if(result.rarity.key==='SR') return 'sr';
+  if(result.rarity.key==='R')  return 'rare';
   return 'common';
 }
 
-// 動画を再生してPromiseで完了を待つ
 function playGachaVideo(videoKey) {
-  return new Promise((resolve) => {
-    const video = document.getElementById('gacha-video');
-    const src = GACHA_VIDEOS[videoKey];
-
-    if (!videoAvailable[videoKey]) {
-      resolve(false); // 動画なし→フォールバック
-      return;
-    }
-
-    video.src = src;
-    video.style.display = 'block';
-    video.currentTime = 0;
-
-    const onEnd = () => {
-      video.removeEventListener('ended', onEnd);
-      video.style.display = 'none';
-      resolve(true);
-    };
-    video.addEventListener('ended', onEnd);
-
-    // タップでスキップ（子供が待ちきれない場合用）
-    const onSkip = () => {
-      video.removeEventListener('ended', onEnd);
-      video.removeEventListener('click', onSkip);
-      video.pause();
-      video.style.display = 'none';
-      resolve(true);
-    };
-    video.addEventListener('click', onSkip, { once: true });
-
-    video.play().catch(() => {
-      // 自動再生ブロック等の場合はフォールバック
-      video.style.display = 'none';
-      resolve(false);
-    });
+  return new Promise((resolve)=>{
+    const video=document.getElementById('gacha-video');
+    if(!videoAvailable[videoKey]){resolve(false);return;}
+    video.src=GACHA_VIDEOS[videoKey]; video.style.display='block'; video.currentTime=0;
+    const onEnd=()=>{ video.removeEventListener('ended',onEnd); video.style.display='none'; resolve(true); };
+    video.addEventListener('ended',onEnd);
+    const onSkip=()=>{ video.removeEventListener('ended',onEnd); video.removeEventListener('click',onSkip); video.pause(); video.style.display='none'; resolve(true); };
+    video.addEventListener('click',onSkip,{once:true});
+    video.play().catch(()=>{ video.style.display='none'; resolve(false); });
   });
 }
 
-// ============================================================
-// ガチャ実行
-// ============================================================
+// ─── 共通演出 ─────────────────────────────────────────────────────────
+async function playAnimation(videoKey, fallbackMs) {
+  const machineWrap=document.getElementById('machine-wrap');
+  const overlay=document.getElementById('gacha-overlay');
+  const loading=document.getElementById('gacha-loading');
+  machineWrap.classList.add('spinning');
+  overlay.classList.add('show');
+  loading.classList.add('show');
+  const played = await playGachaVideo(videoKey);
+  if(!played) await new Promise(r=>setTimeout(r,fallbackMs));
+  machineWrap.classList.remove('spinning');
+  loading.classList.remove('show');
+}
+
+// ─── 1連ガチャ ─────────────────────────────────────────────────────────
 window.pullGacha = async function() {
-  if ((save.coins || 0) < GACHA_COST) { showToast('コインがたりないよ！', 'ng'); return; }
+  if((save.coins||0)<GACHA_COST){showToast('コインがたりないよ！','ng');return;}
   save.coins -= GACHA_COST;
   updateUI();
 
-  const machineWrap = document.getElementById('machine-wrap');
-  machineWrap.classList.add('spinning');
+  const result=drawGacha();
+  const videoKey=getVideoKey(result);
+  const fallbackMs=result.isMiss?1200:(result.rarity.key==='SR'?2500:1800);
+  await playAnimation(videoKey, fallbackMs);
 
-  const overlay = document.getElementById('gacha-overlay');
-  const loading = document.getElementById('gacha-loading');
-  const card = document.getElementById('result-card');
-  overlay.classList.add('show');
-  card.classList.remove('show');
+  const card=document.getElementById('result-card');
+  document.getElementById('result-10').classList.remove('show');
 
-  // 抽選（先に結果を決める）
-  const result = drawGacha();
-
-  // 動画再生を試みる
-  const videoKey = getVideoKey(result);
-  loading.classList.add('show');
-  const played = await playGachaVideo(videoKey);
-
-  // 動画が再生されなかった場合は従来のローディング演出
-  if (!played) {
-    const waitMs = result.isMiss ? 1200 : (result.rarity.key === 'SR' ? 2500 : 1800);
-    await new Promise(r => setTimeout(r, waitMs));
+  if(result.isMiss){
+    save.coins+=MISS_REFUND; await persist();
+    document.getElementById('result-img').src='parts/gacha_machine.png';
+    document.getElementById('result-img').style.opacity='0.4';
+    document.getElementById('result-rarity').textContent='💨 ハズレ…';
+    document.getElementById('result-rarity').className='rarity-tag rarity-miss';
+    document.getElementById('result-new').style.display='none';
+    document.getElementById('result-msg').textContent=`ざんねん！🪙${MISS_REFUND}コインもどってきたよ`;
+    card.classList.add('show'); updateUI(); return;
   }
-
-  // ローディング非表示
-  machineWrap.classList.remove('spinning');
-  loading.classList.remove('show');
-
-  // --- ハズレ処理 ---
-  if (result.isMiss) {
-    save.coins += MISS_REFUND;
-    await persist();
-    document.getElementById('result-img').src = 'parts/gacha_machine.png';
-    document.getElementById('result-img').style.opacity = '0.4';
-    document.getElementById('result-rarity').textContent = '💨 ハズレ…';
-    document.getElementById('result-rarity').className = 'rarity-tag rarity-miss';
-    document.getElementById('result-new').style.display = 'none';
-    document.getElementById('result-msg').textContent = `ざんねん！🪙${MISS_REFUND}コインもどってきたよ`;
-    card.classList.add('show');
-    updateUI();
-    return;
-  }
-
-  // --- 当たり処理 ---
-  const isNew = !save.gachaOwned.includes(result.id);
-  if (isNew) save.gachaOwned.push(result.id);
+  const isNew=!save.gachaOwned.includes(result.id);
+  if(isNew) save.gachaOwned.push(result.id);
   await persist();
-
-  document.getElementById('result-img').src = `parts/${result.id}.png`;
-  document.getElementById('result-img').style.opacity = '1';
-  document.getElementById('result-rarity').textContent = result.rarity.label;
-  document.getElementById('result-rarity').className = `rarity-tag ${result.rarity.css}`;
-
-  if (isNew) {
-    document.getElementById('result-new').style.display = 'inline-block';
-    document.getElementById('result-msg').textContent = 'あたらしい衣装をゲットしたよ！🎉';
-  } else {
-    document.getElementById('result-new').style.display = 'none';
-    document.getElementById('result-msg').textContent = 'もう持ってる衣装だった…！';
-  }
-
+  document.getElementById('result-img').src=`parts/${result.id}.png`;
+  document.getElementById('result-img').style.opacity='1';
+  document.getElementById('result-rarity').textContent=result.rarity.label;
+  document.getElementById('result-rarity').className=`rarity-tag ${result.rarity.css}`;
+  document.getElementById('result-new').style.display=isNew?'inline-block':'none';
+  document.getElementById('result-msg').textContent=isNew?'あたらしい衣装をゲットしたよ！🎉':'もう持ってる衣装だった…！';
   card.classList.add('show');
-  spawnSparkles(overlay);
-  updateUI();
-  renderCollection();
+  spawnSparkles(document.getElementById('gacha-overlay'));
+  updateUI(); renderCollection();
 };
 
-window.closeResult = function() {
+// ─── 10連ガチャ ────────────────────────────────────────────────────────
+window.pull10Gacha = async function() {
+  if((save.coins||0)<GACHA_COST_10){showToast('コインがたりないよ！','ng');return;}
+  save.coins -= GACHA_COST_10;
+  updateUI();
+
+  // 10回抽選
+  const results=[];
+  for(let i=0;i<10;i++) results.push(drawGacha());
+
+  // UC以上1枚保証チェック
+  const rarityOrder=['C','UC','R','SR'];
+  const hasUCAbove=results.some(r=>!r.isMiss && r.rarity && rarityOrder.indexOf(r.rarity.key)>=1);
+  let guaranteed=false;
+  if(!hasUCAbove){
+    // 最後の1枚をUC以上に差し替え（UC:75% / R:20% / SR:5%）
+    const rand=Math.random();
+    const gRarity = rand<0.05 ? RARITIES[3] : rand<0.25 ? RARITIES[2] : RARITIES[1];
+    const pick=gRarity.ids[Math.floor(Math.random()*gRarity.ids.length)];
+    const id=`outfit_${String(pick).padStart(2,'0')}`;
+    results[9]={id, num:pick, rarity:gRarity, isMiss:false};
+    guaranteed=true;
+  }
+
+  // コイン計算・新規フラグ
+  let missRefund=0, newCount=0;
+  for(const r of results){
+    if(r.isMiss){ save.coins+=MISS_REFUND; missRefund+=MISS_REFUND; }
+    else{
+      const isNew=!save.gachaOwned.includes(r.id);
+      if(isNew){ save.gachaOwned.push(r.id); newCount++; }
+      r.isNew=isNew;
+    }
+  }
+
+  // 演出（最高レアリティの動画）
+  const topKey=results.reduce((best,r)=>{
+    if(r.isMiss) return best;
+    const idx=rarityOrder.indexOf(r.rarity.key);
+    return idx>rarityOrder.indexOf(best)?r.rarity.key:best;
+  },'C');
+  const videoKey=topKey==='SR'?'sr':topKey==='R'?'rare':'common';
+  await playAnimation(videoKey, 1800);
+
+  // 結果表示
+  document.getElementById('result-card').classList.remove('show');
+  const grid=document.getElementById('r10-grid');
+  grid.innerHTML=results.map((r,i)=>{
+    const delay=`${i*0.05}s`;
+    if(r.isMiss) return `<div class="r10-item" style="--delay:${delay};border-color:#aaa"><img src="parts/gacha_machine.png" style="opacity:.3"><span class="r10-label rarity-miss">MISS</span></div>`;
+    const bc=r.rarity.dot==='sr'?'#f5af19':r.rarity.dot==='r'?'#c850c0':r.rarity.dot==='uc'?'#4facfe':'#8bc34a';
+    const newBadge=r.isNew?'<span class="r10-new">NEW</span>':'';;
+    return `<div class="r10-item" style="--delay:${delay};border-color:${bc}"><img src="parts/${r.id}.png">${newBadge}<span class="r10-label ${r.rarity.css}">${r.rarity.key}</span></div>`;
+  }).join('');
+
+  document.getElementById('r10-guarantee').textContent=guaranteed?'✨ UC以上1枚確定が発動しました！':'';;
+  let summary='';
+  if(newCount>0) summary+=`🎉 NEW ${newCount}枚ゲット！  `;
+  if(missRefund>0) summary+=`🪙 ${missRefund}コインもどってきたよ`;
+  document.getElementById('r10-summary').textContent=summary||'おつかれさま！';
+
+  document.getElementById('result-10').classList.add('show');
+  spawnSparkles(document.getElementById('gacha-overlay'));
+  await persist(); updateUI(); renderCollection();
+};
+
+window.closeResult=function(){
   document.getElementById('gacha-overlay').classList.remove('show');
   document.getElementById('result-card').classList.remove('show');
+  document.getElementById('result-10').classList.remove('show');
   document.getElementById('gacha-loading').classList.remove('show');
 };
 
-function spawnSparkles(container) {
-  const colors = ['#ffd700','#ff69b4','#87ceeb','#fff','#c850c0','#ff6b6b'];
-  for (let i = 0; i < 30; i++) {
-    setTimeout(() => {
-      const spark = document.createElement('div');
-      spark.className = 'sparkle-burst';
-      const angle = Math.random() * Math.PI * 2;
-      const dist = 80 + Math.random() * 180;
-      spark.style.cssText = `
-        left: 50%; top: 45%;
-        background: ${colors[Math.floor(Math.random() * colors.length)]};
-        --dx: ${Math.cos(angle) * dist}px;
-        --dy: ${Math.sin(angle) * dist}px;
-        width: ${4 + Math.random() * 6}px;
-        height: ${4 + Math.random() * 6}px;
-      `;
-      container.appendChild(spark);
-      setTimeout(() => spark.remove(), 1000);
-    }, i * 40);
-  }
+function spawnSparkles(container){
+  const colors=['#ffd700','#ff69b4','#87ceeb','#fff','#c850c0','#ff6b6b'];
+  for(let i=0;i<30;i++) setTimeout(()=>{
+    const s=document.createElement('div'); s.className='sparkle-burst';
+    const a=Math.random()*Math.PI*2, d=80+Math.random()*180;
+    s.style.cssText=`left:50%;top:45%;background:${colors[Math.floor(Math.random()*colors.length)]};--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d}px;width:${4+Math.random()*6}px;height:${4+Math.random()*6}px;`;
+    container.appendChild(s); setTimeout(()=>s.remove(),1000);
+  },i*40);
 }
 
-function renderCollection() {
-  const grid = document.getElementById('collection-grid');
-  grid.innerHTML = '';
-  const allNums = getAllOutfitNums();
-  for (const num of allNums) {
-    const id = `outfit_${String(num).padStart(2, '0')}`;
-    const owned = (save.gachaOwned || []).includes(id);
-    const rarity = getRarityForOutfit(num);
-    const slot = document.createElement('div');
-    slot.className = 'coll-slot' + (owned ? ' owned' : '');
-    if (rarity) {
-      const dot = document.createElement('div');
-      dot.className = `rarity-dot ${rarity.dot}`;
-      slot.appendChild(dot);
-    }
-    if (owned) {
-      const img = document.createElement('img');
-      img.src = `parts/${id}.png`;
-      img.alt = id;
-      slot.appendChild(img);
-    } else {
-      const lock = document.createElement('span');
-      lock.className = 'lock-icon';
-      lock.textContent = '🔒';
-      slot.appendChild(lock);
-    }
+function renderCollection(){
+  const grid=document.getElementById('collection-grid');
+  grid.innerHTML='';
+  for(const num of getAllOutfitNums()){
+    const id=`outfit_${String(num).padStart(2,'0')}`;
+    const owned=(save.gachaOwned||[]).includes(id);
+    const rarity=getRarityForOutfit(num);
+    const slot=document.createElement('div'); slot.className='coll-slot'+(owned?' owned':'');
+    if(rarity){ const dot=document.createElement('div'); dot.className=`rarity-dot ${rarity.dot}`; slot.appendChild(dot); }
+    if(owned){ const img=document.createElement('img'); img.src=`parts/${id}.png`; img.alt=id; slot.appendChild(img); }
+    else { const lock=document.createElement('span'); lock.className='lock-icon'; lock.textContent='🔒'; slot.appendChild(lock); }
     grid.appendChild(slot);
   }
 }
 
-function showToast(msg, type) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast show ' + (type || '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.className = 'toast'; }, 2500);
+function showToast(msg,type){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast show '+(type||'');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.className='toast',2500);
 }
 
 init();

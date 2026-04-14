@@ -220,6 +220,8 @@ body {
 
 <!-- オーバーレイ -->
 <div class="gacha-overlay" id="gacha-overlay">
+  <video id="gacha-video" playsinline preload="auto"
+    style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;z-index:1;"></video>
   <div class="gacha-loading" id="gacha-loading">
     <div style="font-size:72px;animation:machineShake .4s ease-in-out infinite">🎀</div>
     <p>ドキドキ…</p>
@@ -262,10 +264,13 @@ import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/fireb
 const app = initializeApp(FIREBASE_CONFIG);
 const db  = getFirestore(app);
 
-const GACHA_COST    = 1000;
-const GACHA_COST_10 = 9000;
+const GACHA_COST      = 1000;
+const GACHA_COST_10   = 9000;
+const MISS_RATE       = 0.80;   // はずれ確率80%
+const MISS_REFUND     = 100;    // はずれ時コイン返却
+const GUARANTEE_MIN_STARS = 4;  // 10連SR以上保証
 
-// stars値 → レアリティ定義
+// stars値 → レアリティ定義（合計20%を分配）
 const RARITY_MAP = {
   1: { key:'C',   css:'rarity-c',   dot:'c',   label:'コモン',          rate:0.40 },
   2: { key:'UC',  css:'rarity-uc',  dot:'uc',  label:'⭐ アンコモン',    rate:0.30 },
@@ -273,11 +278,53 @@ const RARITY_MAP = {
   4: { key:'SR',  css:'rarity-sr',  dot:'sr',  label:'🌟 スーパーレア',  rate:0.10 },
   5: { key:'SSR', css:'rarity-ssr', dot:'ssr', label:'💫 エクストラ',    rate:0.05 },
 };
-// 10連SR以上保証（stars>=4）
-const GUARANTEE_MIN_STARS = 4;
 
-let manifest = [];    // gacha-manifest.json の配列
-let username = '', save = {}, toastTimer = null;
+// 動画設定（gacha.html と共通）
+const GACHA_VIDEOS = {
+  miss:   './parts/gacha_normal.mp4',
+  common: './parts/gacha_normal.mp4',
+  rare:   './parts/gacha_rare.mp4',
+  sr:     './parts/gacha_sr.mp4',
+};
+let videoAvailable = { miss:false, common:false, rare:false, sr:false };
+async function checkVideos() {
+  for (const key of Object.keys(GACHA_VIDEOS)) {
+    try { const r = await fetch(GACHA_VIDEOS[key],{method:'HEAD'}); videoAvailable[key] = r.ok; }
+    catch { videoAvailable[key] = false; }
+  }
+}
+function getVideoKey(result) {
+  if (result.isMiss) return 'miss';
+  if (result.stars >= 5) return 'sr';
+  if (result.stars >= 4) return 'sr';
+  if (result.stars >= 3) return 'rare';
+  return 'common';
+}
+function playGachaVideo(videoKey) {
+  return new Promise(resolve => {
+    const video = document.getElementById('gacha-video');
+    if (!videoAvailable[videoKey]) { resolve(false); return; }
+    video.src = GACHA_VIDEOS[videoKey];
+    video.style.display = 'block';
+    video.currentTime = 0;
+    const onEnd = () => { video.removeEventListener('ended',onEnd); video.style.display='none'; resolve(true); };
+    video.addEventListener('ended', onEnd);
+    video.addEventListener('click', () => { video.pause(); video.style.display='none'; resolve(true); }, {once:true});
+    video.play().catch(() => { video.style.display='none'; resolve(false); });
+  });
+}
+async function playAnimation(videoKey, fallbackMs) {
+  document.getElementById('machine-wrap').classList.add('spinning');
+  document.getElementById('gacha-overlay').classList.add('show');
+  document.getElementById('gacha-loading').classList.add('show');
+  const played = await playGachaVideo(videoKey);
+  if (!played) await delay(fallbackMs);
+  document.getElementById('machine-wrap').classList.remove('spinning');
+  document.getElementById('gacha-loading').classList.remove('show');
+}
+
+let manifest = [];
+let username = '', save = {};
 let currentCat = 'all';
 
 // ─────────────────────────────────────
@@ -306,6 +353,7 @@ async function init() {
   if (!save.coins)            save.coins = 0;
   if (!save.gachaAvatarOwned) save.gachaAvatarOwned = [];
 
+  checkVideos();
   buildCatTabs();
   updateUI();
   renderCollection();
@@ -334,9 +382,13 @@ function updateUI() {
 // ガチャロジック
 // ─────────────────────────────────────
 function drawOne() {
-  // 重み付きランダム
   const rand = Math.random();
-  // まず対象stars配列を確率で選ぶ
+
+  // 80% はずれ
+  if (rand < MISS_RATE) return { isMiss: true };
+
+  // 残り20% をレアリティ振り分け
+  const r2 = (rand - MISS_RATE) / (1 - MISS_RATE);
   const byStars = {};
   for (const item of manifest) {
     const s = item.stars || 4;
@@ -344,97 +396,113 @@ function drawOne() {
     byStars[s].push(item);
   }
   const starsKeys = Object.keys(byStars).map(Number).sort((a,b)=>a-b);
-
-  // 存在するstars値だけで合計レートを正規化
-  let total = 0;
-  for (const s of starsKeys) total += (RARITY_MAP[s]?.rate || 0.10) * byStars[s].length;
+  let totalRate = 0;
+  for (const s of starsKeys) totalRate += (RARITY_MAP[s]?.rate || 0.10);
 
   let cum = 0;
-  const r = rand * total;
   for (const s of starsKeys) {
     const rDef = RARITY_MAP[s] || RARITY_MAP[4];
-    cum += rDef.rate * byStars[s].length;
-    if (r <= cum) {
+    cum += rDef.rate / totalRate;
+    if (r2 <= cum) {
       const pool = byStars[s];
       const item = pool[Math.floor(Math.random() * pool.length)];
-      return { item, rarity: rDef, stars: s };
+      return { isMiss: false, item, rarity: rDef, stars: s };
     }
   }
-  // フォールバック
   const fallback = manifest[Math.floor(Math.random()*manifest.length)];
-  return { item: fallback, rarity: RARITY_MAP[fallback.stars||4] || RARITY_MAP[4], stars: fallback.stars||4 };
+  return { isMiss: false, item: fallback, rarity: RARITY_MAP[fallback.stars||4]||RARITY_MAP[4], stars: fallback.stars||4 };
 }
 
-function isNew(itemId) {
-  return !(save.gachaAvatarOwned || []).includes(itemId);
+// SR以上が確定の1枚を引く（10連保証用）
+function drawGuaranteed() {
+  const srPool = manifest.filter(it => (it.stars||4) >= GUARANTEE_MIN_STARS);
+  const pool = srPool.length > 0 ? srPool : manifest;
+  const item = pool[Math.floor(Math.random()*pool.length)];
+  return { isMiss: false, item, rarity: RARITY_MAP[item.stars||4]||RARITY_MAP[4], stars: item.stars||4 };
 }
+
+function isNew(itemId) { return !(save.gachaAvatarOwned||[]).includes(itemId); }
 function addOwned(itemId) {
   if (!save.gachaAvatarOwned) save.gachaAvatarOwned = [];
   if (!save.gachaAvatarOwned.includes(itemId)) save.gachaAvatarOwned.push(itemId);
 }
 
-// 1連
+// ─── 1連 ───
 window.pullGacha = async function() {
-  if ((save.coins||0) < GACHA_COST) { showToast('コインがたりない！', 'ng'); return; }
+  if ((save.coins||0) < GACHA_COST) { showToast('コインがたりない！','ng'); return; }
   save.coins -= GACHA_COST;
   updateUI();
-  showOverlay(true);
 
-  await delay(900);
-  const { item, rarity } = drawOne();
-  const wasNew = isNew(item.id);
-  addOwned(item.id);
+  const result = drawOne();
+  const vKey = getVideoKey(result);
+  const fallMs = result.isMiss ? 1200 : result.stars >= 4 ? 2500 : 1800;
+  await playAnimation(vKey, fallMs);
+
+  const card = document.getElementById('result-card');
+  document.getElementById('result-10').classList.remove('show');
+
+  if (result.isMiss) {
+    save.coins += MISS_REFUND;
+    await persist();
+    document.getElementById('result-img').src = 'parts/gacha_machine.png';
+    document.getElementById('result-img').style.opacity = '0.4';
+    document.getElementById('result-rarity').textContent = '💨 ハズレ…';
+    document.getElementById('result-rarity').className   = 'rarity-tag rarity-miss';
+    document.getElementById('result-new').style.display  = 'none';
+    document.getElementById('result-msg').textContent    = `ざんねん！🪙${MISS_REFUND}コインもどってきたよ`;
+    card.classList.add('show'); updateUI(); return;
+  }
+
+  const wasNew = isNew(result.item.id);
+  addOwned(result.item.id);
   await persist();
 
-  hideLoading();
-  const card = document.getElementById('result-card');
-  document.getElementById('result-img').src    = item.file;
-  document.getElementById('result-rarity').textContent  = rarity.label;
-  document.getElementById('result-rarity').className    = 'rarity-tag ' + rarity.css;
-  document.getElementById('result-new').style.display   = wasNew ? '' : 'none';
-  document.getElementById('result-msg').textContent     = wasNew
-    ? `「${item.name}」をゲット！` : `「${item.name}」(すでにもってる)`;
+  document.getElementById('result-img').src = result.item.file;
+  document.getElementById('result-img').style.opacity = '1';
+  document.getElementById('result-img').onerror = function() {
+    this.style.display='none';
+    document.getElementById('result-msg').textContent = result.item.name + (wasNew?' をゲット！':'(すでにもってる)');
+  };
+  document.getElementById('result-rarity').textContent = result.rarity.label;
+  document.getElementById('result-rarity').className   = 'rarity-tag ' + result.rarity.css;
+  document.getElementById('result-new').style.display  = wasNew ? 'inline-block' : 'none';
+  document.getElementById('result-msg').textContent    = wasNew
+    ? `「${result.item.name}」をゲット！🎉` : `「${result.item.name}」(すでにもってる)`;
   card.classList.add('show');
-  updateUI();
-  renderCollection();
+  updateUI(); renderCollection();
 };
 
-// 10連
+// ─── 10連 ───
 window.pull10Gacha = async function() {
-  if ((save.coins||0) < GACHA_COST_10) { showToast('コインがたりない！', 'ng'); return; }
+  if ((save.coins||0) < GACHA_COST_10) { showToast('コインがたりない！','ng'); return; }
   save.coins -= GACHA_COST_10;
   updateUI();
-  showOverlay(true);
 
-  await delay(1000);
+  // SR以上の動画で統一
+  await playAnimation('sr', 2500);
 
   const results = [];
   for (let i = 0; i < 10; i++) results.push(drawOne());
 
-  // SR以上保証
+  // SR以上保証：非はずれかつSR以上が0枚なら最後を差替え
+  const hasHighHit = results.some(r => !r.isMiss && r.stars >= GUARANTEE_MIN_STARS);
   let guaranteed = false;
-  const hasHigh = results.some(r => r.stars >= GUARANTEE_MIN_STARS);
-  if (!hasHigh) {
-    // 最後の1枚をSR以上に置き換え
-    const srPool = manifest.filter(it => (it.stars||4) >= GUARANTEE_MIN_STARS);
-    if (srPool.length > 0) {
-      const item = srPool[Math.floor(Math.random()*srPool.length)];
-      const rarity = RARITY_MAP[item.stars||4] || RARITY_MAP[4];
-      results[9] = { item, rarity, stars: item.stars||4 };
-      guaranteed = true;
-    }
+  if (!hasHighHit) {
+    results[9] = drawGuaranteed();
+    guaranteed = true;
   }
 
-  // 所有登録
-  let newCount = 0;
+  // はずれのコイン返却計算・所有登録
+  let missCount = 0, newCount = 0;
   results.forEach(r => {
+    if (r.isMiss) { missCount++; return; }
     const wasNew = isNew(r.item.id);
     addOwned(r.item.id);
     if (wasNew) { r.isNew = true; newCount++; }
   });
+  const missRefundTotal = missCount * MISS_REFUND;
+  if (missRefundTotal > 0) save.coins += missRefundTotal;
   await persist();
-
-  hideLoading();
 
   // グリッド表示
   const grid = document.getElementById('r10-grid');
@@ -443,21 +511,33 @@ window.pull10Gacha = async function() {
     const div = document.createElement('div');
     div.className = 'r10-item';
     div.style.setProperty('--delay', (i * 0.06) + 's');
-    const borderColor = r.stars >= 5 ? '#ffd700' : r.stars >= 4 ? '#f5af19' : r.stars >= 3 ? '#c850c0' : '#4facfe';
-    div.style.borderColor = borderColor;
-    div.innerHTML = `
-      <img src="${r.item.file}" alt="${r.item.name}" onerror="this.style.display='none'">
-      <div class="r10-label ${r.rarity.css}">${r.rarity.key}</div>
-      ${r.isNew ? '<div class="r10-new">NEW!</div>' : ''}
-    `;
+
+    if (r.isMiss) {
+      div.style.borderColor = '#aaa';
+      div.style.opacity = '0.6';
+      div.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:2em;opacity:.4">💨</div>
+        <div class="r10-label rarity-miss">MISS</div>
+      `;
+    } else {
+      const borderColor = r.stars >= 5 ? '#ffd700' : r.stars >= 4 ? '#f5af19' : r.stars >= 3 ? '#c850c0' : '#4facfe';
+      div.style.borderColor = borderColor;
+      div.innerHTML = `
+        <img src="${r.item.file}" alt="${r.item.name}"
+          onerror="this.parentElement.querySelector('.item-fallback').style.display='flex';this.style.display='none'">
+        <div class="item-fallback" style="display:none;align-items:center;justify-content:center;height:100%;font-size:.65em;font-weight:900;color:#888;padding:4px;text-align:center;">${r.item.name}</div>
+        <div class="r10-label ${r.rarity.css}">${r.rarity.key}</div>
+        ${r.isNew ? '<div class="r10-new">NEW!</div>' : ''}
+      `;
+    }
     grid.appendChild(div);
   });
 
+  const missMsg = missRefundTotal > 0 ? ` / はずれ${missCount}回 🪙+${missRefundTotal}` : '';
   document.getElementById('r10-guarantee').textContent = guaranteed ? '✨ SR以上を1枚確定でゲット！' : '';
-  document.getElementById('r10-summary').textContent   = `NEW ${newCount}件ゲット！`;
+  document.getElementById('r10-summary').textContent   = `NEW ${newCount}件ゲット！${missMsg}`;
   document.getElementById('result-10').classList.add('show');
-  updateUI();
-  renderCollection();
+  updateUI(); renderCollection();
 };
 
 window.closeResult = function() {
@@ -539,16 +619,6 @@ function renderCollection() {
 // ─────────────────────────────────────
 // ヘルパー
 // ─────────────────────────────────────
-function showOverlay(loading) {
-  document.getElementById('gacha-overlay').classList.add('show');
-  if (loading) {
-    document.getElementById('gacha-loading').classList.add('show');
-    document.getElementById('machine-wrap').classList.add('spinning');
-  }
-}
-function hideLoading() {
-  document.getElementById('gacha-loading').classList.remove('show');
-}
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 let toastTmr = null;

@@ -660,6 +660,16 @@ body::before {
 .lesson-btn .lesson-name { font-size: .9rem; font-weight: 900; display: block; margin-bottom: 2px; }
 .lesson-btn .lesson-desc { font-size: .72rem; color: var(--text2); font-weight: 700; }
 .lesson-btn .lesson-arrow { font-size: .85rem; color: var(--text3); }
+.coin-pill {
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(245,166,35,0.12);
+  border: 1.5px solid rgba(245,166,35,0.4);
+  padding: 5px 12px; border-radius: 20px;
+  font-weight: 900; font-size: .85rem; color: var(--gold);
+  text-decoration: none; transition: .2s; flex-shrink: 0;
+  cursor: pointer;
+}
+.coin-pill:hover { background: rgba(245,166,35,0.22); transform: scale(1.04); }
 .avatar-btn {
   display: flex; align-items: center; justify-content: center;
   width: 34px; height: 34px; min-width: 34px; border-radius: 50%;
@@ -705,6 +715,7 @@ body::before {
     <a href="pet.html" class="avatar-btn" title="ペット" style="background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.3);">
     <span id="topbar-pet">🐾</span>
     </a>
+    <a href="gacha.html" class="coin-pill" title="ガチャへ">🪙 <span id="ui-coins">0</span></a>
     <button class="logout-btn" onclick="logout()">ログアウト</button>
   </div>
   <div class="level-section">
@@ -730,6 +741,15 @@ body::before {
       </svg>
       <div class="ring-text" id="ui-ring-text">0/10</div>
     </div>
+  </div>
+  <!-- ガチャリンク -->
+  <div style="display:flex;gap:10px;margin-bottom:12px;">
+    <a href="gacha.html" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:14px;background:linear-gradient(135deg,rgba(255,105,180,.15),rgba(200,80,192,.15));border:1.5px solid rgba(200,80,192,.35);text-decoration:none;font-weight:900;font-size:.9rem;color:#c850c0;transition:.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+      🎰 ガチャ <span style="font-size:.75rem;font-weight:700;opacity:.75;">100コイン</span>
+    </a>
+    <a href="gacha-avatar.html" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:14px;background:linear-gradient(135deg,rgba(255,158,226,.15),rgba(161,140,209,.15));border:1.5px solid rgba(200,80,192,.35);text-decoration:none;font-weight:900;font-size:.9rem;color:#9f7aea;transition:.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+      👗 アバターガチャ <span style="font-size:.75rem;font-weight:700;opacity:.75;">1000コイン</span>
+    </a>
   </div>
   <div class="categories">
     <button class="cat-btn active" onclick="setCategory(0)"><span class="icon">🔢</span><span class="label">四則</span></button>
@@ -878,6 +898,7 @@ function renderUI() {
   document.getElementById('ui-username').textContent='👤 '+username;
   document.getElementById('ui-streak').textContent=save.streak||0;
   document.getElementById('ui-xp').textContent=save.xp||0;
+  document.getElementById('ui-coins').textContent=save.coins||0;
   const hEl=document.getElementById('ui-hearts'); hEl.innerHTML='';
   for(let i=0;i<HEARTS_MAX;i++){const s=document.createElement('span');s.className='heart'+(i>=(save.hearts||0)?' lost':'');s.textContent='❤️';hEl.appendChild(s);}
   const lv=save.level||1, xp=save.xp||0, max=xpForLv(lv);
@@ -1202,13 +1223,56 @@ window.checkRevive=function(){ const elapsed=Date.now()-(save.lastHeartRegen||Da
 
 window.toggleHint=function(){ hintVisible=!hintVisible; const box=document.getElementById('hint-box'),btn=document.getElementById('hint-btn'); if(box) box.style.display=hintVisible?'block':'none'; if(btn) btn.textContent=hintVisible?'💡 ヒントを隠す':'💡 ヒントを見る'; };
 
+
+let memoInputMode = 'draw'; // 現在のメモ入力モード
+
+window.setMemoInputMode = function(mode) {
+  memoInputMode = mode;
+  const drawView = document.getElementById('memo-draw-view');
+  const textView = document.getElementById('memo-text-view');
+  const tabDraw  = document.getElementById('memo-tab-draw');
+  const tabText  = document.getElementById('memo-tab-text');
+  if (!drawView || !textView) return;
+
+  const isDraw = (mode === 'draw');
+  drawView.style.display = isDraw ? '' : 'none';
+  textView.style.display = isDraw ? 'none' : '';
+  if (tabDraw) tabDraw.classList.toggle('active',  isDraw);
+  if (tabText) tabText.classList.toggle('active', !isDraw);
+
+  if (isDraw) {
+    // キャンバスモード：numpad を元に戻す
+    const numpadWrap = document.getElementById('numpad-wrap');
+    if (numpadWrap) numpadWrap.style.display = '';
+    setTimeout(initMemoCanvas, 50);
+  } else {
+    // テキストモード：numpad を隠して OS キーボードを使う
+    const numpadWrap = document.getElementById('numpad-wrap');
+    if (numpadWrap) numpadWrap.style.display = 'none';
+    // textarea にフォーカス → OS キーボードが開く
+    setTimeout(() => {
+      const ta = document.getElementById('memo-textarea');
+      if (ta) { ta.focus(); ta.readOnly = false; }
+    }, 80);
+  }
+};
+
 window.toggleMemo=function(){
   memoVisible=!memoVisible;
   const panel=document.getElementById('memo-panel');
   const fab=document.getElementById('memo-fab');
   if(panel) panel.classList.toggle('visible', memoVisible);
   if(fab)   fab.classList.toggle('open', memoVisible);
-  if(memoVisible) setTimeout(initMemoCanvas, 50);
+  if(memoVisible){
+    setTimeout(()=>{
+      if(memoInputMode==='draw') initMemoCanvas();
+      else setMemoInputMode('text');
+    },50);
+  } else {
+    // パネルを閉じたら numpad を元に戻す
+    const numpadWrap = document.getElementById('numpad-wrap');
+    if(numpadWrap) numpadWrap.style.display = '';
+  }
 };
 
 /* === キャンバスメモ（タッチ対応） === */
@@ -1402,9 +1466,9 @@ function testJudge(correct){ testAnswered=true;testTotal++;if(correct){testCorre
 window.submitTestAnswer=function(){ if(testAnswered) return;if(testCurrentQ.type==='fraction'){const fn=parseInt(document.getElementById('t-fn')?.value,10);const fd=parseInt(document.getElementById('t-fd')?.value,10);if(isNaN(fn)||isNaN(fd)) return;const g=gcd(fn,fd);const correct=(fn/g===testCurrentQ.na&&fd/g===testCurrentQ.da);testJudge(correct);}else{const inp=document.getElementById('t-ans');if(!inp) return;const val=parseFloat(inp.value);if(isNaN(val)) return;testJudge(val.toString()===testCurrentQ.answer);} };
 window.submitTestChoice=function(val,btn){ if(testAnswered) return;const correct=(val===testCurrentQ.answer);btn.classList.add(correct?'ok':'ng');testJudge(correct); };
 function endTest(){ testMode=false;clearInterval(testTimer);const tl=getTestLv(save.level||1);const timeBonus=Math.round(Math.max(0,testTimeLeft)/TEST_TIME*30);const score=testCorrect*7+timeBonus;const isNew=score>(save.bestTestScore||0);if(isNew){save.bestTestScore=score;save.bestTestLv=tl.lv;}
-// テストクリア報酬：初回300コイン、2回目以降50コイン
+// テストクリア報酬：初回5000コイン、2回目以降3000コイン
 const isFirstClear = !save.testCleared;
-const testCoinReward = isFirstClear ? 300 : 50;
+const testCoinReward = isFirstClear ? 5000 : 3000;
 save.coins = (save.coins || 0) + testCoinReward;
 if (isFirstClear) save.testCleared = true;
 persistSave();

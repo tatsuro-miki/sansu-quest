@@ -337,13 +337,18 @@ async function init() {
   }
   save.chibOwned.forEach(function(id) { unlockedParts[id] = true; });
 
+  // 装備中パーツを構築（Firestoreのデータ or 初期値：目だけ装備・他はなし）
   selected = {};
   for (var catId in manifest.categories) {
     if (save.chibEquipped[catId] !== undefined) {
       selected[catId] = save.chibEquipped[catId];
-    } else {
+    } else if (catId === 'eyes') {
+      // 目だけ最初の無料アイテムをデフォルトで装備
       var items = manifest.categories[catId].items;
       selected[catId] = items.length > 0 ? items[0].id : null;
+    } else {
+      // 目以外はなし（裸）
+      selected[catId] = null;
     }
   }
 
@@ -389,7 +394,8 @@ function buildPartsGrid() {
   var catData = manifest.categories[activeCategory];
   if (!catData) return;
 
-  if (activeCategory !== 'eyes' && activeCategory !== 'hair') {
+  // 「なし」カード（目以外すべて。髪も外せる）
+  if (activeCategory !== 'eyes') {
     var noneCard = document.createElement('div');
     noneCard.className = 'part-card none-card' + (selected[activeCategory] === null ? ' selected' : '');
     noneCard.innerHTML = '<span class="none-icon">✕</span>';

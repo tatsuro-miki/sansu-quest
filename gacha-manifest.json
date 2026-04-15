@@ -187,7 +187,7 @@
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
-   "transform": { "x": -1, "y": -5, "scale": 60 }
+   "transform": { "x": 2, "y": -5, "scale": 63 }
  },
  {
    "id": "セーラー服",

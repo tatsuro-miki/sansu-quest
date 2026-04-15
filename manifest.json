@@ -28,8 +28,8 @@
       "z_index": 4,
       "items": [
         {"id": "bottoms_パープルパンツ", "name": "パープルパンツ", "file": "chibi-parts/bottoms/パープルパンツ.png", "cost": 1000, "stars": 0, "transform": {"x": 0, "y": 20, "scale": 24}},
-        {"id": "bottoms_ピンクショートパンツ", "name": "ピンクショートパンツ", "file": "chibi-parts/bottoms/ピンクショートパンツ.png", "cost": 2000, "stars": 2, "transform": {"x": 0, "y": -6, "scale": 81}},
-        {"id": "bottoms_ピンクスカート", "name": "ピンクスカート", "file": "chibi-parts/bottoms/ピンクスカート.png", "cost": 3000, "stars": 3, "transform": {"x": -1, "y": 24, "scale": 50}},
+        {"id": "bottoms_ピンクショートパンツ", "name": "ピンクショートパンツ", "file": "chibi-parts/bottoms/ピンクショートパンツ.png", "cost": 2000, "stars": 2, "transform": {"x": 0, "y": 19, "scale": 22}},
+        {"id": "bottoms_ピンクスカート", "name": "ピンクスカート", "file": "chibi-parts/bottoms/ピンクスカート.png", "cost": 3000, "stars": 3, "transform": {"x": 0, "y": 18, "scale": 24}},
         {"id": "bottoms_ブラックフリルスカート", "name": "ブラックフリルスカート", "file": "chibi-parts/bottoms/ブラックフリルスカート.png", "cost": 9000, "stars": 4, "transform": {"x": 0, "y": 22, "scale": 27}}
       ]
     },
@@ -37,8 +37,8 @@
       "display_name": "め",
       "z_index": 10,
       "items": [
-        {"id": "eyes_blue", "name": "blue", "file": "chibi-parts/eyes/blue.png", "cost": 0, "stars": 0, "transform": {"x": 0, "y": -8, "scale": 25}},
-        {"id": "eyes_blue1", "name": "blue1", "file": "chibi-parts/eyes/blue1.png", "cost": 3000, "stars": 2, "transform": {"x": 0, "y": -7, "scale": 30}},
+        {"id": "eyes_blue", "name": "blue", "file": "chibi-parts/eyes/blue.png", "cost": 0, "stars": 0, "transform": {"x": 0, "y": -1, "scale": 22}},
+        {"id": "eyes_blue1", "name": "blue1", "file": "chibi-parts/eyes/blue1.png", "cost": 3000, "stars": 2, "transform": {"x": 0, "y": 3, "scale": 27}},
         {"id": "eyes_blue2", "name": "blue2", "file": "chibi-parts/eyes/blue2.png", "cost": 3000, "stars": 3, "transform": {"x": 0, "y": 3, "scale": 32}},
         {"id": "eyes_blue3", "name": "blue3", "file": "chibi-parts/eyes/blue3.png", "cost": 4000, "stars": 4, "transform": {"x": 0, "y": 1, "scale": 29}},
         {"id": "eyes_blue4", "name": "blue4", "file": "chibi-parts/eyes/blue4.png", "cost": 5000, "stars": 5, "transform": {"x": 0, "y": 1, "scale": 26}},
@@ -94,11 +94,11 @@
         {"id": "tops_tops2", "name": "tops2", "file": "chibi-parts/tops/tops2.png", "cost": 3000, "stars": 2, "transform": {"x": 0, "y": 15, "scale": 28}},
         {"id": "tops_tops3", "name": "tops3", "file": "chibi-parts/tops/tops3.png", "cost": 5000, "stars": 3, "transform": {"x": 0, "y": 13, "scale": 25}},
         {"id": "tops_tops4", "name": "tops4", "file": "chibi-parts/tops/tops4.png", "cost": 5000, "stars": 4, "transform": {"x": 0, "y": 12, "scale": 23}},
-        {"id": "tops_ゴシックチョーカー", "name": "ゴシックチョーカー", "file": "chibi-parts/tops/ゴシックチョーカー.png", "cost": 15000, "stars": 5, "transform": {"x": -1, "y": 18, "scale": 45}},
-        {"id": "tops_ゴシックパーカー", "name": "ゴシックパーカー", "file": "chibi-parts/tops/ゴシックパーカー.png", "cost": 15000, "stars": 5, "transform": {"x": -3, "y": 22, "scale": 47}},
-        {"id": "tops_ゴシックフリル", "name": "ゴシックフリル", "file": "chibi-parts/tops/ゴシックフリル.png", "cost": 15000, "stars": 5, "transform": {"x": -2, "y": 18, "scale": 45}},
-        {"id": "tops_ゴシックレース", "name": "ゴシックレース", "file": "chibi-parts/tops/ゴシックレース.png", "cost": 17000, "stars": 5, "transform": {"x": 0, "y": 16, "scale": 37}},
-        {"id": "tops_ピンクのカーディガン", "name": "ピンクのカーディガン", "file": "chibi-parts/tops/ピンクのカーディガン.png", "cost": 3000, "stars": 5, "transform": {"x": 0, "y": -6, "scale": 82}}
+        {"id": "tops_ゴシックチョーカー", "name": "ゴシックチョーカー", "file": "chibi-parts/tops/ゴシックチョーカー.png", "cost": 15000, "stars": 5, "transform": {"x": 1, "y": 19, "scale": 37}},
+        {"id": "tops_ゴシックパーカー", "name": "ゴシックパーカー", "file": "chibi-parts/tops/ゴシックパーカー.png", "cost": 15000, "stars": 5, "transform": {"x": 1, "y": 22, "scale": 47}},
+        {"id": "tops_ゴシックフリル", "name": "ゴシックフリル", "file": "chibi-parts/tops/ゴシックフリル.png", "cost": 15000, "stars": 5, "transform": {"x": 0, "y": 21, "scale": 41}},
+        {"id": "tops_ゴシックレース", "name": "ゴシックレース", "file": "chibi-parts/tops/ゴシックレース.png", "cost": 17000, "stars": 5, "transform": {"x": 0, "y": 19, "scale": 37}},
+        {"id": "tops_ピンクのカーディガン", "name": "ピンクのカーディガン", "file": "chibi-parts/tops/ピンクのカーディガン.png", "cost": 3000, "stars": 5, "transform": {"x": 0, "y": 18, "scale": 37}}
       ]
     }
   }

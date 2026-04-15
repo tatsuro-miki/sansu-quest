@@ -1,4 +1,4 @@
-﻿[
+[
  {
    "id": "pink1",
    "name": "pink1",
@@ -28,7 +28,7 @@
  {
    "id": "猫耳の瞳 (1)",
    "name": "猫耳の瞳 (1)",
-   "file": "chibi-parts/gacha/tops/猫耳の瞳 (1).png",
+   "file": "chibi-parts/gacha/eyes/猫耳の瞳 (1).png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -41,7 +41,7 @@
  {
    "id": "エクステピンクツインテール",
    "name": "エクステピンクツインテール",
-   "file": "chibi-parts/gacha/accessory/エクステピンクツインテール.png",
+   "file": "chibi-parts/gacha/accessories/エクステピンクツインテール.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -80,7 +80,7 @@
  {
    "id": "パジャマ黒",
    "name": "パジャマ黒",
-   "file": "chibi-parts/gacha/top/パジャマ黒.png",
+   "file": "chibi-parts/gacha/tops/パジャマ黒.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,

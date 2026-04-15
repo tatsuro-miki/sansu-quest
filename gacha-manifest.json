@@ -1,5 +1,5 @@
 [
-  {"id": "pink1", "name": "pink1", "file": "chibi-parts/gacha/eyes/pink1.png", "category": "eyes", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0, "y": 2, "scale": 30.5}},
+  {"id": "pink1", "name": "pink1", "file": "chibi-parts/gacha/eyes/pink1.png", "category": "eyes", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0, "y": 4, "scale": 30.5}},
   {"id": "猫の目", "name": "猫の目", "file": "chibi-parts/gacha/eyes/猫の目.png", "category": "eyes", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0, "y": 4, "scale": 29}},
   {"id": "猫耳の瞳 (1)", "name": "猫耳の瞳 (1)", "file": "chibi-parts/gacha/eyes/猫耳の瞳 (1).png", "category": "eyes", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0, "y": 2.5, "scale": 29.5}},
   {"id": "エクステピンクツインテール", "name": "エクステピンクツインテール", "file": "chibi-parts/gacha/accessories/エクステピンクツインテール.png", "category": "accessories", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0, "y": 5, "scale": 59.5}},

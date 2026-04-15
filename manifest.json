@@ -1,5 +1,20 @@
-{
-  "categories": {
+"categories": {
+      "hair": {
+      "display_name": "かみ",
+      "z_index": 20,
+      "items": [
+        {
+          "id": "hair_オレンジツインシニョンセミロング",
+          "name": "オレンジツインシニョンセミロング",
+          "file": "chibi-parts/hair/オレンジツインシニョンセミロング.png",
+          "cost": 8000,
+          "stars": 0,
+          "transform": {
+            "x": 0,
+            "y": -1,
+            "scale": 55
+          }
+        },
     "accessories": {
       "display_name": "アクセ",
       "z_index": 25,
@@ -281,22 +296,6 @@
         }
       ]
     },
-    "hair": {
-      "display_name": "かみ",
-      "z_index": 20,
-      "items": [
-        {
-          "id": "hair_オレンジツインシニョンセミロング",
-          "name": "オレンジツインシニョンセミロング",
-          "file": "chibi-parts/hair/オレンジツインシニョンセミロング.png",
-          "cost": 8000,
-          "stars": 0,
-          "transform": {
-            "x": 0,
-            "y": -1,
-            "scale": 50
-          }
-        },
         {
           "id": "hair_ゴシックピンク",
           "name": "ゴシックピンク",

@@ -1,4 +1,4 @@
-"categories": {
+{"categories": {
       "hair": {
       "display_name": "かみ",
       "z_index": 20,
@@ -756,3 +756,4 @@
       ]
     }
   }
+}

@@ -236,5 +236,19 @@
      "y": 0,
      "scale": 9
    }
+ },
+ {
+   "id": "ウサ耳と魔女帽",
+   "name": "ウサ耳と魔女帽",
+   "file": "chibi-parts/gacha/hair/ウサ耳と魔女帽.png",
+   "category": "hair",
+   "cost": 1000,
+   "stars": 4,
+   "z_index": 10,
+   "transform": {
+     "x": 1.5,
+     "y": 16.5,
+     "scale": 120
+   }
  }
 ]

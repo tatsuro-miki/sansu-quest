@@ -117,7 +117,7 @@
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
-   "transform": { "x": 0, "y": -2.5, "scale": 69.5 }
+   "transform": { "x": 0, "y": 18, "scale": 35.5 }
  },
  {
    "id": "黒ジャージ",
@@ -137,7 +137,7 @@
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
-   "transform": { "x": 2, "y": 23.5, "scale": 48 }
+   "transform": { "x": 0, "y": 23.5, "scale": 48 }
  },
  {
    "id": "白ジャージ",

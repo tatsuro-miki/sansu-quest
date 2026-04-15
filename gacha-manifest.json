@@ -28,7 +28,7 @@
  {
    "id": "猫耳の瞳 (1)",
    "name": "猫耳の瞳 (1)",
-   "file": "chibi-parts/gacha/outfit/猫耳の瞳 (1).png",
+   "file": "chibi-parts/gacha/tops/猫耳の瞳 (1).png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -54,7 +54,7 @@
  {
    "id": "パジャマグレー",
    "name": "パジャマグレー",
-   "file": "chibi-parts/gacha/face/パジャマグレー.png",
+   "file": "chibi-parts/gacha/tops/パジャマグレー.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -67,7 +67,7 @@
  {
    "id": "ぱじゃま黄色",
    "name": "ぱじゃま黄色",
-   "file": "chibi-parts/gacha/outfit/ぱじゃま黄色.png",
+   "file": "chibi-parts/gacha/tops/ぱじゃま黄色.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -80,7 +80,7 @@
  {
    "id": "パジャマ黒",
    "name": "パジャマ黒",
-   "file": "chibi-parts/gacha/face/パジャマ黒.png",
+   "file": "chibi-parts/gacha/top/パジャマ黒.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -93,7 +93,7 @@
  {
    "id": "ぱじゃま紫",
    "name": "ぱじゃま紫",
-   "file": "chibi-parts/gacha/face/ぱじゃま紫.png",
+   "file": "chibi-parts/gacha/tops/ぱじゃま紫.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -106,7 +106,7 @@
  {
    "id": "パジャマ水色",
    "name": "パジャマ水色",
-   "file": "chibi-parts/gacha/outfit/パジャマ水色.png",
+   "file": "chibi-parts/gacha/tops/パジャマ水色.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -119,7 +119,7 @@
  {
    "id": "パジャマ白",
    "name": "パジャマ白",
-   "file": "chibi-parts/gacha/outfit/パジャマ白.png",
+   "file": "chibi-parts/gacha/tops/パジャマ白.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -132,7 +132,7 @@
  {
    "id": "ピンクジャージ",
    "name": "ピンクジャージ",
-   "file": "chibi-parts/gacha/outfit/ピンクジャージ.png",
+   "file": "chibi-parts/gacha/tops/ピンクジャージ.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -145,7 +145,7 @@
  {
    "id": "ピンクのスウェット",
    "name": "ピンクのスウェット",
-   "file": "chibi-parts/gacha/outfit/ピンクのスウェット.png",
+   "file": "chibi-parts/gacha/tops/ピンクのスウェット.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -158,7 +158,7 @@
  {
    "id": "黒ジャージ",
    "name": "黒ジャージ",
-   "file": "chibi-parts/gacha/outfit/黒ジャージ.png",
+   "file": "chibi-parts/gacha/tops/黒ジャージ.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -171,7 +171,7 @@
  {
    "id": "青ジャージ",
    "name": "青ジャージ",
-   "file": "chibi-parts/gacha/outfit/青ジャージ.png",
+   "file": "chibi-parts/gacha/tops/青ジャージ.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -184,7 +184,7 @@
  {
    "id": "白ジャージ",
    "name": "白ジャージ",
-   "file": "chibi-parts/gacha/outfit/白ジャージ.png",
+   "file": "chibi-parts/gacha/tops/白ジャージ.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -197,7 +197,7 @@
  {
    "id": "猫口1",
    "name": "猫口1",
-   "file": "chibi-parts/gacha/face/猫口1.png",
+   "file": "chibi-parts/gacha/mouth/猫口1.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,
@@ -210,7 +210,7 @@
  {
    "id": "猫口2",
    "name": "猫口2",
-   "file": "chibi-parts/gacha/face/猫口2.png",
+   "file": "chibi-parts/gacha/mouth/猫口2.png",
    "cost": 1000,
    "stars": 4,
    "z_index": 10,

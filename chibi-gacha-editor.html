@@ -58,10 +58,9 @@ h1{text-align:center;font-size:1.3em;color:#a78bfa;margin-bottom:16px}
 .right{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:10px}
 .right h2{font-size:0.78em;color:#7c83b0;text-transform:uppercase;letter-spacing:.1em}
 .stage-wrap{background:#f5f0e8;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.5);overflow:hidden}
-#stage{width:268px;height:345px;position:relative;overflow:hidden}
-#stage img{position:absolute;height:auto}
-#base-img{width:100%;height:100%;object-fit:contain;left:0;top:0;z-index:1}
-#part-img{z-index:10;display:none}
+#stage{width:268px;height:340px;position:relative;overflow:hidden}
+#base-img{position:absolute;width:100%;height:100%;object-fit:contain;left:0;top:0;z-index:1}
+#part-img{position:absolute;height:auto;z-index:10;display:none}
 .guides{position:absolute;inset:0;pointer-events:none;z-index:5}
 .gh,.gv{position:absolute;background:rgba(167,139,250,.35)}
 .gh{width:100%;height:1px;top:50%}
@@ -199,7 +198,7 @@ h1{text-align:center;font-size:1.3em;color:#a78bfa;margin-bottom:16px}
 
   <!-- 右：プレビュー -->
   <div class="right">
-    <h2>👁️ プレビュー（実寸268×345）</h2>
+    <h2>👁️ プレビュー（実寸268×340）</h2>
     <div class="stage-wrap">
       <div id="stage">
         <img id="base-img" src="https://raw.githubusercontent.com/tatsuro-miki/sansu-quest/main/chibi-parts/base_body.png" alt="body">

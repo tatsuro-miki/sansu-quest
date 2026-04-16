@@ -1047,7 +1047,6 @@ function genDecimalV2(qlv) {
 
 // qlvベース 文章題ジェネレーター
 function genWordV2(qlv) {
-  if (qlv <= 4) return genArithmeticV2(qlv);
   if (qlv <= 7) return genWord('mid');
   return genWord('hard');
 }

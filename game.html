@@ -878,7 +878,7 @@ async function init() {
   if (save.lastLogin !== today) { save.loginDays = save.lastLogin===yesterday ? (save.loginDays||0)+1 : 1; save.streak = save.loginDays; save.lastLogin = today; }
   if (save.dailyDate !== today) { save.dailyDone=0; save.dailyDate=today; save.hearts=HEARTS_MAX; }
   const elapsed = Date.now()-(save.lastHeartRegen||Date.now());
-  const regen = Math.floor(elapsed/(30*60*1000));
+  const regen = Math.floor(elapsed/(5*60*1000));
   if (regen>0) { save.hearts=Math.min(HEARTS_MAX,(save.hearts||0)+regen); save.lastHeartRegen=Date.now(); }
   if (!save.coins) save.coins = 0;
   if (!save.ownedParts) save.ownedParts = ['hair_short','clothes_simple','acc_none','face_happy'];
@@ -1036,11 +1036,17 @@ function genDecimalV2(qlv) {
     const ans=(Math.round(parseFloat(a)*parseFloat(b)*100)/100).toFixed(2);
     return {type:'number',lv:'lv3',label:'小数かけ算(小数×小数)',text:a+' × '+b+' ＝ ?',answer:ans,hint:'小数どうしをかけよう'};
   }
-  // qlv10: 整数÷整数で小数の答え（例: 7÷2=3.5）
-  const dens=[2,4,5,10], den=dens[R(0,dens.length-1)];
-  const q=R(1,9), num=den*q;
-  const dAns=(num/den).toFixed(den===4?2:1);
-  return {type:'number',lv:'lv3',label:'小数わり算',text:num+' ÷ '+den+' ＝ ?',answer:dAns,hint:'答えを小数で表そう'};
+  // qlv10: 小数第2位のたし算・ひき算（例: 0.45 ＋ 0.32）
+  const op2=R(0,1);
+  const a2=(R(10,99)/100).toFixed(2), b2=(R(10,99)/100).toFixed(2);
+  if (op2===0) {
+    const ans2=((parseFloat(a2)*100+parseFloat(b2)*100)/100).toFixed(2);
+    return {type:'number',lv:'lv3',label:'小数たし算(小数第2位)',text:a2+' ＋ '+b2+' ＝ ?',answer:ans2,hint:'小数第2位まで計算しよう'};
+  } else {
+    const big2=parseFloat(a2)>=parseFloat(b2)?a2:b2, sml2=parseFloat(a2)>=parseFloat(b2)?b2:a2;
+    const ans2=((parseFloat(big2)*100-parseFloat(sml2)*100)/100).toFixed(2);
+    return {type:'number',lv:'lv3',label:'小数ひき算(小数第2位)',text:big2+' ー '+sml2+' ＝ ?',answer:ans2,hint:'小数第2位まで計算しよう'};
+  }
 }
 
 // qlvベース 文章題ジェネレーター
@@ -1206,6 +1212,17 @@ if (difficulty === 'hard') {
     }, 400);
   }
 }
+// 5連続正解でハート1個回復
+if (save.questionStreak > 0 && save.questionStreak % 5 === 0 && (save.hearts||0) < HEARTS_MAX) {
+  save.hearts = Math.min(HEARTS_MAX, (save.hearts||0) + 1);
+  setTimeout(() => {
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);font-size:2.2rem;font-weight:900;color:#e74c3c;z-index:9999;pointer-events:none;background:white;padding:14px 28px;border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,.2);animation:resultPop .4s ease;';
+    el.textContent = '❤️ ハート回復！';
+    document.body.appendChild(el);
+    setTimeout(() => { el.style.transition='opacity .5s'; el.style.opacity='0'; setTimeout(()=>el.remove(),500); }, 2200);
+  }, 300);
+}
                      
 save.pet = save.pet || {};
 save.pet.questionsForFood = (save.pet.questionsForFood || 0) + 1;
@@ -1253,7 +1270,7 @@ function showNextBtn(){
 }
 
 function renderGameOver(){ hideNumpad(); document.getElementById('main-area').innerHTML=`<div class="gameover-card"><h2>💔 ハートがなくなった！</h2><p>30分ごとにハートが回復するよ。<br>また後でチャレンジしよう！</p><p style="margin-bottom:20px;font-size:.85rem;color:var(--text2)">今日の正解: <strong style="color:var(--xp)">${save.dailyDone||0}</strong> 問 / 累計: <strong style="color:var(--gold)">${save.totalCorrect||0}</strong> 問</p><button class="revive-btn" onclick="checkRevive()">❤️ ハートを確認する</button><button class="revive-btn ghost" onclick="logout()">ログアウト</button></div>`; }
-window.checkRevive=function(){ const elapsed=Date.now()-(save.lastHeartRegen||Date.now()); const regen=Math.floor(elapsed/(30*60*1000)); if(regen>0||save.hearts>0){save.hearts=Math.min(HEARTS_MAX,(save.hearts||0)+regen);save.lastHeartRegen=Date.now();persistSave();renderUI();nextQuestion();}else{const mins=Math.ceil((30*60*1000-(Date.now()-(save.lastHeartRegen||Date.now())))/60000);alert(`あと約${mins}分でハートが回復します！`);} };
+window.checkRevive=function(){ const elapsed=Date.now()-(save.lastHeartRegen||Date.now()); const regen=Math.floor(elapsed/(5*60*1000)); if(regen>0||save.hearts>0){save.hearts=Math.min(HEARTS_MAX,(save.hearts||0)+regen);save.lastHeartRegen=Date.now();persistSave();renderUI();nextQuestion();}else{const mins=Math.ceil((5*60*1000-(Date.now()-(save.lastHeartRegen||Date.now())))/60000);alert(`あと約${mins}分でハートが回復します！`);} };
 
 window.toggleHint=function(){ hintVisible=!hintVisible; const box=document.getElementById('hint-box'),btn=document.getElementById('hint-btn'); if(box) box.style.display=hintVisible?'block':'none'; if(btn) btn.textContent=hintVisible?'💡 ヒントを隠す':'💡 ヒントを見る'; };
 

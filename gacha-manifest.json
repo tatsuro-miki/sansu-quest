@@ -13,10 +13,10 @@
   {"id": "ぱじゃま紫", "name": "ぱじゃま紫", "file": "chibi-parts/gacha/tops/ぱじゃま紫.png", "category": "tops", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0, "y": 16.5, "scale": 33.5}},
   {"id": "パジャマ水色", "name": "パジャマ水色", "file": "chibi-parts/gacha/tops/パジャマ水色.png", "category": "tops", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0, "y": 17, "scale": 34.5}},
   {"id": "パジャマ白", "name": "パジャマ白", "file": "chibi-parts/gacha/tops/パジャマ白.png", "category": "tops", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0, "y": 15.5, "scale": 34.5}},
-  {"id": "ピンクジャージ", "name": "ピンクジャージ", "file": "chibi-parts/gacha/tops/ピンクジャージ.png", "category": "tops", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0.5, "y": 16, "scale": 55.5}},
+  {"id": "ピンクジャージ", "name": "ピンクジャージ", "file": "chibi-parts/gacha/tops/ピンクジャージ.png", "category": "tops", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0, "y": 21, "scale": 46.5}},
   {"id": "ピンクのスウェット", "name": "ピンクのスウェット", "file": "chibi-parts/gacha/tops/ピンクのスウェット.png", "category": "tops", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0, "y": 16, "scale": 31}},
-  {"id": "黒ジャージ", "name": "黒ジャージ", "file": "chibi-parts/gacha/tops/黒ジャージ.png", "category": "tops", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 2, "y": 16, "scale": 55}},
-  {"id": "青ジャージ", "name": "青ジャージ", "file": "chibi-parts/gacha/tops/青ジャージ.png", "category": "tops", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 2, "y": 16, "scale": 55}},
-  {"id": "白ジャージ", "name": "白ジャージ", "file": "chibi-parts/gacha/tops/白ジャージ.png", "category": "tops", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 2, "y": 16, "scale": 55}},
+  {"id": "黒ジャージ", "name": "黒ジャージ", "file": "chibi-parts/gacha/tops/黒ジャージ.png", "category": "tops", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0, "y": 21, "scale": 46.5}},
+  {"id": "青ジャージ", "name": "青ジャージ", "file": "chibi-parts/gacha/tops/青ジャージ.png", "category": "tops", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0, "y": 21, "scale": 46.5}},
+  {"id": "白ジャージ", "name": "白ジャージ", "file": "chibi-parts/gacha/tops/白ジャージ.png", "category": "tops", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0, "y": 21, "scale": 46.5}},
   {"id": "セーラー服", "name": "セーラー服", "file": "chibi-parts/gacha/tops/セーラー服.png", "category": "tops", "cost": 1000, "stars": 4, "z_index": 10, "transform": {"x": 0.5, "y": 19.5, "scale": 37.5}}
 ]

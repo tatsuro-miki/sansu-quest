@@ -929,15 +929,14 @@ function genWord(tier){ if(tier==='easy') return genArithmetic('easy'); const ro
 
 // プレイヤーレベル → 問題レベル(qlv 1-10)
 function getQlv(lv) {
-  if (lv <= 3)  return 1;   // 1桁たし算・ひき算
-  if (lv <= 6)  return 2;   // 2桁たし算・ひき算
-  if (lv <= 10) return 3;   // 2桁 + かけ算入門
-  if (lv <= 15) return 4;   // 全四則(小)
-  if (lv <= 21) return 5;   // 全四則(中)
-  if (lv <= 28) return 6;   // 全四則(大) + 分数入門
-  if (lv <= 36) return 7;   // 3桁計算 + 異分母分数
-  if (lv <= 50) return 8;   // 大きい数 + 分数かけ算
-  if (lv <= 70) return 9;   // 難問
+  // qlv1・2（1桁/2桁の足し算）は廃止、最低 qlv3 から開始
+  if (lv <= 5)  return 3;   // 2桁 + かけ算入門
+  if (lv <= 12) return 4;   // 全四則(小)
+  if (lv <= 20) return 5;   // 全四則(中)
+  if (lv <= 30) return 6;   // 全四則(大) + 分数入門
+  if (lv <= 42) return 7;   // 3桁計算 + 異分母分数
+  if (lv <= 58) return 8;   // 大きい数 + 分数かけ算
+  if (lv <= 78) return 9;   // 難問
   return 10;                // 最高難易度
 }
 
@@ -1014,7 +1013,6 @@ function genFractionV2(qlv) {
 
 // qlvベース 小数ジェネレーター
 function genDecimalV2(qlv) {
-  if (qlv <= 4) return genArithmeticV2(qlv);
   // qlv5: 小数たし算・ひき算（0.1～4.9）
   if (qlv <= 5) {
     const op = R(0,1);

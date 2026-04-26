@@ -16,6 +16,12 @@
         {"id": "hair_ブラウンセミロング", "name": "ブラウンセミロング", "file": "chibi-parts/hair/ブラウンセミロング.png", "cost": 2000, "stars": 5, "transform": {"x": 0, "y": -3, "scale": 47}},
         {"id": "hair_ブルー猫耳セミロング", "name": "ブルー猫耳セミロング", "file": "chibi-parts/hair/ブルー猫耳セミロング.png", "cost": 10000, "stars": 5, "transform": {"x": 1, "y": 1, "scale": 60}},
         {"id": "hair_茶色ボブ", "name": "茶色ボブ", "file": "chibi-parts/hair/茶色ボブ.png", "cost": 2000, "stars": 5, "transform": {"x": 0, "y": -4, "scale": 50}}
+        {"id": "hair_さやかhair", "name": "さやかhair", "file": "chibi-parts/hair/さやかhair.png", "cost": 20000, "stars": 5, "transform": {"x": 1, "y": -6, "scale": 47}},
+        {"id": "hair_ほむらhair", "name": "ほむらhair", "file": "chibi-parts/hair/ほむらhair.png", "cost": 20000, "stars": 5, "transform": {"x": 4, "y": -7, "scale": 55}},
+        {"id": "hair_まみhair", "name": "まみhair", "file": "chibi-parts/hair/まみhair.png", "cost": 20000, "stars": 5, "transform": {"x": 1, "y": -1, "scale": 53}},
+        {"id": "hair_杏子hair", "name": "杏子hair", "file": "chibi-parts/hair/杏子hair.png", "cost": 20000, "stars": 5, "transform": {"x": 3, "y": -4, "scale": 47}},
+        {"id": "hair_まどかhair", "name": "まどかhair", "file": "chibi-parts/hair/まどかhair.png", "cost": 20000, "stars": 5, "transform": {"x": 3, "y": 0, "scale": 63}},
+        {"id": "hair_ほのかhair", "name": "ほのかhair", "file": "chibi-parts/hair/ほのかhair.png", "cost": 20000, "stars": 5, "transform": {"x": 2, "y": -4, "scale": 46}}
       ]
     },
     "accessories": {
@@ -55,6 +61,11 @@
         {"id": "eyes_purple2", "name": "purple2", "file": "chibi-parts/eyes/purple2.png", "cost": 5000, "stars": 5, "transform": {"x": -1, "y": 0, "scale": 31}},
         {"id": "eyes_purple3", "name": "purple3", "file": "chibi-parts/eyes/purple3.png", "cost": 6000, "stars": 5, "transform": {"x": 0, "y": 1, "scale": 28}},
         {"id": "eyes_yellow1", "name": "yellow1", "file": "chibi-parts/eyes/yellow1.png", "cost": 1000, "stars": 5, "transform": {"x": 0, "y": 2, "scale": 33}}
+        {"id": "eyes_さやかEyes", "name": "さやかEyes", "file": "chibi-parts/eyes/さやかEyes.png", "cost": 15000, "stars": 5, "transform": {"x": 0, "y": -3, "scale": 24}},
+        {"id": "eyes_ほむらEyes", "name": "ほむらEyes", "file": "chibi-parts/eyes/ほむらEyes.png", "cost": 15000, "stars": 5, "transform": {"x": 0, "y": -1, "scale": 24}},
+        {"id": "eyes_まみEyes", "name": "まみEyes", "file": "chibi-parts/eyes/まみEyes.png", "cost": 15000, "stars": 5, "transform": {"x": 0, "y": -1, "scale": 27}},
+        {"id": "eyes_杏子Eyes", "name": "杏子Eyes", "file": "chibi-parts/eyes/杏子Eyes.png", "cost": 15000, "stars": 5, "transform": {"x": 0, "y": -1, "scale": 26}},
+        {"id": "eyes_まどかEyes", "name": "まどかEyes", "file": "chibi-parts/eyes/まどかEyes.png", "cost": 15000, "stars": 5, "transform": {"x": 0, "y": -1, "scale": 27}}
       ]
     },
     "mouth": {
@@ -84,6 +95,10 @@
         {"id": "shoes_厚底スニーカー青", "name": "厚底スニーカー青", "file": "chibi-parts/shoes/厚底スニーカー青.png", "cost": 10000, "stars": 5, "transform": {"x": -2, "y": 30, "scale": 30}},
         {"id": "shoes_厚底スニーカー黄色", "name": "厚底スニーカー黄色", "file": "chibi-parts/shoes/厚底スニーカー黄色.png", "cost": 10000, "stars": 5, "transform": {"x": -1, "y": 28, "scale": 30}},
         {"id": "shoes_紫ブーツ", "name": "紫ブーツ", "file": "chibi-parts/shoes/紫ブーツ.png", "cost": 10000, "stars": 5, "transform": {"x": -2, "y": 30, "scale": 27}}
+      　{"id": "shoes_さやかleg", "name": "さやかleg", "file": "chibi-parts/shoes/さやかleg.png", "cost": 5000, "stars": 4, "transform": {"x": 1, "y": 26, "scale": 16}},
+        {"id": "shoes_ほむらLegs", "name": "ほむらLegs", "file": "chibi-parts/shoes/ほむらLegs.png", "cost": 5000, "stars": 4, "transform": {"x": 0, "y": 25, "scale": 18}},
+        {"id": "shoes_まみLegs", "name": "まみLegs", "file": "chibi-parts/shoes/まみLegs.png", "cost": 5000, "stars": 4, "transform": {"x": 0, "y": 25, "scale": 17}},
+        {"id": "shoes_杏子Legs", "name": "杏子Legs", "file": "chibi-parts/shoes/杏子Legs.png", "cost": 5000, "stars": 4, "transform": {"x": 0, "y": 26, "scale": 19}}
       ]
     },
     "tops": {
@@ -99,6 +114,11 @@
         {"id": "tops_ゴシックフリル", "name": "ゴシックフリル", "file": "chibi-parts/tops/ゴシックフリル.png", "cost": 15000, "stars": 5, "transform": {"x": 0, "y": 21, "scale": 41}},
         {"id": "tops_ゴシックレース", "name": "ゴシックレース", "file": "chibi-parts/tops/ゴシックレース.png", "cost": 17000, "stars": 5, "transform": {"x": 0, "y": 19, "scale": 37}},
         {"id": "tops_ピンクのカーディガン", "name": "ピンクのカーディガン", "file": "chibi-parts/tops/ピンクのカーディガン.png", "cost": 3000, "stars": 5, "transform": {"x": 0, "y": 18, "scale": 37}}
+        {"id": "tops_さやか服", "name": "さやか服", "file": "chibi-parts/tops/さやか服.png", "cost": 20000, "stars": 5, "transform": {"x": 2, "y": 23, "scale": 45}},
+        {"id": "tops_ほむら服", "name": "ほむら服", "file": "chibi-parts/tops/ほむら服.png", "cost": 20000, "stars": 5, "transform": {"x": -4, "y": 25, "scale": 52}},
+        {"id": "tops_まみ服", "name": "まみ服", "file": "chibi-parts/tops/まみ服.png", "cost": 20000, "stars": 5, "transform": {"x": 0, "y": 26, "scale": 51}},
+        {"id": "tops_杏子服", "name": "杏子服", "file": "chibi-parts/tops/杏子服.png", "cost": 20000, "stars": 5, "transform": {"x": 0, "y": 17, "scale": 34}},
+        {"id": "tops_まどか服", "name": "まどか服", "file": "chibi-parts/tops/まどか服.png", "cost": 20000, "stars": 5, "transform": {"x": -1, "y": 23, "scale": 45}}
       ]
     }
   }
